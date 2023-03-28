@@ -26,16 +26,18 @@ class ClassicalSolver:
 
     def solve(self) -> np.array:
         n = self.oracle.complexity
-        secret = np.empty(n, dtype=np.byte)
+        solution = np.empty(n, dtype=np.byte)
 
         for i in range(n):
             inp = np.zeros(n, dtype=np.byte)
             inp[i] = 1
 
             if self.oracle.query(inp):
-                secret[i] = 1
+                solution[i] = 1
+            else:
+                solution[i] = 0
 
-        return secret
+        return solution
 
 
 class QuantumOracle:
