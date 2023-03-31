@@ -1,5 +1,4 @@
-import qiskit_aer.noise as noise
-from qiskit import Aer
+from qiskit import Aer, transpile
 
 from builder import *
 
@@ -19,50 +18,25 @@ print("# of queries:".ljust(20, " "), oracle.query_count)
 # =============================================
 
 qoracle = QuantumOracle(secret)
-builder = BVAlgBuilder(qoracle)
+builder = QuantumCircuitBuild(qoracle)
 builder.create_circuit()
 qc = builder.circuit
 qc.draw(output="mpl", initial_state=True, plot_barriers=False, interactive=True)
 
 # =============================================
 
-# Import from Qiskit Aer noise module
-from qiskit_aer.noise import pauli_error
-from qiskit import transpile
+noise_build = NoiseBuild()
 
-# Error probabilities
-prob_1 = 0.2  # 1-qubit gate
-prob_2 = 0.2  # 2-qubit gate
+noise_build.applyResetError()
+noise_build.applyMeasurementError()
+noise_build.applyGateError()
 
-p_reset = 0.03
-p_meas = 0.1
-p_gate1 = 0.05
-
-# Depolarizing quantum errors
-error_1 = noise.depolarizing_error(prob_1, 1)
-error_2 = noise.depolarizing_error(prob_2, 2)
-
-error_reset = pauli_error([('X', p_reset), ('I', 1 - p_reset)])
-error_meas = pauli_error([('X', p_meas), ('I', 1 - p_meas)])
-error_gate1 = pauli_error([('X', p_gate1), ('I', 1 - p_gate1)])
-error_gate2 = error_gate1.tensor(error_gate1)
-
-# Add errors to noise model
-noise_model = noise.NoiseModel()
-noise_model.add_all_qubit_quantum_error(error_1, ["h", "z", "x"])
-noise_model.add_all_qubit_quantum_error(error_2, ["cx"])
-
-noise_model.add_all_qubit_quantum_error(error_reset, "reset")
-noise_model.add_all_qubit_quantum_error(error_meas, "measure")
-noise_model.add_all_qubit_quantum_error(error_gate1, ["u1", "u2", "u3"])
-
-# Get basis gates from noise model
-basis_gates = noise_model.basis_gates
+basis_gates = noise_build.model.basis_gates
 
 backend = Aer.get_backend("qasm_simulator")
 
 qc_compiled = transpile(builder.circuit, backend)
-job = backend.run(qc_compiled, shots=1000, basis_gates=basis_gates, noise_model=noise_model)
+job = backend.run(qc_compiled, shots=800, basis_gates=basis_gates, noise_model=noise_build.model)
 result = job.result()
 counts = result.get_counts(qc)
 
@@ -82,3 +56,5 @@ plt.tick_params(
     labelbottom=False)  # labels along the bottom edge are off
 
 plt.show()
+config = backend.configuration()
+print()
