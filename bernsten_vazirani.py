@@ -1,5 +1,10 @@
+"""This module implements classical and quantum implementations of Bernstein-Vazirani's algorithm.
+The module contains both classical and quantum oracles with solution for both of them."""
+
+import dis
 from abc import ABC
 from functools import wraps
+from typing import Callable
 
 import numpy as np
 from qiskit import QuantumRegister, ClassicalRegister, QuantumCircuit
@@ -11,7 +16,7 @@ def count_incrementer(method):
     """Increments the Oracles' query counter by one."""
 
     @wraps(method)
-    def _impl(self, *method_args, **method_kwargs):
+    def _impl(self, *method_args, **method_kwargs) -> Callable:
         self.query_count += 1
         return method(self, *method_args, **method_kwargs)
 
@@ -24,7 +29,18 @@ class Oracle(ABC):
     def __init__(self, secret: np.array):
         self.complexity = len(secret)
         self.secret = secret
+
         self.query_count = 0
+
+    def validate(self) -> bool:
+        """Va"""
+        return self.secret is not None and \
+            self.complexity == len(self.secret) and \
+            self.query_count >= 0
+
+    def used(self) -> bool:
+        """Checks whether the oracle was already used or not."""
+        return self.query_count != 0
 
 
 class ClassicalOracle(Oracle):
@@ -39,13 +55,16 @@ class ClassicalOracle(Oracle):
 
 
 class QuantumOracle(Oracle):
-    """Represents an implementation of a quantum oracle for the Bernstein-Vazirani problem. The oracle is not queried
-    like classical oracles, instead it is applied on a given quantum circuit with exactly specified operational
-    quantum registers (input-output quantum bits)."""
+    """Represents an implementation of a quantum oracle for the Bernstein-Vazirani problem. The
+    oracle is not queried like classical oracles, instead it is applied on a given quantum
+    circuit with exactly specified operational quantum registers (input-output quantum bits)."""
 
     @count_incrementer
-    def apply_circuit(self, circuit: QuantumCircuit, in_qreg: QuantumRegister, out_qreg: QuantumRegister):
-        """Constructs an oracle within the given quantum circuit on top of the input/output qubits."""
+    def apply_circuit(self, circuit: QuantumCircuit,
+                      in_qreg: QuantumRegister,
+                      out_qreg: QuantumRegister):
+        """Constructs an oracle within the given quantum circuit on top of the input/output
+        qubits."""
         # ensure correct size of quantum registers
         if in_qreg.size != self.complexity:
             raise ValueError("Invalid input register size.")
@@ -80,9 +99,17 @@ class ClassicalSolver:
 
         return solution
 
+    def ops_count(self) -> int:
+        """Calculates the number of instructions needed to solve the oracle. A line in
+        disassembled solution code is counted as one operation."""
+        bytecode = dis.Bytecode(self.solve)
+        count = bytecode.dis().count('\n')
+        return count
+
 
 class QuantumCircuitBuild:
-    """Represents a quantum circuit building tool for the implementation of the Bernstein-Vazirani algorithm."""
+    """Represents a quantum circuit building tool for the implementation of the
+    Bernstein-Vazirani algorithm."""
 
     def __init__(self, oracle: QuantumOracle):
         self.oracle = oracle
@@ -102,6 +129,7 @@ class QuantumCircuitBuild:
 
     def __simulate_random_initial_state(self):
         """Initializes quantum registers at random states."""
+        # https://quantumcomputing.stackexchange.com/q/4962
         for qubit in self.qreg:
             self.circuit.initialize(random_statevector(2).data, qubit)
         self.circuit.initialize(random_statevector(2), self.auxreg)
@@ -133,7 +161,8 @@ class QuantumCircuitBuild:
         self.circuit.measure(self.qreg, self.creg)
 
     def create_circuit(self):
-        """Builds a quantum implementation of the Bernstein-Vazirani's algorithm with the preset secret."""
+        """Builds a quantum implementation of the Bernstein-Vazirani's algorithm with the preset
+        secret."""
         self.allocate_registers()
         self.__simulate_random_initial_state()
         self.reset_registers()
@@ -152,17 +181,17 @@ class NoiseBuild:
     def __init__(self):
         self.model = NoiseModel()
 
-    def applyResetError(self, rate: float = 0.03):
+    def apply_reset_error(self, rate: float = 0.03):
         """Applies reset error channel."""
         error_reset = reset_error(rate, 1 - rate)
         self.model.add_all_qubit_quantum_error(error_reset, "reset")
 
-    def applyMeasurementError(self, rate: float = 0.05):
+    def apply_measurement_error(self, rate: float = 0.05):
         """Applies measurement error channel."""
         error_meas = pauli_error([('X', rate), ('I', 1 - rate)])
         self.model.add_all_qubit_quantum_error(error_meas, "measure")
 
-    def applyGateError(self, single_rate: float = 0.07, double_rate: float = 0.11):
+    def apply_gate_error(self, single_rate: float = 0.07, double_rate: float = 0.11):
         """Applies gates' error channels."""
         error_1 = depolarizing_error(single_rate, 1)
         self.model.add_all_qubit_quantum_error(error_1, ["h", "z", "x"])
