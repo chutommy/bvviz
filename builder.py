@@ -3,6 +3,8 @@ from functools import wraps
 
 import numpy as np
 from qiskit import QuantumRegister, ClassicalRegister, QuantumCircuit
+from qiskit.quantum_info import random_statevector
+from qiskit_aer.noise import NoiseModel, pauli_error, depolarizing_error, reset_error
 
 
 def count_incrementer(method):
@@ -79,7 +81,7 @@ class ClassicalSolver:
         return solution
 
 
-class BVAlgBuilder:
+class QuantumCircuitBuild:
     """Represents a quantum circuit building tool for the implementation of the Bernstein-Vazirani algorithm."""
 
     def __init__(self, oracle: QuantumOracle):
@@ -91,13 +93,27 @@ class BVAlgBuilder:
 
         self.circuit = None
 
-    def __allocate_registers(self):
+    def allocate_registers(self):
+        """Allocates quantum and classical register according to oracle's complexity."""
         self.qreg = QuantumRegister(self.oracle.complexity, "qreg")
         self.creg = ClassicalRegister(self.oracle.complexity, "creg")
         self.auxreg = QuantumRegister(1, "auxreg")
         self.circuit = QuantumCircuit(self.qreg, self.auxreg, self.creg)
 
-    def __prepare_initial_state(self):
+    def __simulate_random_initial_state(self):
+        """Initializes quantum registers at random states."""
+        for qubit in self.qreg:
+            self.circuit.initialize(random_statevector(2).data, qubit)
+        self.circuit.initialize(random_statevector(2), self.auxreg)
+
+    def reset_registers(self):
+        """Introduces quantum registers into ket zeroes."""
+        for qubit in self.qreg:
+            self.circuit.reset(qubit)
+        self.circuit.reset(self.auxreg)
+
+    def prepare_initial_state(self):
+        """Prepares initial state of all quantum qubits"""
         # introduce qubits into superposition
         for qubit in self.qreg:
             self.circuit.h(qubit)
@@ -109,7 +125,8 @@ class BVAlgBuilder:
         # self.circuit.h(self.auxreg)
         # self.circuit.z(self.auxreg)
 
-    def __measure(self):
+    def measure(self):
+        """Apply measurement of quantum query register on the classical register."""
         for qubit in self.qreg:
             self.circuit.h(qubit)
 
@@ -117,11 +134,38 @@ class BVAlgBuilder:
 
     def create_circuit(self):
         """Builds a quantum implementation of the Bernstein-Vazirani's algorithm with the preset secret."""
-        self.__allocate_registers()
-        self.__prepare_initial_state()
+        self.allocate_registers()
+        self.__simulate_random_initial_state()
+        self.reset_registers()
+        self.prepare_initial_state()
 
         self.circuit.barrier()
         self.oracle.apply_circuit(self.circuit, self.qreg, self.auxreg)
         self.circuit.barrier()
 
-        self.__measure()
+        self.measure()
+
+
+class NoiseBuild:
+    """Builds a simple custom noise model to imitate real quantum computer."""
+
+    def __init__(self):
+        self.model = NoiseModel()
+
+    def applyResetError(self, rate: float = 0.03):
+        """Applies reset error channel."""
+        error_reset = reset_error(rate, 1 - rate)
+        self.model.add_all_qubit_quantum_error(error_reset, "reset")
+
+    def applyMeasurementError(self, rate: float = 0.05):
+        """Applies measurement error channel."""
+        error_meas = pauli_error([('X', rate), ('I', 1 - rate)])
+        self.model.add_all_qubit_quantum_error(error_meas, "measure")
+
+    def applyGateError(self, single_rate: float = 0.07, double_rate: float = 0.11):
+        """Applies gates' error channels."""
+        error_1 = depolarizing_error(single_rate, 1)
+        self.model.add_all_qubit_quantum_error(error_1, ["h", "z", "x"])
+
+        error_2 = depolarizing_error(double_rate, 2)
+        self.model.add_all_qubit_quantum_error(error_2, ["cx"])
