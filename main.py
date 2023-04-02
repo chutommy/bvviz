@@ -50,30 +50,56 @@ job = sim.execute(compiled_circuit=qc_compiled, shots=1000, seed_simulator=rando
 result = job.result()
 counts = result.get_counts(qc)
 
-# creating the dataset
-courses = list(counts.keys())
-values = list(counts.values())
-
 # =========================
 
 qc_compiled.draw(output="mpl")
 plt.show()
+plt.close()
 
 plot_circuit_layout(qc_compiled, sim.backend)
 plt.show()
+plt.close()
+
+plot_gate_map(sim.backend)
+plt.show()
+plt.close()
+
+plot_error_map(sim.backend)
+plt.show()
+plt.close()
+
+ys = result.get_memory()
+xs = [x for x in range(len(ys))]
+plt.scatter(xs, ys)
+plt.tick_params(
+    axis='y',
+    which='both',
+    labelleft=False)
+plt.show()
+plt.close()
 
 qc.draw(output="mpl", initial_state=True, plot_barriers=False, interactive=True)
 plt.show()
+plt.close()
 
+courses = list(counts.keys())
+values = list(counts.values())
 plt.bar(courses, values)
 plt.tick_params(
-    axis='x',  # changes apply to the x-axis
-    which='both',  # both major and minor ticks are affected
-    bottom=False,  # ticks along the bottom edge are off
-    top=False,  # ticks along the top edge are off
-    labelbottom=False)  # labels along the bottom edge are off
+    axis='x',
+    which='both',
+    bottom=False,
+    top=False,
+    labelbottom=False)
 plt.show()
+plt.close()
 
-# config = backend.configuration()
-# props = backend.properties()
-# print()
+print("==========================")
+
+print(sim.backend.num_qubits)
+print(sim.backend.backend_version)
+print(sim.backend.operation_names)
+print(sim.backend.version)
+print(job.backend())
+print(job.job_id())
+print(job.result().success)
