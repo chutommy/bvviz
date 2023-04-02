@@ -46,6 +46,10 @@ class Oracle(ABC):
 class ClassicalOracle(Oracle):
     """Represents an implementation of a classical oracle for the Bernstein-Vazirani problem."""
 
+    complexity = None
+    secret = None
+    query_count = None
+
     @count_incrementer
     def query(self, inp: np.array) -> bool:
         """Apply the classical BV function."""
@@ -58,6 +62,10 @@ class QuantumOracle(Oracle):
     """Represents an implementation of a quantum oracle for the Bernstein-Vazirani problem. The
     oracle is not queried like classical oracles, instead it is applied on a given quantum
     circuit with exactly specified operational quantum registers (input-output quantum bits)."""
+
+    complexity = None
+    secret = None
+    query_count = None
 
     @count_incrementer
     def apply_circuit(self, circuit: QuantumCircuit,
@@ -79,19 +87,20 @@ class QuantumOracle(Oracle):
 class ClassicalSolver:
     """Implements a classical solution to the BV problem."""
 
-    def __init__(self, oracle: ClassicalOracle):
-        self.oracle = oracle
+    def __init__(self):
+        pass
 
-    def solve(self) -> np.array:
+    @staticmethod
+    def solve(oracle: ClassicalOracle) -> np.array:
         """Queries over all positional bits to determine the secret value of all indices."""
-        solution = np.empty(self.oracle.complexity, dtype=np.byte)
+        solution = np.empty(oracle.complexity, dtype=np.byte)
 
-        for i in range(self.oracle.complexity):
+        for i in range(oracle.complexity):
             # create a query with a single on-bit at exposing input index
-            input_val = np.zeros(self.oracle.complexity, dtype=np.byte)
+            input_val = np.zeros(shape=oracle.complexity, dtype=np.byte)
             input_val[i] = 1
 
-            answer = self.oracle.query(input_val)
+            answer = oracle.query(inp=input_val)
             if answer == 1:
                 solution[i] = 1
             else:
@@ -111,19 +120,17 @@ class QuantumCircuitBuild:
     """Represents a quantum circuit building tool for the implementation of the
     Bernstein-Vazirani algorithm."""
 
-    def __init__(self, oracle: QuantumOracle):
-        self.oracle = oracle
-
+    def __init__(self):
         self.qreg = None  # quantum BV query register
         self.auxreg = None  # auxiliary output qubit register
         self.creg = None  # classical measurement register
 
         self.circuit = None
 
-    def allocate_registers(self):
+    def allocate_registers(self, complexity: int):
         """Allocates quantum and classical register according to oracle's complexity."""
-        self.qreg = QuantumRegister(size=self.oracle.complexity, name="qreg")
-        self.creg = ClassicalRegister(size=self.oracle.complexity, name="creg")
+        self.qreg = QuantumRegister(size=complexity, name="qreg")
+        self.creg = ClassicalRegister(size=complexity, name="creg")
         self.auxreg = QuantumRegister(size=1, name="auxreg")
         self.circuit = QuantumCircuit(self.qreg, self.auxreg, self.creg,
                                       name="cirq", global_phase=random_float())
@@ -161,16 +168,18 @@ class QuantumCircuitBuild:
 
         self.circuit.measure(self.qreg, self.creg)
 
-    def create_circuit(self):
+    def create_circuit(self, oracle=QuantumOracle):
         """Builds a quantum implementation of the Bernstein-Vazirani's algorithm with the preset
         secret."""
-        self.allocate_registers()
+        self.allocate_registers(complexity=oracle.complexity)
         self.__simulate_random_initial_state()
         self.reset_registers()
         self.prepare_initial_state()
 
         self.circuit.barrier()
-        self.oracle.apply_circuit(self.circuit, self.qreg, self.auxreg)
+        oracle.apply_circuit(circuit=self.circuit,
+                             in_qreg=self.qreg,
+                             out_qreg=self.auxreg)
         self.circuit.barrier()
 
         self.measure()
