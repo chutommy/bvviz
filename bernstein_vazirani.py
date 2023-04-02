@@ -46,9 +46,9 @@ class Oracle(ABC):
 class ClassicalOracle(Oracle):
     """Represents an implementation of a classical oracle for the Bernstein-Vazirani problem."""
 
-    complexity = None
-    secret = None
-    query_count = None
+    complexity: int = None
+    secret: np.array = None
+    query_count: int = None
 
     @count_incrementer
     def query(self, inp: np.array) -> bool:
@@ -63,9 +63,9 @@ class QuantumOracle(Oracle):
     oracle is not queried like classical oracles, instead it is applied on a given quantum
     circuit with exactly specified operational quantum registers (input-output quantum bits)."""
 
-    complexity = None
-    secret = None
-    query_count = None
+    complexity: int = None
+    secret: np.array = None
+    query_count: int = None
 
     @count_incrementer
     def apply_circuit(self, circuit: QuantumCircuit,
@@ -100,6 +100,7 @@ class ClassicalSolver:
             input_val = np.zeros(shape=oracle.complexity, dtype=np.byte)
             input_val[i] = 1
 
+            # noinspection PyArgumentList
             answer = oracle.query(inp=input_val)
             if answer == 1:
                 solution[i] = 1
@@ -177,6 +178,7 @@ class QuantumCircuitBuild:
         self.prepare_initial_state()
 
         self.circuit.barrier()
+        # noinspection PyArgumentList
         oracle.apply_circuit(circuit=self.circuit,
                              in_qreg=self.qreg,
                              out_qreg=self.auxreg)
