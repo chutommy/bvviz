@@ -1,62 +1,99 @@
 from random import randint
+from time import perf_counter_ns
 
 import matplotlib.pyplot as plt
 from qiskit.providers.fake_provider import FakeGuadalupeV2
 from qiskit.visualization import plot_circuit_layout, plot_gate_map, plot_error_map
 
-from backend_simulator import *
-from bernstein_vazirani import *
+from backend_simulator import Simulator
+from bernstein_vazirani import ClassicalOracle, ClassicalSolver, QuantumOracle, QuantumCircuitBuild
+from utils import str_to_byte
 
-secret = np.array([1, 0, 1, 0, 0, 1, 1, 1, 0], dtype=np.byte)
+# ======================================
 
-oracle = ClassicalOracle(secret=secret)
+SECRET_STR = "101001110"
+
+RESET_RATE = 0.01
+MEASURE_RATE = 0.05
+SINGLE_GATE_RATE = 0.07
+DOUBLE_GATE_RATE = 0.11
+
+LAYOUT_METHOD = "sabre"
+ROUTING_METHOD = "stochastic"
+TRANSLATION_METHOD = "synthesis"
+APPROXIMATION_DEGREE = 0
+OPTIMIZATION_LEVEL = 2
+
+SHOT_COUNT = 1000
+
+backend = FakeGuadalupeV2()
+random_seed = randint(10 ** 9, 10 ** 10)
+
+# ======================================
+
 solver = ClassicalSolver()
+secret_seq = str_to_byte(SECRET_STR)
+oracle = ClassicalOracle(secret=secret_seq)
+cl_start = perf_counter_ns()
 solution = solver.solve(oracle=oracle)
+cl_stop = perf_counter_ns()
 
-print(solution)
-
-print("secret string:".ljust(20, " "), secret)
-print("classical solution:".ljust(20, " "), solution)
-print("match:".ljust(20, " "), np.array_equal(solution, secret))
-print("# of queries:".ljust(20, " "), oracle.query_count)
-
-# =============================================
-
-q_oracle = QuantumOracle(secret=secret)
 builder = QuantumCircuitBuild()
-builder.create_circuit(oracle=q_oracle)
-qc = builder.circuit
-
-print("classical ops", solver.ops_count())
-print("qc ops", builder.circuit.count_ops())
-print("qc size", builder.circuit.size())
-print("qc global phase", builder.circuit.global_phase)
-print("qc qubits", builder.circuit.num_qubits)
-print("qc cbits", builder.circuit.num_clbits)
-
-# =============================================
-
+q_oracle = QuantumOracle(secret=SECRET_STR)
+builder.create_circuit(oracle=q_oracle, random_initialization=True)
 sim = Simulator()
-sim.set_noise(reset_rate=0.01, measure_rate=0.05, single_gate_rate=0.07, double_gate_rate=0.11)
-basis_gates = sim.noise_config.model.basis_gates
-
-random_seed = randint(1000, 1000 ** 3)
-
-sim.set_backend(FakeGuadalupeV2())
-qc_compiled = sim.transpile(circuit=builder.circuit, layout_method="sabre", routing_method="stochastic",
-                            translation_method="synthesis", approximation_degree=0,
-                            seed_transpiler=random_seed, optimization_level=2)
-job = sim.execute(compiled_circuit=qc_compiled, shots=1000, seed_simulator=random_seed)
+sim.set_noise(reset_rate=RESET_RATE,
+              measure_rate=MEASURE_RATE,
+              single_gate_rate=SINGLE_GATE_RATE,
+              double_gate_rate=DOUBLE_GATE_RATE)
+sim.set_backend(backend)
+sim.transpile(circuit=builder.circuit,
+              seed_transpiler=random_seed,
+              layout_method=LAYOUT_METHOD,
+              routing_method=ROUTING_METHOD,
+              translation_method=TRANSLATION_METHOD,
+              approximation_degree=APPROXIMATION_DEGREE,
+              optimization_level=OPTIMIZATION_LEVEL)
+qu_start = perf_counter_ns()
+job = sim.execute(shots=SHOT_COUNT, seed_simulator=random_seed)
+qu_stop = perf_counter_ns()
+# noinspection PyUnresolvedReferences
 result = job.result()
-counts = result.get_counts(qc)
+counts = result.get_counts(builder.circuit)
 
-# =========================
+# ======================================
 
-qc_compiled.draw(output="mpl")
+cl_solution = solution
+cl_queries = oracle.query_count
+cl_bytecode_instructions = solver.ops_count()
+cl_time = cl_start - cl_stop
+
+qu_queries = q_oracle.query_count
+qu_used_gates = builder.circuit.count_ops()
+qu_gates_count = builder.circuit.size()
+qu_global_phase = builder.circuit.global_phase
+qu_qubit_count = builder.circuit.num_qubits
+qu_clbit_count = builder.circuit.num_clbits
+qu_time = qu_start - qu_stop
+qu_qasm = QuantumCircuitBuild().create_circuit(
+    oracle=q_oracle, random_initialization=False).circuit.qasm(formatted=False)
+
+# noinspection PyUnresolvedReferences
+be_backend_name = job.backend()
+be_version = sim.backend.backend_version
+be_qubit_capacity = sim.backend.num_qubits
+# noinspection PyUnresolvedReferences
+job_id = job.job_id()
+# noinspection PyUnresolvedReferences
+job_success = job.result().success
+
+# ======================================
+
+sim.compiled_circuit.draw(output="mpl")
 plt.show()
 plt.close()
 
-plot_circuit_layout(qc_compiled, sim.backend)
+plot_circuit_layout(sim.compiled_circuit, sim.backend)
 plt.show()
 plt.close()
 
@@ -69,7 +106,7 @@ plt.show()
 plt.close()
 
 ys = result.get_memory()
-xs = [x for x in range(len(ys))]
+xs = list(range(len(ys)))
 plt.scatter(xs, ys)
 plt.tick_params(
     axis='y',
@@ -78,7 +115,10 @@ plt.tick_params(
 plt.show()
 plt.close()
 
-qc.draw(output="mpl", initial_state=True, plot_barriers=False, interactive=True)
+builder.circuit.draw(output="mpl",
+                     initial_state=True,
+                     plot_barriers=False,
+                     interactive=True)
 plt.show()
 plt.close()
 
@@ -93,13 +133,3 @@ plt.tick_params(
     labelbottom=False)
 plt.show()
 plt.close()
-
-print("==========================")
-
-print(sim.backend.num_qubits)
-print(sim.backend.backend_version)
-print(sim.backend.operation_names)
-print(sim.backend.version)
-print(job.backend())
-print(job.job_id())
-print(job.result().success)
