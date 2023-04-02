@@ -4,12 +4,12 @@ The module contains both classical and quantum oracles with solution for both of
 import dis
 from abc import ABC
 from functools import wraps
+from random import random as random_float
 from typing import Callable
 
 import numpy as np
 from qiskit import QuantumRegister, ClassicalRegister, QuantumCircuit
 from qiskit.quantum_info import random_statevector
-from qiskit_aer.noise import NoiseModel, pauli_error, depolarizing_error, reset_error
 
 
 def count_incrementer(method):
@@ -122,10 +122,11 @@ class QuantumCircuitBuild:
 
     def allocate_registers(self):
         """Allocates quantum and classical register according to oracle's complexity."""
-        self.qreg = QuantumRegister(self.oracle.complexity, "qreg")
-        self.creg = ClassicalRegister(self.oracle.complexity, "creg")
-        self.auxreg = QuantumRegister(1, "auxreg")
-        self.circuit = QuantumCircuit(self.qreg, self.auxreg, self.creg)
+        self.qreg = QuantumRegister(size=self.oracle.complexity, name="qreg")
+        self.creg = ClassicalRegister(size=self.oracle.complexity, name="creg")
+        self.auxreg = QuantumRegister(size=1, name="auxreg")
+        self.circuit = QuantumCircuit(self.qreg, self.auxreg, self.creg,
+                                      name="cirq", global_phase=random_float())
 
     def __simulate_random_initial_state(self):
         """Initializes quantum registers at random states."""
@@ -173,28 +174,3 @@ class QuantumCircuitBuild:
         self.circuit.barrier()
 
         self.measure()
-
-
-class NoiseBuild:
-    """Builds a simple custom noise model to imitate real quantum computer."""
-
-    def __init__(self):
-        self.model = NoiseModel()
-
-    def apply_reset_error(self, rate: float = 0.03):
-        """Applies reset error channel."""
-        error_reset = reset_error(rate, 1 - rate)
-        self.model.add_all_qubit_quantum_error(error_reset, "reset")
-
-    def apply_measurement_error(self, rate: float = 0.05):
-        """Applies measurement error channel."""
-        error_meas = pauli_error([('X', rate), ('I', 1 - rate)])
-        self.model.add_all_qubit_quantum_error(error_meas, "measure")
-
-    def apply_gate_error(self, single_rate: float = 0.07, double_rate: float = 0.11):
-        """Applies gates' error channels."""
-        error_1 = depolarizing_error(single_rate, 1)
-        self.model.add_all_qubit_quantum_error(error_1, ["h", "z", "x"])
-
-        error_2 = depolarizing_error(double_rate, 2)
-        self.model.add_all_qubit_quantum_error(error_2, ["cx"])
