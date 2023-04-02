@@ -58,8 +58,9 @@ class Simulator:
         """Set custom backend."""
         self.backend = backed
 
-    def transpile(self, circuit: QuantumCircuit, layout_method: str, routing_method: str, translation_method: str,
-                  approximation_degree: float, seed_transpiler: int, optimization_level: int) -> QuantumCircuit:
+    def transpile(self, circuit: QuantumCircuit, *, seed_transpiler: int,
+                  layout_method: str, routing_method: str, translation_method: str,
+                  approximation_degree: float, optimization_level: int) -> QuantumCircuit:
         """Return a compiled quantum circuit on the configured backend provider."""
         self.compiled_circuit = transpile(circuits=circuit, backend=self.backend,
                                           basis_gates=self.noise_config.model.basis_gates,
@@ -73,6 +74,5 @@ class Simulator:
 
     def execute(self, compiled_circuit: QuantumCircuit, shots: int, seed_simulator: int) -> Job:
         """Runs the compiled circuit."""
-        return self.backend.run(compiled_circuit, shots=shots,
-                                noise_model=self.noise_config.model, memory=True, seed_simulator=seed_simulator,
-                                init_qubits=False)
+        return self.backend.run(compiled_circuit, shots=shots, noise_model=self.noise_config.model,
+                                memory=True, seed_simulator=seed_simulator, init_qubits=False)

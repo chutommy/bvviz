@@ -139,9 +139,11 @@ class QuantumCircuitBuild:
     def __simulate_random_initial_state(self):
         """Initializes quantum registers at random states."""
         # https://quantumcomputing.stackexchange.com/q/4962
+        # pylint: disable=no-member
         for qubit in self.qreg:
             self.circuit.initialize(random_statevector(2).data, qubit)
         self.circuit.initialize(random_statevector(2), self.auxreg)
+        # pylint: enable=no-member
 
     def reset_registers(self):
         """Introduces quantum registers into ket zeroes."""
