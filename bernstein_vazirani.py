@@ -83,6 +83,8 @@ class QuantumOracle(Oracle):
             if self.secret[self.complexity - i - 1]:
                 circuit.cx(in_qreg[i], out_qreg[0])
 
+        return self
+
 
 class ClassicalSolver:
     """Implements a classical solution to the BV problem."""
@@ -136,6 +138,8 @@ class QuantumCircuitBuild:
         self.circuit = QuantumCircuit(self.qreg, self.auxreg, self.creg,
                                       name="cirq", global_phase=random_float())
 
+        return self
+
     def __simulate_random_initial_state(self):
         """Initializes quantum registers at random states."""
         # https://quantumcomputing.stackexchange.com/q/4962
@@ -145,11 +149,15 @@ class QuantumCircuitBuild:
         self.circuit.initialize(random_statevector(2), self.auxreg)
         # pylint: enable=no-member
 
+        return self
+
     def reset_registers(self):
         """Introduces quantum registers into ket zeroes."""
         for qubit in self.qreg:
             self.circuit.reset(qubit)
         self.circuit.reset(self.auxreg)
+
+        return self
 
     def prepare_initial_state(self):
         """Prepares initial state of all quantum qubits"""
@@ -164,6 +172,8 @@ class QuantumCircuitBuild:
         # self.circuit.h(self.auxreg)
         # self.circuit.z(self.auxreg)
 
+        return self
+
     def measure(self):
         """Apply measurement of quantum query register on the classical register."""
         for qubit in self.qreg:
@@ -171,11 +181,14 @@ class QuantumCircuitBuild:
 
         self.circuit.measure(self.qreg, self.creg)
 
-    def create_circuit(self, oracle=QuantumOracle):
+        return self
+
+    def create_circuit(self, oracle: QuantumOracle, random_initialization: bool):
         """Builds a quantum implementation of the Bernstein-Vazirani's algorithm with the preset
         secret."""
         self.allocate_registers(complexity=oracle.complexity)
-        self.__simulate_random_initial_state()
+        if random_initialization:
+            self.__simulate_random_initial_state()
         self.reset_registers()
         self.prepare_initial_state()
 
@@ -187,3 +200,5 @@ class QuantumCircuitBuild:
         self.circuit.barrier()
 
         self.measure()
+
+        return self
