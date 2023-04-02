@@ -1,6 +1,7 @@
+from random import randint
+
 import matplotlib.pyplot as plt
-from qiskit import transpile
-from qiskit.providers.fake_provider import FakeAuckland
+from qiskit.providers.fake_provider import FakeGuadalupeV2
 from qiskit.visualization import plot_circuit_layout
 
 from backend_simulator import *
@@ -9,8 +10,8 @@ from bernstein_vazirani import *
 secret = np.array([1, 0, 1, 0, 0, 1, 1, 1, 0], dtype=np.byte)
 
 oracle = ClassicalOracle(secret=secret)
-solver = ClassicalSolver(oracle=oracle)
-solution = solver.solve()
+solver = ClassicalSolver()
+solution = solver.solve(oracle=oracle)
 
 print(solution)
 
@@ -22,8 +23,8 @@ print("# of queries:".ljust(20, " "), oracle.query_count)
 # =============================================
 
 qoracle = QuantumOracle(secret=secret)
-builder = QuantumCircuitBuild(oracle=qoracle)
-builder.create_circuit()
+builder = QuantumCircuitBuild()
+builder.create_circuit(oracle=qoracle)
 qc = builder.circuit
 
 print("classical ops", solver.ops_count())
@@ -37,20 +38,12 @@ print("qc cbits", builder.circuit.num_clbits)
 
 
 sim = Simulator()
-sim.set_noise()
-sim.set_noise(reset_rate=0.01, measure_rate=0.03, single_gate_rate=0.04, double_gate_rate=0.06)
+sim.set_noise(reset_rate=0.01, measure_rate=0.05, single_gate_rate=0.07, double_gate_rate=0.11)
 basis_gates = sim.noise_config.model.basis_gates
 
-be = FakeAuckland()
-# be = Aer.get_backend("qasm_simulator")
-sim.set_backend(be)
-
-backend = sim.backend
-
-# qc_compiled = transpile(circuits=builder.circuit, backend=backend, basis_gates=basis_gates,
-#                         backend_properties=backend.properties(), layout_method="trivial")
-qc_compiled = transpile(circuits=builder.circuit, backend=backend, basis_gates=basis_gates, layout_method="trivial")
-job = backend.run(qc_compiled, shots=1000, basis_gates=basis_gates, noise_model=sim.noise_config.model)
+sim.set_backend(FakeGuadalupeV2())
+qc_compiled = sim.transpile(builder.circuit, "sabre", "stochastic", "synthesis", 0, randint(1000, 1000 ** 3), 2)
+job = sim.backend.run(qc_compiled, shots=800, basis_gates=basis_gates, noise_model=sim.noise_config.model)
 result = job.result()
 counts = result.get_counts(qc)
 
@@ -63,7 +56,7 @@ values = list(counts.values())
 qc_compiled.draw(output="mpl")
 plt.show()
 
-plot_circuit_layout(qc_compiled, backend)
+plot_circuit_layout(qc_compiled, sim.backend)
 plt.show()
 
 qc.draw(output="mpl", initial_state=True, plot_barriers=False, interactive=True)
@@ -79,4 +72,5 @@ plt.tick_params(
 plt.show()
 
 # config = backend.configuration()
+# props = backend.properties()
 # print()
