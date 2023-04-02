@@ -2,7 +2,7 @@ from random import randint
 
 import matplotlib.pyplot as plt
 from qiskit.providers.fake_provider import FakeGuadalupeV2
-from qiskit.visualization import plot_circuit_layout
+from qiskit.visualization import plot_circuit_layout, plot_gate_map, plot_error_map
 
 from backend_simulator import *
 from bernstein_vazirani import *
@@ -22,9 +22,9 @@ print("# of queries:".ljust(20, " "), oracle.query_count)
 
 # =============================================
 
-qoracle = QuantumOracle(secret=secret)
+q_oracle = QuantumOracle(secret=secret)
 builder = QuantumCircuitBuild()
-builder.create_circuit(oracle=qoracle)
+builder.create_circuit(oracle=q_oracle)
 qc = builder.circuit
 
 print("classical ops", solver.ops_count())
@@ -36,14 +36,17 @@ print("qc cbits", builder.circuit.num_clbits)
 
 # =============================================
 
-
 sim = Simulator()
 sim.set_noise(reset_rate=0.01, measure_rate=0.05, single_gate_rate=0.07, double_gate_rate=0.11)
 basis_gates = sim.noise_config.model.basis_gates
 
+random_seed = randint(1000, 1000 ** 3)
+
 sim.set_backend(FakeGuadalupeV2())
-qc_compiled = sim.transpile(builder.circuit, "sabre", "stochastic", "synthesis", 0, randint(1000, 1000 ** 3), 2)
-job = sim.backend.run(qc_compiled, shots=800, basis_gates=basis_gates, noise_model=sim.noise_config.model)
+qc_compiled = sim.transpile(circuit=builder.circuit, layout_method="sabre", routing_method="stochastic",
+                            translation_method="synthesis", approximation_degree=0,
+                            seed_transpiler=random_seed, optimization_level=2)
+job = sim.execute(compiled_circuit=qc_compiled, shots=1000, seed_simulator=random_seed)
 result = job.result()
 counts = result.get_counts(qc)
 

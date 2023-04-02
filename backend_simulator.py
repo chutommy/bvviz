@@ -1,7 +1,7 @@
 """Provides custom backend simulators and services."""
 
 from qiskit import transpile, QuantumCircuit
-from qiskit.providers import Backend
+from qiskit.providers import Backend, Job
 from qiskit_aer.noise import NoiseModel, pauli_error, depolarizing_error, reset_error
 
 
@@ -24,7 +24,7 @@ class NoiseConfig:
     def apply_single_gate_error(self, rate: float):
         """Applies single gate error channel."""
         error = depolarizing_error(rate, 1)
-        self.model.add_all_qubit_quantum_error(error, ["h", "z", "x"])
+        self.model.add_all_qubit_quantum_error(error, ["i", "h", "z", "x"])
 
     def apply_double_gate_error(self, rate: float):
         """Applies double gate error channel."""
@@ -71,6 +71,8 @@ class Simulator:
                                           optimization_level=optimization_level)
         return self.compiled_circuit
 
-    # def execute(self, compiled_circuit: QuantumCircuit = None):
-    #     if compiled_circuit is not None:
-    #         self.compiled_circuit = compiled_circuit
+    def execute(self, compiled_circuit: QuantumCircuit, shots: int, seed_simulator: int) -> Job:
+        """Runs the compiled circuit."""
+        return self.backend.run(compiled_circuit, shots=shots,
+                                noise_model=self.noise_config.model, memory=True, seed_simulator=seed_simulator,
+                                init_qubits=False)
