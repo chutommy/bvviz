@@ -39,7 +39,7 @@ solution = solver.solve(oracle=oracle)
 cl_stop = perf_counter_ns()
 
 builder = QuantumCircuitBuild()
-q_oracle = QuantumOracle(secret=SECRET_STR)
+q_oracle = QuantumOracle(secret=secret_seq)
 builder.create_circuit(oracle=q_oracle, random_initialization=True)
 sim = Simulator()
 sim.set_noise(reset_rate=RESET_RATE,
@@ -105,9 +105,10 @@ plot_error_map(sim.backend)
 plt.show()
 plt.close()
 
-ys = result.get_memory()
+yss = result.get_memory()
+ys = [int(i, 2) for i in yss]
 xs = list(range(len(ys)))
-plt.scatter(xs, ys)
+plt.scatter(xs, ys, alpha=0.1)
 plt.tick_params(
     axis='y',
     which='both',
