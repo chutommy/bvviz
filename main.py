@@ -5,13 +5,13 @@ import matplotlib.pyplot as plt
 from qiskit.providers.fake_provider import FakeGuadalupeV2
 from qiskit.visualization import plot_circuit_layout, plot_gate_map, plot_error_map
 
-from backend_simulator import Simulator
 from bernstein_vazirani import ClassicalOracle, ClassicalSolver, QuantumOracle, QuantumCircuitBuild
+from simulation import Simulator
 from utils import str_to_byte
 
 # ======================================
 
-SECRET_STR = "101001110"
+SECRET_STR = "10100111011"
 
 RESET_RATE = 0.01
 MEASURE_RATE = 0.05
@@ -31,15 +31,14 @@ random_seed = randint(10 ** 9, 10 ** 10)
 
 # ======================================
 
-solver = ClassicalSolver()
 secret_seq = str_to_byte(SECRET_STR)
-oracle = ClassicalOracle(secret=secret_seq)
-cl_start = perf_counter_ns()
-solution = solver.solve(oracle=oracle)
-cl_stop = perf_counter_ns()
 
+solver = ClassicalSolver()
 builder = QuantumCircuitBuild()
+
+oracle = ClassicalOracle(secret=secret_seq)
 q_oracle = QuantumOracle(secret=secret_seq)
+
 builder.create_circuit(oracle=q_oracle, random_initialization=True)
 sim = Simulator()
 sim.set_noise(reset_rate=RESET_RATE,
@@ -54,14 +53,20 @@ sim.transpile(circuit=builder.circuit,
               translation_method=TRANSLATION_METHOD,
               approximation_degree=APPROXIMATION_DEGREE,
               optimization_level=OPTIMIZATION_LEVEL)
+
+cl_start = perf_counter_ns()
+solution = solver.solve(oracle=oracle)
+cl_stop = perf_counter_ns()
+
 qu_start = perf_counter_ns()
 job = sim.execute(shots=SHOT_COUNT, seed_simulator=random_seed)
 qu_stop = perf_counter_ns()
+
+# ======================================
+
 # noinspection PyUnresolvedReferences
 result = job.result()
 counts = result.get_counts(builder.circuit)
-
-# ======================================
 
 cl_solution = solution
 cl_queries = oracle.query_count

@@ -8,6 +8,8 @@ from qiskit_aer.noise import NoiseModel, pauli_error, depolarizing_error, reset_
 class NoiseConfig:
     """Builds a simple custom noise model to imitate real quantum computer."""
 
+    mode: NoiseModel = None
+
     def __init__(self):
         self.model = NoiseModel()
 
@@ -43,10 +45,9 @@ class NoiseConfig:
 class Simulator:
     """Represents a wrapper for the providers' Aer backend simulation providers."""
 
-    def __init__(self):
-        self.backend = None
-        self.noise_config = None
-        self.compiled_circuit = None
+    backend: Backend = None
+    noise_config: NoiseConfig = None
+    compiled_circuit: QuantumCircuit = None
 
     def set_noise(self, reset_rate: float = None, measure_rate: float = None,
                   single_gate_rate: float = None, double_gate_rate: float = None):
@@ -97,6 +98,7 @@ class Simulator:
         if compiled_circuit is not None:
             self.compiled_circuit = compiled_circuit
 
+        # noinspection PyUnresolvedReferences
         return self.backend.run(run_input=self.compiled_circuit,
                                 shots=shots,
                                 noise_model=self.noise_config.model,

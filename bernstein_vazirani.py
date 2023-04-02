@@ -26,10 +26,13 @@ def count_incrementer(method):
 class Oracle(ABC):
     """A base oracle with unexposed function."""
 
+    secret: np.array = None
+    complexity: int = 0
+    query_count: int = 0
+
     def __init__(self, secret: np.array):
         self.complexity = len(secret)
         self.secret = secret
-
         self.query_count = 0
 
     def validate(self) -> bool:
@@ -46,8 +49,8 @@ class Oracle(ABC):
 class ClassicalOracle(Oracle):
     """Represents an implementation of a classical oracle for the Bernstein-Vazirani problem."""
 
-    complexity: int = None
     secret: np.array = None
+    complexity: int = None
     query_count: int = None
 
     @count_incrementer
@@ -63,8 +66,8 @@ class QuantumOracle(Oracle):
     oracle is not queried like classical oracles, instead it is applied on a given quantum
     circuit with exactly specified operational quantum registers (input-output quantum bits)."""
 
-    complexity: int = None
     secret: np.array = None
+    complexity: int = None
     query_count: int = None
 
     @count_incrementer
@@ -88,9 +91,6 @@ class QuantumOracle(Oracle):
 
 class ClassicalSolver:
     """Implements a classical solution to the BV problem."""
-
-    def __init__(self):
-        pass
 
     @staticmethod
     def solve(oracle: ClassicalOracle) -> np.array:
@@ -123,12 +123,10 @@ class QuantumCircuitBuild:
     """Represents a quantum circuit building tool for the implementation of the
     Bernstein-Vazirani algorithm."""
 
-    def __init__(self):
-        self.qreg = None  # quantum BV query register
-        self.auxreg = None  # auxiliary output qubit register
-        self.creg = None  # classical measurement register
-
-        self.circuit = None
+    qreg: QuantumRegister = None  # quantum BV query register
+    auxreg: QuantumRegister = None  # auxiliary output qubit register
+    creg: ClassicalRegister = None  # classical measurement register
+    circuit: QuantumCircuit = None
 
     def allocate_registers(self, complexity: int):
         """Allocates quantum and classical register according to oracle's complexity."""
@@ -140,6 +138,7 @@ class QuantumCircuitBuild:
 
         return self
 
+    # noinspection PyUnresolvedReferences
     def __simulate_random_initial_state(self):
         """Initializes quantum registers at random states."""
         # https://quantumcomputing.stackexchange.com/q/4962
