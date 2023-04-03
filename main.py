@@ -14,7 +14,7 @@ from utils import str_to_byte
 cfg = Configuration()
 
 cfg.seed = 1406711823  # randint(10 ** 9, 10 ** 10)
-cfg.backend = Backend.MELBOURNE.value
+cfg.backend = Backend.MELBOURNE
 cfg.shot_count = 1000
 
 cfg.noise_config.reset_rate = 0.01
@@ -44,7 +44,7 @@ q_oracle = QuantumOracle(secret=secret_seq)
 builder.create_circuit(oracle=q_oracle, random_initialization=True)
 sim = Simulator()
 sim.set_noise(config=cfg.noise_config)
-sim.set_backend(cfg.backend)
+sim.set_backend(cfg.backend.value)
 sim.transpile(circuit=builder.circuit, seed=cfg.seed, config=cfg.transpile_config)
 
 cl_start = perf_counter_ns()

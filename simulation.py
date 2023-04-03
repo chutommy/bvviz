@@ -69,9 +69,9 @@ class Simulator:
 
         return self
 
-    def set_backend(self, backed: Backend):
+    def set_backend(self, backend: Backend):
         """Set custom backend."""
-        self.backend = backed
+        self.backend = backend
         return self
 
     def transpile(self, circuit: QuantumCircuit, config: TranspileConfiguration, seed: int):
