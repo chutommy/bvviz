@@ -1,37 +1,39 @@
-from random import randint
 from time import perf_counter_ns
 
 import matplotlib.pyplot as plt
-from qiskit.providers.fake_provider import FakeGuadalupeV2
 from qiskit.visualization import plot_circuit_layout, plot_gate_map, plot_error_map
 
 from bernstein_vazirani import ClassicalOracle, ClassicalSolver, QuantumOracle, QuantumCircuitBuild
+from config import Backend, LayoutMethod, RoutingMethod, TranslationMethod, Configuration, \
+    OptimizationLevel
 from simulation import Simulator
 from utils import str_to_byte
 
 # ======================================
 
-SECRET_STR = "10100111011"
+cfg = Configuration()
 
-RESET_RATE = 0.01
-MEASURE_RATE = 0.05
-SINGLE_GATE_RATE = 0.07
-DOUBLE_GATE_RATE = 0.11
+cfg.seed = 1406711823  # randint(10 ** 9, 10 ** 10)
+cfg.backend = Backend.MELBOURNE.value
+cfg.shot_count = 1000
 
-LAYOUT_METHOD = "sabre"
-ROUTING_METHOD = "stochastic"
-TRANSLATION_METHOD = "synthesis"
-APPROXIMATION_DEGREE = 0
-OPTIMIZATION_LEVEL = 2
+cfg.noise_config.reset_rate = 0.01
+cfg.noise_config.measure_rate = 0.05
+cfg.noise_config.single_gate_rate = 0.07
+cfg.noise_config.double_gate_rate = 0.11
 
-SHOT_COUNT = 1000
+cfg.transpile_config.layout_method = LayoutMethod.NOISE_ADAPTIVE
+cfg.transpile_config.routing_method = RoutingMethod.LOOKAHEAD
+cfg.transpile_config.translation_method = TranslationMethod.SYNTHESIS
 
-backend = FakeGuadalupeV2()
-random_seed = randint(10 ** 9, 10 ** 10)
+cfg.transpile_config.approximation_degree = 0.99
+cfg.transpile_config.optimization_level = OptimizationLevel.HEAVY
+
+secret_str = "10100111011"
 
 # ======================================
 
-secret_seq = str_to_byte(SECRET_STR)
+secret_seq = str_to_byte(secret_str)
 
 solver = ClassicalSolver()
 builder = QuantumCircuitBuild()
@@ -41,25 +43,16 @@ q_oracle = QuantumOracle(secret=secret_seq)
 
 builder.create_circuit(oracle=q_oracle, random_initialization=True)
 sim = Simulator()
-sim.set_noise(reset_rate=RESET_RATE,
-              measure_rate=MEASURE_RATE,
-              single_gate_rate=SINGLE_GATE_RATE,
-              double_gate_rate=DOUBLE_GATE_RATE)
-sim.set_backend(backend)
-sim.transpile(circuit=builder.circuit,
-              seed_transpiler=random_seed,
-              layout_method=LAYOUT_METHOD,
-              routing_method=ROUTING_METHOD,
-              translation_method=TRANSLATION_METHOD,
-              approximation_degree=APPROXIMATION_DEGREE,
-              optimization_level=OPTIMIZATION_LEVEL)
+sim.set_noise(config=cfg.noise_config)
+sim.set_backend(cfg.backend)
+sim.transpile(circuit=builder.circuit, seed=cfg.seed, config=cfg.transpile_config)
 
 cl_start = perf_counter_ns()
 solution = solver.solve(oracle=oracle)
 cl_stop = perf_counter_ns()
 
 qu_start = perf_counter_ns()
-job = sim.execute(shots=SHOT_COUNT, seed_simulator=random_seed)
+job = sim.execute(shots=cfg.shot_count, seed_simulator=cfg.seed)
 qu_stop = perf_counter_ns()
 
 # ======================================
@@ -124,7 +117,8 @@ plt.close()
 builder.circuit.draw(output="mpl",
                      initial_state=True,
                      plot_barriers=False,
-                     interactive=True)
+                     interactive=True,
+                     fold=-1)
 plt.show()
 plt.close()
 

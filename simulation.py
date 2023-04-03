@@ -4,6 +4,8 @@ from qiskit import transpile, QuantumCircuit
 from qiskit.providers import Backend, Job
 from qiskit_aer.noise import NoiseModel, pauli_error, depolarizing_error, reset_error
 
+from config import NoiseConfiguration, TranspileConfiguration
+
 
 class NoiseConfig:
     """Builds a simple custom noise model to imitate real quantum computer."""
@@ -49,22 +51,21 @@ class Simulator:
     noise_config: NoiseConfig = None
     compiled_circuit: QuantumCircuit = None
 
-    def set_noise(self, reset_rate: float = None, measure_rate: float = None,
-                  single_gate_rate: float = None, double_gate_rate: float = None):
+    def set_noise(self, config: NoiseConfiguration):
         """Applies noise channels."""
         self.noise_config = NoiseConfig()
 
-        if reset_rate:
-            self.noise_config.apply_reset_error(rate=reset_rate)
+        if config.reset_rate:
+            self.noise_config.apply_reset_error(rate=config.reset_rate)
 
-        if measure_rate:
-            self.noise_config.apply_measurement_error(rate=measure_rate)
+        if config.measure_rate:
+            self.noise_config.apply_measurement_error(rate=config.measure_rate)
 
-        if single_gate_rate:
-            self.noise_config.apply_single_gate_error(rate=single_gate_rate)
+        if config.single_gate_rate:
+            self.noise_config.apply_single_gate_error(rate=config.single_gate_rate)
 
-        if double_gate_rate:
-            self.noise_config.apply_double_gate_error(rate=double_gate_rate)
+        if config.double_gate_rate:
+            self.noise_config.apply_double_gate_error(rate=config.double_gate_rate)
 
         return self
 
@@ -73,23 +74,17 @@ class Simulator:
         self.backend = backed
         return self
 
-    def transpile(self, circuit: QuantumCircuit, *,
-                  seed_transpiler: int,
-                  layout_method: str,
-                  routing_method: str,
-                  translation_method: str,
-                  approximation_degree: float,
-                  optimization_level: int):
+    def transpile(self, circuit: QuantumCircuit, config: TranspileConfiguration, seed: int):
         """Return a compiled quantum circuit on the configured backend provider."""
         self.compiled_circuit = transpile(circuits=circuit,
                                           backend=self.backend,
+                                          seed_transpiler=seed,
                                           basis_gates=self.noise_config.model.basis_gates,
-                                          layout_method=layout_method,
-                                          routing_method=routing_method,
-                                          translation_method=translation_method,
-                                          approximation_degree=(1 - approximation_degree),
-                                          seed_transpiler=seed_transpiler,
-                                          optimization_level=optimization_level)
+                                          layout_method=config.layout_method.value,
+                                          routing_method=config.routing_method.value,
+                                          translation_method=config.translation_method.value,
+                                          approximation_degree=config.approximation_degree,
+                                          optimization_level=config.optimization_level.value)
         return self
 
     def execute(self, shots: int, seed_simulator: int,
