@@ -4,9 +4,9 @@ import matplotlib.pyplot as plt
 from qiskit.visualization import plot_circuit_layout, plot_gate_map, plot_error_map
 
 from bernstein_vazirani import ClassicalOracle, ClassicalSolver, QuantumOracle, QuantumCircuitBuild
-from config import Backend, LayoutMethod, RoutingMethod, TranslationMethod, Configuration, \
+from config import LayoutMethod, RoutingMethod, TranslationMethod, Configuration, \
     OptimizationLevel
-from simulation import Simulator
+from simulation import Simulator, BackendService
 from utils import str_to_byte
 
 # ======================================
@@ -14,7 +14,7 @@ from utils import str_to_byte
 cfg = Configuration()
 
 cfg.seed = 1406711823  # randint(10 ** 9, 10 ** 10)
-cfg.backend = Backend.MELBOURNE
+cfg.backend = BackendService().list_backends()[0]
 cfg.shot_count = 1000
 
 cfg.noise_config.reset_rate = 0.01
@@ -44,7 +44,7 @@ q_oracle = QuantumOracle(secret=secret_seq)
 builder.create_circuit(oracle=q_oracle, random_initialization=True)
 sim = Simulator()
 sim.set_noise(config=cfg.noise_config)
-sim.set_backend(cfg.backend.value)
+sim.set_backend(cfg.backend)
 sim.transpile(circuit=builder.circuit, seed=cfg.seed, config=cfg.transpile_config)
 
 cl_start = perf_counter_ns()

@@ -1,7 +1,9 @@
 """Provides custom backend simulators and services."""
+from typing import List
 
 from qiskit import transpile, QuantumCircuit
 from qiskit.providers import Backend, Job
+from qiskit.providers.fake_provider import FakeProviderForBackendV2, FakeQasmSimulator
 from qiskit_aer.noise import NoiseModel, pauli_error, depolarizing_error, reset_error
 
 from config import NoiseConfiguration, TranspileConfiguration
@@ -100,3 +102,30 @@ class Simulator:
                                 memory=True,
                                 seed_simulator=seed_simulator,
                                 init_qubits=False)
+
+
+# https://qiskit.org/documentation/apidoc/providers_fake_provider.html
+class BackendService:
+    """Fake backend service for builds to mimic the behavior of IBM Quantum systems using system
+    snapshots."""
+
+    provider: FakeProviderForBackendV2 = None
+    backend: Backend = None
+
+    def __init__(self):
+        self.provider = FakeProviderForBackendV2()
+        self.backend = FakeQasmSimulator()
+
+    def list_backends(self) -> List[Backend]:
+        """Returns available list of provided backends."""
+        return self.provider.backends()
+
+    def set_backend(self, backend: Backend):
+        """Set the provider's backend to the given backend instance."""
+        self.backend = backend
+
+        return self
+
+    def get_backend(self) -> Backend:
+        """Returns service's default quantum backend."""
+        return self.backend
