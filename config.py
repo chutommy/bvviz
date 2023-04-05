@@ -1,8 +1,11 @@
 """Provides configuration for the simulator."""
 from dataclasses import dataclass
 from enum import Enum
+from typing import List
 
 import qiskit.providers.fake_provider as provider
+from qiskit.providers import Backend
+from qiskit.providers.fake_provider import FakeProviderForBackendV2, FakeQasmSimulator, FakeProvider
 
 
 # https://qiskit.org/documentation/apidoc/transpiler_passes.html#layout-selection-placement
@@ -45,48 +48,25 @@ class OptimizationLevel(Enum):
 
 
 # https://qiskit.org/documentation/apidoc/providers_fake_provider.html
-class Backend(Enum):
-    """Fake backends built to mimic the behavior of IBM Quantum systems using system snapshots."""
+class BackendService:
+    """Fake backend service for builds to mimic the behavior of IBM Quantum systems using system snapshots."""
 
-    ALMADEN = provider.FakeAlmadenV2()
-    ARMONK = provider.FakeArmonkV2()
-    ATHENS = provider.FakeAthensV2()
-    AUCKLAND = provider.FakeAuckland()
-    BELEM = provider.FakeBelemV2()
-    BOEBLINGEN = provider.FakeBoeblingenV2()
-    BOGOTA = provider.FakeBogotaV2()
-    BROOKLYN = provider.FakeBrooklynV2()
-    BURLINGTON = provider.FakeBurlingtonV2()
-    CAIRO = provider.FakeCairoV2()
-    CAMBRIDGE = provider.FakeCambridgeV2()
-    ESSEX = provider.FakeEssexV2()
-    GENEVA = provider.FakeGeneva()
-    GUADALUPE = provider.FakeGuadalupeV2()
-    HANOI = provider.FakeHanoiV2()
-    JAKARTA = provider.FakeJakartaV2()
-    JOHANNESBURG = provider.FakeJohannesburgV2()
-    KOLKATA = provider.FakeKolkataV2()
-    LAGOS = provider.FakeLagosV2()
-    LIMA = provider.FakeLimaV2()
-    LONDON = provider.FakeLondonV2()
-    MANHATTAN = provider.FakeManhattanV2()
-    MELBOURNE = provider.FakeMelbourneV2()
-    MONTREAL = provider.FakeMontrealV2()
-    MUMBAI = provider.FakeMumbaiV2()
-    NAIROBI = provider.FakeNairobiV2()
-    OSLO = provider.FakeOslo()
-    OURENSE = provider.FakeOurenseV2()
-    PARIS = provider.FakeParisV2()
-    PRAGUE = provider.FakePrague()
-    POUGHKEEPSIE = provider.FakePoughkeepsieV2()
-    ROCHESTER = provider.FakeRochesterV2()
-    SANTIAGO = provider.FakeSantiagoV2()
-    SINGAPORE = provider.FakeSingaporeV2()
-    TORONTO = provider.FakeTorontoV2()
-    VALENCIA = provider.FakeValenciaV2()
-    VIGO = provider.FakeVigoV2()
-    WASHINGTON = provider.FakeWashingtonV2()
-    YORKTOWN = provider.FakeYorktownV2()
+    provider: FakeProviderForBackendV2 = None
+    backend: Backend = None
+
+    def __init__(self):
+        self.provider = FakeProviderForBackendV2()
+        self.backend = FakeQasmSimulator()
+
+    def list_backends(self) -> List[Backend]:
+        """Returns available list of provided backends."""
+        return self.provider.backends()
+
+    def set_backend(self, backend: Backend):
+        """Set the provider's backend to the given backend instance."""
+        self.backend = backend
+
+        return self
 
 
 @dataclass
@@ -111,7 +91,6 @@ class TranspileConfiguration:
     optimization_level: OptimizationLevel = OptimizationLevel.NO
 
 
-@dataclass
 class Configuration:
     """Configuration for the Bernstein-Vazirani protocol simulator."""
 
