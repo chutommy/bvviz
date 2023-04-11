@@ -67,7 +67,6 @@ class TranspileConfiguration:
     optimization_level: OptimizationLevel = OptimizationLevel.NO
 
 
-@dataclass
 class Configuration:
     """Configuration for the Bernstein-Vazirani protocol simulator."""
 

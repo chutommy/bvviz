@@ -2,7 +2,6 @@
 The module contains both classical and quantum oracles with solution for both of them."""
 
 import dis
-from abc import ABC
 from functools import wraps
 from random import random as random_float
 from typing import Callable
@@ -23,12 +22,12 @@ def count_incrementer(method):
     return _impl
 
 
-class Oracle(ABC):
-    """A base oracle with unexposed function."""
+class ClassicalOracle:
+    """Represents an implementation of a classical oracle for the Bernstein-Vazirani problem."""
 
     secret: np.array = None
-    complexity: int = 0
-    query_count: int = 0
+    complexity: int = None
+    query_count: int = None
 
     def __init__(self, secret: np.array):
         self.complexity = len(secret)
@@ -36,22 +35,10 @@ class Oracle(ABC):
         self.query_count = 0
 
     def validate(self) -> bool:
-        """Va"""
-        return self.secret is not None and \
-            self.complexity == len(self.secret) and \
-            self.query_count >= 0
-
-    def used(self) -> bool:
-        """Checks whether the oracle was already used or not."""
-        return self.query_count != 0
-
-
-class ClassicalOracle(Oracle):
-    """Represents an implementation of a classical oracle for the Bernstein-Vazirani problem."""
-
-    secret: np.array = None
-    complexity: int = None
-    query_count: int = None
+        """Validate integrity of the oracle."""
+        return self.secret is not None \
+            and self.complexity == len(self.secret) \
+            and self.query_count >= 0
 
     @count_incrementer
     def query(self, inp: np.array) -> bool:
@@ -61,7 +48,7 @@ class ClassicalOracle(Oracle):
         return out_bit
 
 
-class QuantumOracle(Oracle):
+class QuantumOracle:
     """Represents an implementation of a quantum oracle for the Bernstein-Vazirani problem. The
     oracle is not queried like classical oracles, instead it is applied on a given quantum
     circuit with exactly specified operational quantum registers (input-output quantum bits)."""
@@ -69,6 +56,21 @@ class QuantumOracle(Oracle):
     secret: np.array = None
     complexity: int = None
     query_count: int = None
+
+    def __init__(self, secret: np.array):
+        self.complexity = len(secret)
+        self.secret = secret
+        self.query_count = 0
+
+    def validate(self) -> bool:
+        """Validate integrity of the oracle."""
+        return self.secret is not None \
+            and self.complexity == len(self.secret) \
+            and self.query_count >= 0
+
+    def used(self) -> bool:
+        """Checks whether the oracle was already used or not."""
+        return self.query_count != 0
 
     @count_incrementer
     def apply_circuit(self, circuit: QuantumCircuit,
