@@ -82,11 +82,11 @@ class Simulator:
                                           backend=self.backend,
                                           seed_transpiler=seed,
                                           basis_gates=self.noise_config.model.basis_gates,
-                                          layout_method=config.layout_method.value,
-                                          routing_method=config.routing_method.value,
-                                          translation_method=config.translation_method.value,
+                                          layout_method=config.layout_method,
+                                          routing_method=config.routing_method,
+                                          translation_method=config.translation_method,
                                           approximation_degree=config.approximation_degree,
-                                          optimization_level=config.optimization_level.value)
+                                          optimization_level=config.optimization_level)
         return self
 
     def execute(self, shots: int, seed_simulator: int,

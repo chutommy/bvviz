@@ -31,7 +31,7 @@ class RoutingMethod(Enum):
 class TranslationMethod(Enum):
     """Name of translation pass method."""
 
-    UNROLLER = "unroller"
+    # UNROLLER = "unroller"
     TRANSLATOR = "translator"
     SYNTHESIS = "synthesis"
 
@@ -61,7 +61,7 @@ class TranspileConfiguration:
 
     layout_method: LayoutMethod = LayoutMethod.TRIVIAL
     routing_method: RoutingMethod = RoutingMethod.NONE
-    translation_method: TranslationMethod = TranslationMethod.UNROLLER
+    translation_method: TranslationMethod = TranslationMethod.TRANSLATOR
 
     approximation_degree: float = 1
     optimization_level: OptimizationLevel = OptimizationLevel.NO
@@ -70,7 +70,8 @@ class TranspileConfiguration:
 class Configuration:
     """Configuration for the Bernstein-Vazirani protocol simulator."""
 
-    seed: int = 42
+    transpiler_seed: int = 42
+    simulator_seed: int = 42
     shot_count: int = 1000
 
     backend: Backend = provider.FakeQasmSimulator()
