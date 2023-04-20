@@ -76,8 +76,7 @@ class QuantumOracle:
     def apply_circuit(self, circuit: QuantumCircuit,
                       in_qreg: QuantumRegister,
                       out_qreg: QuantumRegister):
-        """Constructs an oracle within the given quantum circuit on top of the input/output
-        qubits."""
+        """Constructs an oracle within the given quantum circuit on top of the input/output qubits."""
         # ensure correct size of quantum registers
         if in_qreg.size != self.complexity:
             raise ValueError("Invalid input register size.")
@@ -114,16 +113,15 @@ class ClassicalSolver:
         return solution
 
     def ops_count(self) -> int:
-        """Calculates the number of instructions needed to solve the oracle. A line in
-        disassembled solution code is counted as one operation."""
+        """Calculates the number of instructions needed to solve the oracle. A line in disassembled solution code is
+        counted as one operation."""
         bytecode = dis.Bytecode(self.solve)
         count = bytecode.dis().count('\n')
         return count
 
 
 class QuantumCircuitBuild:
-    """Represents a quantum circuit building tool for the implementation of the
-    Bernstein-Vazirani algorithm."""
+    """Represents a quantum circuit building tool for the implementation of the Bernstein-Vazirani algorithm."""
 
     qreg: QuantumRegister = None  # quantum BV query register
     auxreg: QuantumRegister = None  # auxiliary output qubit register
@@ -185,8 +183,7 @@ class QuantumCircuitBuild:
         return self
 
     def create_circuit(self, oracle: QuantumOracle, random_initialization: bool):
-        """Builds a quantum implementation of the Bernstein-Vazirani's algorithm with the preset
-        secret."""
+        """Builds a quantum implementation of the Bernstein-Vazirani's algorithm with the preset secret."""
         self.allocate_registers(complexity=oracle.complexity)
         if random_initialization:
             self.__simulate_random_initial_state()

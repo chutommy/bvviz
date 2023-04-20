@@ -4,8 +4,7 @@ import matplotlib.pyplot as plt
 from qiskit.visualization import plot_circuit_layout, plot_gate_map, plot_error_map
 
 from bernstein_vazirani import ClassicalOracle, ClassicalSolver, QuantumOracle, QuantumCircuitBuild
-from config import LayoutMethod, RoutingMethod, TranslationMethod, Configuration, \
-    OptimizationLevel
+from config import LayoutMethod, RoutingMethod, TranslationMethod, Configuration, OptimizationLevel
 from simulation import Simulator, BackendService
 from utils import str_to_byte
 
@@ -73,8 +72,9 @@ qu_global_phase = builder.circuit.global_phase
 qu_qubit_count = builder.circuit.num_qubits
 qu_clbit_count = builder.circuit.num_clbits
 qu_time = qu_start - qu_stop
-qu_qasm = QuantumCircuitBuild().create_circuit(
-    oracle=q_oracle, random_initialization=False).circuit.qasm(formatted=False)
+qu_qasm = QuantumCircuitBuild() \
+    .create_circuit(oracle=q_oracle, random_initialization=False) \
+    .circuit.qasm(formatted=False)
 
 # noinspection PyUnresolvedReferences
 be_backend_name = job.backend()

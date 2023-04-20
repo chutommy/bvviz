@@ -106,8 +106,7 @@ class Simulator:
 
 # https://qiskit.org/documentation/apidoc/providers_fake_provider.html
 class BackendService:
-    """Fake backend service for builds to mimic the behavior of IBM Quantum systems using system
-    snapshots."""
+    """Fake backend service for builds to mimic the behavior of IBM Quantum systems using system snapshots."""
 
     provider: FakeProviderForBackendV2 = None
     backend: Backend = None
