@@ -2,6 +2,7 @@ import json
 from random import randint
 from time import perf_counter_ns
 
+import pandas as pd
 import streamlit as st
 from matplotlib import pyplot as plt
 from qiskit.providers import Backend
@@ -212,8 +213,6 @@ with solution_cols[1]:
 
 st.divider()
 
-
-
 st.divider()
 
 download_cols = st.columns(3)
@@ -226,12 +225,26 @@ download_cols[1].download_button("Download measurements", data=memory_csv, mime=
                                  help="Download measurements of the experiment as a CSV file. The file will contain the raw data from the experiment, including the binary outcome of each measurement in the order in which they were taken. The file is saved in a comma-separated value format and can be imported into spreadsheet or analysis software for further processing or visualization.",
                                  file_name=f"bernstein_vazirani_{timestamp_str()}.csv", use_container_width=True)
 
-cl_bytecode_instructions = solver.ops_count()
 qu_used_gates = builder.circuit.count_ops()
+gates = {"gate": [], "count": []}
+for gate, count in qu_used_gates.items():
+    gates["gate"].append(gate)
+    gates["count"].append(count)
+df = pd.DataFrame.from_dict(gates)
+st.dataframe(df, use_container_width=True)
+
+print(f"qu_used_gates\t{qu_used_gates}")
+
 qu_gates_count = builder.circuit.size()
 qu_global_phase = builder.circuit.global_phase
 qu_qubit_count = builder.circuit.num_qubits
 qu_clbit_count = builder.circuit.num_clbits
+
+print(f"qu_gates_count\t{qu_gates_count}")
+print(f"qu_global_phase\t{qu_global_phase}")
+print(f"qu_qubit_count\t{qu_qubit_count}")
+print(f"qu_clbit_count\t{qu_clbit_count}")
+
 qu_qasm = QuantumCircuitBuild() \
     .create_circuit(oracle=q_oracle, random_initialization=False) \
     .circuit.qasm(formatted=False)
