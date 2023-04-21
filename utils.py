@@ -1,4 +1,5 @@
 """Provides helper functions."""
+from datetime import datetime
 
 import numpy as np
 
@@ -18,3 +19,7 @@ def byte_to_str(byte_code: np.array) -> str:
             result += "1"
 
     return result
+
+
+def timestamp_str(time: datetime = datetime.now()) -> str:
+    return time.strftime("%Y_%m_%d_%H-%M-%S")
