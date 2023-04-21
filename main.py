@@ -2,6 +2,7 @@ from random import randint
 from time import perf_counter_ns
 
 import streamlit as st
+from matplotlib import pyplot as plt
 from qiskit.providers import Backend
 
 from bernstein_vazirani import ClassicalOracle, ClassicalSolver, QuantumOracle, QuantumCircuitBuild
@@ -19,7 +20,7 @@ def backend_to_name(backend: Backend) -> str:
         name = name[5:]
     if name.endswith("_v2"):
         name = name[:-3]
-        name = name.capitalize().replace("_", " ")
+        name = name.replace("_", " ").capitalize()
     return f"{name} ({backend.num_qubits})"
 
 
@@ -52,6 +53,9 @@ if 'init' not in st.session_state:
     st.session_state.single_gate_rate = 0.051
     st.session_state.double_gate_rate = 0.073
 
+    st.session_state.approximation_degree = 0.99
+
+failed = False
 with st.sidebar.form("configuration", clear_on_submit=False):
     st.header("Configuration")
 
@@ -70,6 +74,20 @@ with st.sidebar.form("configuration", clear_on_submit=False):
                                          value=st.session_state.simulator_seed, step=1,
                                          help="Seed to control simulator sampling.",
                                          label_visibility="visible")
+
+    st.divider()
+
+    st.subheader("Input")
+
+    secret_str = st.text_input("Secret String", value="1101",
+                               help="Enter a secret string for the Bernstein-Vazirani algorithm, which determines the value to be discovered using the quantum circuit. This string must consist of 0s and 1s. Note that the length of the secret string must not exceed the number of qubits in the backend simulator minus one, as one qubit is reserved for the ancilla qubit.")
+    if len(secret_str) >= cfg.backend.num_qubits - 1:
+        st.error(
+            f"The length of the secret string ({len(secret_str)}) exceeds the number of qubits in the backend simulator minus one ({cfg.backend.num_qubits} - 1).")
+        failed = True
+    elif not all(c in '01' for c in secret_str):
+        st.error("The secret string should only consist of 0s and 1s.")
+        failed = True
 
     st.divider()
 
@@ -101,28 +119,31 @@ with st.sidebar.form("configuration", clear_on_submit=False):
 
     cfg.transpile_config.routing_method = st.selectbox("Routing Method", options=[rm.value for rm in RoutingMethod],
                                                        index=1, format_func=method_to_name,
-                                                       help="Choose a layout method for the transpiler to map the circuit qubits to physical qubits on the quantum hardware.")
+                                                       help="Choose a routing method for the transpiler to optimize the qubit connections and minimize the errors introduced during the circuit execution.")
 
     cfg.transpile_config.translation_method = st.selectbox("Translation Method",
                                                            options=[tm.value for tm in TranslationMethod],
                                                            index=1, format_func=method_to_name,
-                                                           help="Choose a layout method for the transpiler to map the circuit qubits to physical qubits on the quantum hardware.")
+                                                           help="Choose a translation method for the transpiler to convert the circuit instructions into the instructions compatible with the selected backend.")
 
     cfg.transpile_config.optimization_level = st.select_slider("Optimization Level",
                                                                options=[ol.value for ol in OptimizationLevel],
                                                                value=1, format_func=optimization_to_name,
-                                                               help="Choose a layout method for the transpiler to map the circuit qubits to physical qubits on the quantum hardware.")
+                                                               help="Select an optimization level for the transpiler to optimize the circuit's performance by reducing the number of gates, reducing the circuit depth, or minimizing the number of SWAP gates required for qubit mapping. The higher the optimization level, the more aggressive the optimization process, which can lead to faster execution time but may also affect the circuit's accuracy.")
+
+    cfg.transpile_config.approximation_degree = st.slider("Approximation Degree", min_value=0.9, max_value=1.0,
+                                                          value=st.session_state.approximation_degree, step=0.01,
+                                                          format="%.2f",
+                                                          help="Specify an approximation degree for the transpiler to approximate the circuit's gates using a lower number of gates, reducing the circuit's overall complexity.", )
 
     cfg.transpiler_seed = st.number_input("Transpiler seed", min_value=0, max_value=10 ** 15,
                                           value=st.session_state.transpiler_seed, step=1,
-                                          help="Seed for the stochastic parts of the transpiler.",
-                                          label_visibility="visible")
+                                          help="Seed for the stochastic parts of the transpiler.")
 
     submitted = st.form_submit_button("Execute", type="primary", disabled=False, use_container_width=True)
 
-cfg.transpile_config.approximation_degree = 0.99
-
-secret_str = "1011"
+if failed:
+    st.stop()
 
 # ======================================
 
@@ -181,7 +202,7 @@ job_success = job.result().success
 
 # ======================================
 
-# sim.compiled_circuit.draw(output="mpl")
+# fig = sim.compiled_circuit.draw(output="mpl")
 # plt.show()
 # plt.close()
 #
@@ -196,18 +217,20 @@ job_success = job.result().success
 # plot_error_map(sim.backend)
 # plt.show()
 # plt.close()
-#
-# yss = result.get_memory()
-# ys = [int(i, 2) for i in yss]
-# xs = list(range(len(ys)))
-# plt.scatter(xs, ys, alpha=0.1)
-# plt.tick_params(
-#     axis='y',
-#     which='both',
-#     labelleft=False)
-# plt.show()
-# plt.close()
-#
+
+yss = result.get_memory()
+ys = [int(i, 2) for i in yss]
+xs = list(range(len(ys)))
+
+fig = plt.figure()
+ax = fig.add_subplot(1, 1, 1)
+ax.scatter(xs, ys, alpha=0.1)
+ax.tick_params(
+    axis='y',
+    which='both',
+    labelleft=False)
+st.pyplot(fig)
+
 # builder.circuit.draw(output="mpl",
 #                      initial_state=True,
 #                      plot_barriers=False,
@@ -215,15 +238,17 @@ job_success = job.result().success
 #                      fold=-1)
 # plt.show()
 # plt.close()
-#
-# courses = list(counts.keys())
-# values = list(counts.values())
-# plt.bar(courses, values)
-# plt.tick_params(
-#     axis='x',
-#     which='both',
-#     bottom=False,
-#     top=False,
-#     labelbottom=False)
-# plt.show()
-# plt.close()
+
+courses = list(counts.keys())
+values = list(counts.values())
+
+fig = plt.figure()
+ax = fig.add_subplot(1, 1, 1)
+ax.bar(courses, values)
+ax.tick_params(
+    axis='x',
+    which='both',
+    bottom=False,
+    top=False,
+    labelbottom=False)
+st.pyplot(fig)
