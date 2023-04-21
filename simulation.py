@@ -6,7 +6,7 @@ from qiskit.providers import Backend, Job
 from qiskit.providers.fake_provider import FakeProviderForBackendV2, FakeQasmSimulator
 from qiskit_aer.noise import NoiseModel, pauli_error, depolarizing_error, reset_error
 
-from config import NoiseConfiguration, TranspileConfiguration
+from config import NoiseConfiguration, TranspileConfiguration, TranslationMethod
 
 
 class NoiseConfig:
@@ -84,7 +84,7 @@ class Simulator:
                                           basis_gates=self.noise_config.model.basis_gates,
                                           layout_method=config.layout_method,
                                           routing_method=config.routing_method,
-                                          translation_method=config.translation_method,
+                                          translation_method=TranslationMethod.SYNTHESIS.value,
                                           approximation_degree=config.approximation_degree,
                                           optimization_level=config.optimization_level)
         return self

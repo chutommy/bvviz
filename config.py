@@ -31,7 +31,7 @@ class RoutingMethod(Enum):
 class TranslationMethod(Enum):
     """Name of translation pass method."""
 
-    # UNROLLER = "unroller"
+    UNROLLER = "unroller"
     TRANSLATOR = "translator"
     SYNTHESIS = "synthesis"
 
