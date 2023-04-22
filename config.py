@@ -24,7 +24,7 @@ class RoutingMethod(Enum):
     LOOKAHEAD = "lookahead"
     STOCHASTIC = "stochastic"
     SABRE = "sabre"
-    NONE = "none"
+    # NONE = "none"
 
 
 # https://qiskit.org/documentation/apidoc/transpiler_passes.html#basis-change
@@ -60,7 +60,7 @@ class TranspileConfiguration:
     """Configuration for the transpiler."""
 
     layout_method: str = LayoutMethod.TRIVIAL
-    routing_method: str = RoutingMethod.NONE
+    routing_method: str = RoutingMethod.BASIC
     translation_method: str = TranslationMethod.TRANSLATOR
 
     approximation_degree: float = 1

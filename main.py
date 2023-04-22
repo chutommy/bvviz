@@ -155,197 +155,197 @@ if failed:
     st.stop()
 
 # ======================================
+with st.spinner('Wait for it...'):
+    secret_seq = str_to_byte(secret_str)
 
-secret_seq = str_to_byte(secret_str)
+    solver = ClassicalSolver()
+    builder = QuantumCircuitBuild()
 
-solver = ClassicalSolver()
-builder = QuantumCircuitBuild()
+    oracle = ClassicalOracle(secret=secret_seq)
+    q_oracle = QuantumOracle(secret=secret_seq)
 
-oracle = ClassicalOracle(secret=secret_seq)
-q_oracle = QuantumOracle(secret=secret_seq)
+    builder.create_circuit(oracle=q_oracle, random_initialization=True)
+    sim = Simulator()
+    sim.set_noise(config=cfg.noise_config)
+    sim.set_backend(cfg.backend)
+    sim.transpile(circuit=builder.circuit, seed=cfg.transpiler_seed, config=cfg.transpile_config)
 
-builder.create_circuit(oracle=q_oracle, random_initialization=True)
-sim = Simulator()
-sim.set_noise(config=cfg.noise_config)
-sim.set_backend(cfg.backend)
-sim.transpile(circuit=builder.circuit, seed=cfg.transpiler_seed, config=cfg.transpile_config)
+    cl_start = perf_counter_ns()
+    solution = solver.solve(oracle=oracle)
+    cl_stop = perf_counter_ns()
+    cl_solution = byte_to_str(solution)
+    cl_time = round((cl_stop - cl_start) / 10 ** 9, 2)
 
-cl_start = perf_counter_ns()
-solution = solver.solve(oracle=oracle)
-cl_stop = perf_counter_ns()
-cl_solution = byte_to_str(solution)
-cl_time = round((cl_stop - cl_start) / 10 ** 9, 2)
+    qu_start = perf_counter_ns()
+    job = sim.execute(shots=cfg.shot_count, seed_simulator=cfg.simulator_seed)
+    result = job.result()
+    measurements = result.get_memory()
+    counts = result.get_counts(builder.circuit)
+    qu_stop = perf_counter_ns()
+    qu_time = round((qu_stop - qu_start) / 10 ** 9, 3)
 
-qu_start = perf_counter_ns()
-job = sim.execute(shots=cfg.shot_count, seed_simulator=cfg.simulator_seed)
-result = job.result()
-measurements = result.get_memory()
-counts = result.get_counts(builder.circuit)
-qu_stop = perf_counter_ns()
-qu_time = round((qu_stop - qu_start) / 10 ** 9, 3)
+    qu_solution = max(counts, key=counts.get)
+    qu_solution_ok = qu_solution == secret_str
 
-qu_solution = max(counts, key=counts.get)
-qu_solution_ok = qu_solution == secret_str
+    cl_queries = oracle.query_count
+    qu_queries = q_oracle.query_count
 
-cl_queries = oracle.query_count
-qu_queries = q_oracle.query_count
+    # ======================================
 
-# ======================================
+    solution_cols = st.columns(2)
+    # solution_cols[0].metric("Secret string", value=secret_str)
+    with solution_cols[0]:
+        st.caption(":orange[Classical] approach")
+        st.metric(":orange[CL] solution", value=cl_solution, delta="OK",
+                  help="The solution obtained by the classical algorithm which was computed using classical computation methods.")
 
-solution_cols = st.columns(2)
-# solution_cols[0].metric("Secret string", value=secret_str)
-with solution_cols[0]:
-    st.caption(":orange[Classical] approach")
-    st.metric(":orange[CL] solution", value=cl_solution, delta="OK",
-              help="The solution obtained by the classical algorithm which was computed using classical computation methods.")
+        oracle_cols = st.columns(2)
+        oracle_cols[0].metric(":orange[CL] duration", value=f"{cl_time}s")
+        oracle_cols[1].metric(":orange[CL] queries count", value=f"{cl_queries}x")
 
-    oracle_cols = st.columns(2)
-    oracle_cols[0].metric(":orange[CL] duration", value=f"{cl_time}s")
-    oracle_cols[1].metric(":orange[CL] queries count", value=f"{cl_queries}x")
+    with solution_cols[1]:
+        st.caption(":violet[Quantum] approach")
+        st.metric(":violet[QU] solution", value=qu_solution,
+                  delta="OK" if qu_solution_ok else "BAD",
+                  delta_color="normal" if qu_solution_ok else "inverse",
+                  help="The solution obtained by the quantum circuit which was computed using quantum computation methods")
 
-with solution_cols[1]:
-    st.caption(":violet[Quantum] approach")
-    st.metric(":violet[QU] solution", value=qu_solution,
-              delta="OK" if qu_solution_ok else "BAD",
-              delta_color="normal" if qu_solution_ok else "inverse",
-              help="The solution obtained by the quantum circuit which was computed using quantum computation methods")
+        oracle_cols = st.columns(2)
+        oracle_cols[0].metric(":violet[QU] duration", value=f"{qu_time}s")
+        oracle_cols[1].metric(":violet[QU] queries count", value=f"{qu_queries}x")
 
-    oracle_cols = st.columns(2)
-    oracle_cols[0].metric(":violet[QU] duration", value=f"{qu_time}s")
-    oracle_cols[1].metric(":violet[QU] queries count", value=f"{qu_queries}x")
+    st.divider()
 
-st.divider()
+    backend_cols = st.columns(2)
 
-backend_cols = st.columns(2)
+    with backend_cols[0]:
+        st.subheader("Quantum hardware", anchor=False)
 
-with backend_cols[0]:
-    st.subheader("Quantum hardware", anchor=False)
+        qu_clbit_count = builder.circuit.num_clbits
+        qu_gates_count = builder.circuit.size()
+        qu_qubit_count = builder.circuit.num_qubits
+        qu_global_phase = builder.circuit.global_phase
+        be_qubit_capacity = sim.backend.num_qubits
 
-    qu_clbit_count = builder.circuit.num_clbits
-    qu_gates_count = builder.circuit.size()
-    qu_qubit_count = builder.circuit.num_qubits
-    qu_global_phase = builder.circuit.global_phase
-    be_qubit_capacity = sim.backend.num_qubits
+        be_backend_name = job.backend()
+        be_version = sim.backend.backend_version
+        job_id = job.job_id()
+        job_success = job.result().success
 
-    be_backend_name = job.backend()
-    be_version = sim.backend.backend_version
-    job_id = job.job_id()
-    job_success = job.result().success
+        metric_cols = st.columns(2)
+        metric_cols2 = st.columns(2)
+        metric_cols[0].metric("Classical bits", value=f"{qu_clbit_count}b",
+                              help="The number of classical bits used in the quantum circuit to store and process classical information. These bits are used to control the quantum operations and obtain measurement results.")
+        metric_cols[1].metric("Quantum bits", value=f"{qu_qubit_count}qu",
+                              help="The number of qubits used in the quantum circuit.")
+        metric_cols2[0].metric("Quantum gates", value=f"{qu_gates_count}",
+                               help="The number of elementary operations or quantum gates that were used in the experiment to implement the desired computation.")
+        metric_cols2[1].metric("Quantum bits (cap)", value=f"{be_qubit_capacity}qu",
+                               help="The maximum number of qubits that can be used in a single experiment on this quantum computing device")
+        # metric_cols2[1].metric("Global phase", value=f"{round(qu_global_phase, 2)}π")
 
-    metric_cols = st.columns(2)
-    metric_cols2 = st.columns(2)
-    metric_cols[0].metric("Classical bits", value=f"{qu_clbit_count}b",
-                          help="The number of classical bits used in the quantum circuit to store and process classical information. These bits are used to control the quantum operations and obtain measurement results.")
-    metric_cols[1].metric("Quantum bits", value=f"{qu_qubit_count}qu",
-                          help="The number of qubits used in the quantum circuit.")
-    metric_cols2[0].metric("Quantum gates", value=f"{qu_gates_count}",
-                           help="The number of elementary operations or quantum gates that were used in the experiment to implement the desired computation.")
-    metric_cols2[1].metric("Quantum bits (cap)", value=f"{be_qubit_capacity}qu",
-                           help="The maximum number of qubits that can be used in a single experiment on this quantum computing device")
-    # metric_cols2[1].metric("Global phase", value=f"{round(qu_global_phase, 2)}π")
+        if job_success:
+            st.caption(f"{be_backend_name} {be_version} (:green[success])")
+        else:
+            st.caption(f"{be_backend_name} {be_version} (':red[fail]')")
 
-    if job_success:
-        st.caption(f"{be_backend_name} {be_version} (:green[success])")
-    else:
-        st.caption(f"{be_backend_name} {be_version} (':red[fail]')")
+    with backend_cols[1]:
+        qu_used_gates = builder.circuit.count_ops()
+        gates = {"instruction": [], "count": []}
+        for instruction, count in qu_used_gates.items():
+            gates["instruction"].append(instruction)
+            gates["count"].append(count)
+        df = pd.DataFrame.from_dict(gates)
+        st.dataframe(df, use_container_width=True)
 
-with backend_cols[1]:
-    qu_used_gates = builder.circuit.count_ops()
-    gates = {"instruction": [], "count": []}
-    for instruction, count in qu_used_gates.items():
-        gates["instruction"].append(instruction)
-        gates["count"].append(count)
-    df = pd.DataFrame.from_dict(gates)
-    st.dataframe(df, use_container_width=True)
+    with st.expander("Quantum register - layout details", expanded=False):
+        gate_cols = st.columns([4, 3])
 
-with st.expander("Quantum register - layout details", expanded=False):
-    gate_cols = st.columns([4, 3])
+        with gate_cols[0]:
+            st.header("Circuit layout")
+            st.write(
+                "This is the layout of a circuit transpiled for the target backend. You can see a visual representation of the physical qubits that were used and how they were connected, which provides important information for understanding how the quantum circuit is mapped onto the hardware.")
+            st.write(
+                "By analyzing the layout, you can gain insights into the performance of the circuit on the target hardware, as well as the potential for optimization or further refinement. Overall, the layout provides a valuable tool for understanding and visualizing the complex interactions between the quantum circuit and the underlying hardware.")
 
-    with gate_cols[0]:
-        st.header("Circuit layout")
-        st.write(
-            "This is the layout of a circuit transpiled for the target backend. You can see a visual representation of the physical qubits that were used and how they were connected, which provides important information for understanding how the quantum circuit is mapped onto the hardware.")
-        st.write(
-            "By analyzing the layout, you can gain insights into the performance of the circuit on the target hardware, as well as the potential for optimization or further refinement. Overall, the layout provides a valuable tool for understanding and visualizing the complex interactions between the quantum circuit and the underlying hardware.")
+            st.caption(f"transpiler seed: :blue[{cfg.transpiler_seed}]")
 
-        st.caption(f"transpiler seed: :blue[{cfg.transpiler_seed}]")
+        with gate_cols[1]:
+            gate_layout_tabs = st.tabs(["Transpiled circuit layout", "Gate map of the device"])
 
-    with gate_cols[1]:
-        gate_layout_tabs = st.tabs(["Transpiled circuit layout", "Gate map of the device"])
+            fig = plot_circuit_layout(sim.compiled_circuit, sim.backend)
+            gate_layout_tabs[0].pyplot(fig)
 
-        fig = plot_circuit_layout(sim.compiled_circuit, sim.backend)
-        gate_layout_tabs[0].pyplot(fig)
+            fig = plot_gate_map(sim.backend, label_qubits=True)
+            gate_layout_tabs[1].pyplot(fig)
 
-        fig = plot_gate_map(sim.backend)
-        gate_layout_tabs[1].pyplot(fig)
+    st.divider()
 
-st.divider()
+    download_cols = st.columns(4)
+    timestamp = timestamp_str()
 
-download_cols = st.columns(4)
-timestamp = timestamp_str()
+    download_cols[0].subheader("Downloads:", anchor=False)
 
-download_cols[0].subheader("Downloads:", anchor=False)
+    qu_qasm = QuantumCircuitBuild() \
+        .create_circuit(oracle=q_oracle, random_initialization=False) \
+        .circuit.qasm(formatted=False)
+    download_cols[1].download_button("OpenQASM (qasm)", data=qu_qasm, mime="text/plain",
+                                     help="Download the OpenQASM code for the circuit used in the experiment.",
+                                     file_name=f"bernstein_vazirani_{timestamp}.qasm",
+                                     use_container_width=True)
 
-qu_qasm = QuantumCircuitBuild() \
-    .create_circuit(oracle=q_oracle, random_initialization=False) \
-    .circuit.qasm(formatted=False)
-download_cols[1].download_button("OpenQASM (qasm)", data=qu_qasm, mime="text/plain",
-                                 help="Download the OpenQASM code for the circuit used in the experiment.",
-                                 file_name=f"bernstein_vazirani_{timestamp}.qasm",
-                                 use_container_width=True)
+    memory_csv = '\n'.join(measurements)
+    download_cols[2].download_button("Measurements (CSV)", data=memory_csv, mime="text/csv",
+                                     help="Download measurements of the experiment as a CSV file. The file will contain raw data from the experiment, including the binary outcome of each measurement in the order in which they were taken. The file is saved in a comma-separated value format and can be imported into spreadsheet or analysis software for further processing or visualization.",
+                                     file_name=f"bernstein_vazirani_{timestamp}.csv",
+                                     use_container_width=True)
 
-memory_csv = '\n'.join(measurements)
-download_cols[2].download_button("Measurements (CSV)", data=memory_csv, mime="text/csv",
-                                 help="Download measurements of the experiment as a CSV file. The file will contain raw data from the experiment, including the binary outcome of each measurement in the order in which they were taken. The file is saved in a comma-separated value format and can be imported into spreadsheet or analysis software for further processing or visualization.",
-                                 file_name=f"bernstein_vazirani_{timestamp}.csv",
-                                 use_container_width=True)
+    counts_json = json.dumps(counts, indent=2, sort_keys=True)
+    download_cols[3].download_button("Counts (JSON)", data=counts_json, mime="application/json",
+                                     help="Download the counts of the experiment as a JSON file. The file will contain raw data, including the counts of each measured state. Consider using this data for further analysis or visualization.",
+                                     file_name=f"bernstein_vazirani_{timestamp}.json",
+                                     use_container_width=True)
 
-counts_json = json.dumps(counts, indent=2, sort_keys=True)
-download_cols[3].download_button("Counts (JSON)", data=counts_json, mime="application/json",
-                                 help="Download the counts of the experiment as a JSON file. The file will contain raw data, including the counts of each measured state. Consider using this data for further analysis or visualization.",
-                                 file_name=f"bernstein_vazirani_{timestamp}.json",
-                                 use_container_width=True)
+    # ======================================
 
-# ======================================
+    # fig = sim.compiled_circuit.draw(output="mpl")
+    # st.pyplot(fig)
 
-# fig = sim.compiled_circuit.draw(output="mpl")
-# st.pyplot(fig)
+    # plot_error_map(sim.backend)
+    # plt.show()
+    # plt.close()
 
-# plot_error_map(sim.backend)
-# plt.show()
-# plt.close()
+    yss = measurements
+    ys = [int(i, 2) for i in yss]
+    xs = list(range(len(ys)))
 
-yss = measurements
-ys = [int(i, 2) for i in yss]
-xs = list(range(len(ys)))
+    fig = plt.figure()
+    ax = fig.add_subplot(1, 1, 1)
+    ax.scatter(xs, ys, alpha=0.1)
+    ax.tick_params(
+        axis='y',
+        which='both',
+        labelleft=False)
+    st.pyplot(fig)
 
-fig = plt.figure()
-ax = fig.add_subplot(1, 1, 1)
-ax.scatter(xs, ys, alpha=0.1)
-ax.tick_params(
-    axis='y',
-    which='both',
-    labelleft=False)
-st.pyplot(fig)
+    # builder.circuit.draw(output="mpl",
+    #                      initial_state=True,
+    #                      plot_barriers=False,
+    #                      interactive=True,
+    #                      fold=-1)
+    # plt.show()
+    # plt.close()
 
-# builder.circuit.draw(output="mpl",
-#                      initial_state=True,
-#                      plot_barriers=False,
-#                      interactive=True,
-#                      fold=-1)
-# plt.show()
-# plt.close()
+    courses = list(counts.keys())
+    values = list(counts.values())
 
-courses = list(counts.keys())
-values = list(counts.values())
-
-fig = plt.figure()
-ax = fig.add_subplot(1, 1, 1)
-ax.bar(courses, values)
-ax.tick_params(
-    axis='x',
-    which='both',
-    bottom=False,
-    top=False,
-    labelbottom=False)
-st.pyplot(fig)
+    fig = plt.figure()
+    ax = fig.add_subplot(1, 1, 1)
+    ax.bar(courses, values)
+    ax.tick_params(
+        axis='x',
+        which='both',
+        bottom=False,
+        top=False,
+        labelbottom=False)
+    st.pyplot(fig)
