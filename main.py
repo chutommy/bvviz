@@ -156,7 +156,6 @@ qu_queries = q_oracle.query_count
 # ======================================
 
 solution_cols = st.columns(2)
-# solution_cols[0].metric("Secret string", value=secret_str)
 with solution_cols[0]:
     st.caption(":orange[Classical] approach")
     st.metric(":orange[CL] solution", value=cl_solution, delta="OK",

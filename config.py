@@ -1,4 +1,5 @@
-"""Provides configuration for the simulator."""
+"""Provides configuration for the app engine."""
+
 from dataclasses import dataclass
 from enum import Enum
 

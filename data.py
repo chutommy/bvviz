@@ -1,4 +1,4 @@
-"""Simplifies regular data manipulation."""
+"""Handles regular data manipulation."""
 
 import json
 import re

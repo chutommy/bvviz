@@ -1,4 +1,5 @@
-"""Provides custom backend simulators and services."""
+"""Provides custom configurations of backend simulators and services."""
+
 from typing import List
 
 from qiskit import transpile, QuantumCircuit

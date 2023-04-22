@@ -1,4 +1,5 @@
-"""Provides helper functions."""
+"""Provides utility and helper functions."""
+
 from datetime import datetime
 from random import randint
 
