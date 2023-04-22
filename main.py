@@ -100,15 +100,15 @@ with st.sidebar.form("configuration", clear_on_submit=False):
                                             value=st.session_state.reset_rate, step=0.001, format="%.4f",
                                             help="Specify the error rate for qubit reset operation, which is the probability that a qubit fails to be reset to the initial state.", )
 
-    cfg.noise_config.measure_rate = st.slider("Measure error rate", min_value=0.0, max_value=1.0,
+    cfg.noise_config.measure_rate = st.slider("Measure error rate", min_value=0.0, max_value=0.5,
                                               value=st.session_state.measure_rate, step=0.001, format="%.3f",
                                               help="Specify the error rate for the measurement operation, which is the probability of obtaining an incorrect outcome after performing a measurement on a single qubit.", )
 
-    cfg.noise_config.single_gate_rate = st.slider("Single Gate error rate", min_value=0.0, max_value=1.0,
+    cfg.noise_config.single_gate_rate = st.slider("Single Gate error rate", min_value=0.0, max_value=0.5,
                                                   value=st.session_state.single_gate_rate, step=0.001, format="%.3f",
                                                   help="Specify the error rate for single-qubit gates, which models the probability of error during the execution of a single-qubit gate operations (X, H).", )
 
-    cfg.noise_config.double_gate_rate = st.slider("Two Gate error rate", min_value=0.0, max_value=1.0,
+    cfg.noise_config.double_gate_rate = st.slider("Two Gate error rate", min_value=0.0, max_value=0.5,
                                                   value=st.session_state.double_gate_rate, step=0.001, format="%.3f",
                                                   help="Specify the error rate for two-qubit gates, which models the probability of error during the execution of a two-qubit gate operation (CNOT).", )
 
@@ -213,47 +213,64 @@ with solution_cols[1]:
 
 st.divider()
 
+backend_cols = st.columns(2)
+
+with backend_cols[0]:
+    st.subheader("Quantum hardware", anchor=False)
+
+    qu_clbit_count = builder.circuit.num_clbits
+    qu_gates_count = builder.circuit.size()
+    qu_qubit_count = builder.circuit.num_qubits
+    qu_global_phase = builder.circuit.global_phase
+    be_qubit_capacity = sim.backend.num_qubits
+
+    be_backend_name = job.backend()
+    be_version = sim.backend.backend_version
+    job_id = job.job_id()
+    job_success = job.result().success
+
+    metric_cols = st.columns(2)
+    metric_cols2 = st.columns(2)
+    metric_cols[0].metric("Classical bits", value=f"{qu_clbit_count}b")
+    metric_cols[1].metric("Quantum bits", value=f"{qu_qubit_count}qu")
+    metric_cols2[0].metric("Quantum gates", value=f"{qu_gates_count}")
+    metric_cols2[1].metric("Quantum bits (cap)", value=f"{be_qubit_capacity}qu")
+    # metric_cols2[1].metric("Global phase", value=f"{round(qu_global_phase, 2)}π")
+
+    st.caption(f"{be_backend_name} {be_version} ({'success' if job_success else 'fail'})")
+
+with backend_cols[1]:
+    qu_used_gates = builder.circuit.count_ops()
+    gates = {"instruction": [], "count": []}
+    for instruction, count in qu_used_gates.items():
+        gates["instruction"].append(instruction)
+        gates["count"].append(count)
+    df = pd.DataFrame.from_dict(gates)
+    st.dataframe(df, use_container_width=True)
+
 st.divider()
 
-download_cols = st.columns(3)
-counts_json = json.dumps(counts, indent=2, sort_keys=True)
-download_cols[0].download_button("Download counts", data=counts_json, mime="application/json",
-                                 help="Download the counts of the experiment as a JSON file. The file will contain the raw data, including the counts of each measured state. Consider using this data for further analysis or visualization.",
-                                 file_name=f"bernstein_vazirani_{timestamp_str()}.json", use_container_width=True)
-memory_csv = ','.join(measurements)
-download_cols[1].download_button("Download measurements", data=memory_csv, mime="text/csv",
-                                 help="Download measurements of the experiment as a CSV file. The file will contain the raw data from the experiment, including the binary outcome of each measurement in the order in which they were taken. The file is saved in a comma-separated value format and can be imported into spreadsheet or analysis software for further processing or visualization.",
-                                 file_name=f"bernstein_vazirani_{timestamp_str()}.csv", use_container_width=True)
+download_cols = st.columns(4)
+timestamp = timestamp_str()
 
-qu_used_gates = builder.circuit.count_ops()
-gates = {"gate": [], "count": []}
-for gate, count in qu_used_gates.items():
-    gates["gate"].append(gate)
-    gates["count"].append(count)
-df = pd.DataFrame.from_dict(gates)
-st.dataframe(df, use_container_width=True)
-
-print(f"qu_used_gates\t{qu_used_gates}")
-
-qu_gates_count = builder.circuit.size()
-qu_global_phase = builder.circuit.global_phase
-qu_qubit_count = builder.circuit.num_qubits
-qu_clbit_count = builder.circuit.num_clbits
-
-print(f"qu_gates_count\t{qu_gates_count}")
-print(f"qu_global_phase\t{qu_global_phase}")
-print(f"qu_qubit_count\t{qu_qubit_count}")
-print(f"qu_clbit_count\t{qu_clbit_count}")
+download_cols[0].subheader("Downloads:", anchor=False)
 
 qu_qasm = QuantumCircuitBuild() \
     .create_circuit(oracle=q_oracle, random_initialization=False) \
     .circuit.qasm(formatted=False)
+download_cols[1].download_button("OpenQASM (qasm)", data=qu_qasm, mime="text/plain",
+                                 help="Download the OpenQASM code for the circuit used in the experiment.",
+                                 file_name=f"bernstein_vazirani_{timestamp}.qasm", use_container_width=True)
 
-be_backend_name = job.backend()
-be_version = sim.backend.backend_version
-be_qubit_capacity = sim.backend.num_qubits
-job_id = job.job_id()
-job_success = job.result().success
+memory_csv = '\n'.join(measurements)
+download_cols[2].download_button("Measurements (CSV)", data=memory_csv, mime="text/csv",
+                                 help="Download measurements of the experiment as a CSV file. The file will contain raw data from the experiment, including the binary outcome of each measurement in the order in which they were taken. The file is saved in a comma-separated value format and can be imported into spreadsheet or analysis software for further processing or visualization.",
+                                 file_name=f"bernstein_vazirani_{timestamp}.csv", use_container_width=True)
+
+counts_json = json.dumps(counts, indent=2, sort_keys=True)
+download_cols[3].download_button("Counts (JSON)", data=counts_json, mime="application/json",
+                                 help="Download the counts of the experiment as a JSON file. The file will contain raw data, including the counts of each measured state. Consider using this data for further analysis or visualization.",
+                                 file_name=f"bernstein_vazirani_{(timestamp)}.json", use_container_width=True)
 
 # ======================================
 
