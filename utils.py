@@ -9,6 +9,7 @@ from config import OptimizationLevel
 
 
 def generate_seed() -> int:
+    """Generates random seed."""
     return randint(10 ** 14, 10 ** 15)
 
 
