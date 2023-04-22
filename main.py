@@ -14,7 +14,10 @@ from utils import str_to_byte, timestamp_str, byte_to_str, method_to_name, \
 
 # ======================================
 
-st.title("Bernstein–Vazirani problem", anchor=False)
+st.set_page_config(page_title="Bernstein–Vazirani Algorithm", page_icon="assets/logo.png",
+                   layout="centered", initial_sidebar_state="auto", menu_items=None)
+st.markdown("<style>header{visibility: hidden;}</style>", unsafe_allow_html=True)
+st.title("Bernstein–Vazirani", anchor=False)
 
 cfg = Configuration()
 be = BackendService()
