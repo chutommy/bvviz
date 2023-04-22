@@ -4,7 +4,7 @@ from time import perf_counter_ns
 import pandas as pd
 import streamlit as st
 from matplotlib import pyplot as plt
-from qiskit.visualization import plot_circuit_layout, plot_gate_map
+from qiskit.visualization import plot_circuit_layout, plot_gate_map, plot_error_map
 
 from bernstein_vazirani import ClassicalOracle, ClassicalSolver, QuantumOracle, QuantumCircuitBuild
 from config import LayoutMethod, RoutingMethod, TranslationMethod, Configuration, OptimizationLevel
@@ -27,6 +27,7 @@ button[title="View fullscreen"] {visibility: hidden}
 st.markdown(custom_styles, unsafe_allow_html=True)
 
 st.title("Bernstein–Vazirani Algorithm", anchor=False)
+st.divider()
 
 cfg = Configuration()
 be = BackendService()
@@ -216,10 +217,12 @@ with st.spinner('Wait for it...'):
 
     st.divider()
 
+    st.header("Quantum hardware")
+
     backend_cols = st.columns(2)
 
     with backend_cols[0]:
-        st.subheader("Quantum hardware", anchor=False)
+        st.subheader("Backend metrics", anchor=False)
 
         qu_clbit_count = builder.circuit.num_clbits
         qu_gates_count = builder.circuit.size()
@@ -258,26 +261,59 @@ with st.spinner('Wait for it...'):
         df = pd.DataFrame.from_dict(gates)
         st.dataframe(df, use_container_width=True)
 
-    with st.expander("Quantum register - layout details", expanded=False):
-        gate_cols = st.columns([4, 3])
+    st.divider()
 
-        with gate_cols[0]:
-            st.header("Circuit layout")
-            st.write(
-                "This is the layout of a circuit transpiled for the target backend. You can see a visual representation of the physical qubits that were used and how they were connected, which provides important information for understanding how the quantum circuit is mapped onto the hardware.")
-            st.write(
-                "By analyzing the layout, you can gain insights into the performance of the circuit on the target hardware, as well as the potential for optimization or further refinement. Overall, the layout provides a valuable tool for understanding and visualizing the complex interactions between the quantum circuit and the underlying hardware.")
+    gate_cols = st.columns([2, 3])
 
-            st.caption(f"transpiler seed: :blue[{cfg.transpiler_seed}]")
+    with gate_cols[0]:
+        gate_layout_tabs = st.tabs(["Transpiled circuit layout", "Device's gate map"])
 
-        with gate_cols[1]:
-            gate_layout_tabs = st.tabs(["Transpiled circuit layout", "Gate map of the device"])
+        fig = plot_circuit_layout(sim.compiled_circuit, sim.backend)
+        gate_layout_tabs[0].pyplot(fig)
 
-            fig = plot_circuit_layout(sim.compiled_circuit, sim.backend)
-            gate_layout_tabs[0].pyplot(fig)
+        fig = plot_gate_map(sim.backend, label_qubits=True)
+        gate_layout_tabs[1].pyplot(fig)
 
-            fig = plot_gate_map(sim.backend, label_qubits=True)
-            gate_layout_tabs[1].pyplot(fig)
+    with gate_cols[1]:
+        st.subheader("Circuit layout", anchor=False)
+        st.write(
+            "This is the layout of a circuit transpiled for the target backend. You can see a visual representation of the physical qubits that were used and how they were connected, providing important information for understanding how the quantum circuit is mapped onto the hardware.")
+        st.write(
+            "By analyzing the layout, you can gain insights into the performance of the circuit on the target hardware, as well as the potential for optimization or further refinement. Overall, the layout provides a valuable tool for understanding and visualizing the complex interactions between the quantum circuit and the underlying hardware.")
+
+        st.caption(f"transpiler seed: :blue[{cfg.transpiler_seed}]")
+
+    gate_cols2 = st.columns([2, 3])
+
+    with gate_cols2[0]:
+        st.subheader("Error map", anchor=False)
+        st.write(
+            "An error map provides a visualization of the error rates for each qubit and gate in a quantum computing backend. By examining the error map, users can identify the regions of the hardware that may be more prone to errors, and adjust their configuration settings accordingly to optimize the performance of their quantum circuits. The error rates are represented using a color scale, with higher error rates indicated by lighter colors.")
+        st.write(
+            "It is important to note that the error map shown in the web app is for the default configuration of the backend, and may differ depending on the specific configuration settings chosen by the user.")
+
+        fig = plot_error_map(sim.backend, figsize=(12, 10), show_title=False)
+        gate_cols2[1].pyplot(fig)
+
+    st.divider()
+
+    st.header("Quantum circuit")
+
+    st.write(
+        "In the plot, the qubits are represented as horizontal lines, with the gates or operations acting on them placed vertically at the appropriate locations along the lines. The order of the gates indicates the order of their application in the circuit, and the type of gate is shown by its label, shape and color.")
+
+    circuit_tabs = st.tabs(["Built circuit", "Compiled circuit"])
+
+    fig = builder.circuit.draw(output="mpl", scale=1.1, justify="left", fold=-1,
+                               initial_state=False, plot_barriers=True,
+                               idle_wires=True, with_layout=True, cregbundle=True)
+    circuit_tabs[0].pyplot(fig)
+
+    fig = sim.compiled_circuit.draw(output="mpl", scale=1, justify="left", fold=-1,
+                                    initial_state=False, plot_barriers=True,
+                                    idle_wires=False, with_layout=False, cregbundle=True
+                                    )
+    circuit_tabs[1].pyplot(fig)
 
     st.divider()
 
@@ -306,46 +342,31 @@ with st.spinner('Wait for it...'):
                                      file_name=f"bernstein_vazirani_{timestamp}.json",
                                      use_container_width=True)
 
-    # ======================================
+# ======================================
 
-    # fig = sim.compiled_circuit.draw(output="mpl")
-    # st.pyplot(fig)
+yss = measurements
+ys = [int(i, 2) for i in yss]
+xs = list(range(len(ys)))
 
-    # plot_error_map(sim.backend)
-    # plt.show()
-    # plt.close()
+fig = plt.figure()
+ax = fig.add_subplot(1, 1, 1)
+ax.scatter(xs, ys, alpha=0.1)
+ax.tick_params(
+    axis='y',
+    which='both',
+    labelleft=False)
+st.pyplot(fig)
 
-    yss = measurements
-    ys = [int(i, 2) for i in yss]
-    xs = list(range(len(ys)))
+xs = list(counts.keys())
+ys = list(counts.ys())
 
-    fig = plt.figure()
-    ax = fig.add_subplot(1, 1, 1)
-    ax.scatter(xs, ys, alpha=0.1)
-    ax.tick_params(
-        axis='y',
-        which='both',
-        labelleft=False)
-    st.pyplot(fig)
-
-    # builder.circuit.draw(output="mpl",
-    #                      initial_state=True,
-    #                      plot_barriers=False,
-    #                      interactive=True,
-    #                      fold=-1)
-    # plt.show()
-    # plt.close()
-
-    courses = list(counts.keys())
-    values = list(counts.values())
-
-    fig = plt.figure()
-    ax = fig.add_subplot(1, 1, 1)
-    ax.bar(courses, values)
-    ax.tick_params(
-        axis='x',
-        which='both',
-        bottom=False,
-        top=False,
-        labelbottom=False)
-    st.pyplot(fig)
+fig = plt.figure()
+ax = fig.add_subplot(1, 1, 1)
+ax.bar(xs, ys)
+ax.tick_params(
+    axis='x',
+    which='both',
+    bottom=False,
+    top=False,
+    labelbottom=False)
+st.pyplot(fig)
