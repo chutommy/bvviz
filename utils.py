@@ -1,10 +1,15 @@
 """Provides helper functions."""
 from datetime import datetime
+from random import randint
 
 import numpy as np
 from qiskit.providers import Backend
 
 from config import OptimizationLevel
+
+
+def generate_seed() -> int:
+    return randint(10 ** 14, 10 ** 15)
 
 
 def str_to_byte(string: str) -> np.array:

@@ -1,23 +1,32 @@
 import json
-from random import randint
 from time import perf_counter_ns
 
 import pandas as pd
 import streamlit as st
 from matplotlib import pyplot as plt
+from qiskit.visualization import plot_circuit_layout, plot_gate_map
 
 from bernstein_vazirani import ClassicalOracle, ClassicalSolver, QuantumOracle, QuantumCircuitBuild
 from config import LayoutMethod, RoutingMethod, TranslationMethod, Configuration, OptimizationLevel
 from simulation import Simulator, BackendService
 from utils import str_to_byte, timestamp_str, byte_to_str, method_to_name, \
-    optimization_to_name, backend_to_name
+    optimization_to_name, backend_to_name, generate_seed
 
 # ======================================
 
-st.set_page_config(page_title="Bernstein–Vazirani Algorithm", page_icon="assets/logo.png",
-                   layout="centered", initial_sidebar_state="auto", menu_items=None)
-st.markdown("<style>header{visibility: hidden;}</style>", unsafe_allow_html=True)
-st.title("Bernstein–Vazirani", anchor=False)
+st.set_page_config(page_title="Bernstein–Vazirani", page_icon="assets/logo.png",
+                   layout="wide", initial_sidebar_state="auto", menu_items=None)
+
+custom_styles = '''
+<style>
+header {visibility: hidden}
+footer {visibility: hidden;}
+button[title="View fullscreen"] {visibility: hidden}
+</style>
+'''
+st.markdown(custom_styles, unsafe_allow_html=True)
+
+st.title("Bernstein–Vazirani Algorithm", anchor=False)
 
 cfg = Configuration()
 be = BackendService()
@@ -26,8 +35,8 @@ be_list = list(be.list_backends())
 if 'init' not in st.session_state:
     st.session_state.init = True
 
-    st.session_state.transpiler_seed = randint(10 ** 9, 10 ** 10)
-    st.session_state.simulator_seed = randint(10 ** 9, 10 ** 10)
+    st.session_state.transpiler_seed = generate_seed()
+    st.session_state.simulator_seed = generate_seed()
     st.session_state.shots = 1000
 
     st.session_state.reset_rate = 0.006
@@ -56,7 +65,7 @@ with st.sidebar.form("configuration", clear_on_submit=False):
     #                                      value=st.session_state.simulator_seed, step=1,
     #                                      help="Seed to control simulator sampling.",
     #                                      label_visibility="visible")
-    cfg.simulator_seed = randint(10 ** 9, 10 ** 10)
+    cfg.simulator_seed = generate_seed()
 
     st.divider()
 
@@ -135,7 +144,7 @@ with st.sidebar.form("configuration", clear_on_submit=False):
     # cfg.transpiler_seed = st.number_input("Transpiler seed", min_value=0, max_value=10 ** 15,
     #                                       value=st.session_state.transpiler_seed, step=1,
     #                                       help="Seed for the stochastic parts of the transpiler.")
-    cfg.transpiler_seed = randint(10 ** 9, 10 ** 10)
+    cfg.transpiler_seed = generate_seed()
 
     submitted = st.form_submit_button("Execute", type="primary", disabled=False,
                                       use_container_width=True)
@@ -225,16 +234,20 @@ with backend_cols[0]:
 
     metric_cols = st.columns(2)
     metric_cols2 = st.columns(2)
-    metric_cols[0].metric("Classical bits", value=f"{qu_clbit_count}b")
-    metric_cols[1].metric("Quantum bits", value=f"{qu_qubit_count}qu")
-    metric_cols2[0].metric("Quantum gates", value=f"{qu_gates_count}")
-    metric_cols2[1].metric("Quantum bits (cap)", value=f"{be_qubit_capacity}qu")
+    metric_cols[0].metric("Classical bits", value=f"{qu_clbit_count}b",
+                          help="The number of classical bits used in the quantum circuit to store and process classical information. These bits are used to control the quantum operations and obtain measurement results.")
+    metric_cols[1].metric("Quantum bits", value=f"{qu_qubit_count}qu",
+                          help="The number of qubits used in the quantum circuit.")
+    metric_cols2[0].metric("Quantum gates", value=f"{qu_gates_count}",
+                           help="The number of elementary operations or quantum gates that were used in the experiment to implement the desired computation.")
+    metric_cols2[1].metric("Quantum bits (cap)", value=f"{be_qubit_capacity}qu",
+                           help="The maximum number of qubits that can be used in a single experiment on this quantum computing device")
     # metric_cols2[1].metric("Global phase", value=f"{round(qu_global_phase, 2)}π")
 
     if job_success:
-        st.success(f"{be_backend_name} {be_version} (:green[success])")
+        st.caption(f"{be_backend_name} {be_version} (:green[success])")
     else:
-        st.error(f"{be_backend_name} {be_version} (':red[fail]')")
+        st.caption(f"{be_backend_name} {be_version} (':red[fail]')")
 
 with backend_cols[1]:
     qu_used_gates = builder.circuit.count_ops()
@@ -244,6 +257,27 @@ with backend_cols[1]:
         gates["count"].append(count)
     df = pd.DataFrame.from_dict(gates)
     st.dataframe(df, use_container_width=True)
+
+with st.expander("Quantum register - layout details", expanded=False):
+    gate_cols = st.columns([4, 3])
+
+    with gate_cols[0]:
+        st.header("Circuit layout")
+        st.write(
+            "This is the layout of a circuit transpiled for the target backend. You can see a visual representation of the physical qubits that were used and how they were connected, which provides important information for understanding how the quantum circuit is mapped onto the hardware.")
+        st.write(
+            "By analyzing the layout, you can gain insights into the performance of the circuit on the target hardware, as well as the potential for optimization or further refinement. Overall, the layout provides a valuable tool for understanding and visualizing the complex interactions between the quantum circuit and the underlying hardware.")
+
+        st.caption(f"transpiler seed: :blue[{cfg.transpiler_seed}]")
+
+    with gate_cols[1]:
+        gate_layout_tabs = st.tabs(["Transpiled circuit layout", "Gate map of the device"])
+
+        fig = plot_circuit_layout(sim.compiled_circuit, sim.backend)
+        gate_layout_tabs[0].pyplot(fig)
+
+        fig = plot_gate_map(sim.backend)
+        gate_layout_tabs[1].pyplot(fig)
 
 st.divider()
 
@@ -275,17 +309,8 @@ download_cols[3].download_button("Counts (JSON)", data=counts_json, mime="applic
 # ======================================
 
 # fig = sim.compiled_circuit.draw(output="mpl")
-# plt.show()
-# plt.close()
-#
-# plot_circuit_layout(sim.compiled_circuit, sim.backend)
-# plt.show()
-# plt.close()
-#
-# plot_gate_map(sim.backend)
-# plt.show()
-# plt.close()
-#
+# st.pyplot(fig)
+
 # plot_error_map(sim.backend)
 # plt.show()
 # plt.close()
