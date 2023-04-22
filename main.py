@@ -9,8 +9,8 @@ from matplotlib import pyplot as plt
 from bernstein_vazirani import ClassicalOracle, ClassicalSolver, QuantumOracle, QuantumCircuitBuild
 from config import LayoutMethod, RoutingMethod, TranslationMethod, Configuration, OptimizationLevel
 from simulation import Simulator, BackendService
-from utils import str_to_byte, timestamp_str, byte_to_str, backend_to_name, method_to_name, \
-    optimization_to_name
+from utils import str_to_byte, timestamp_str, byte_to_str, method_to_name, \
+    optimization_to_name, backend_to_name
 
 # ======================================
 
@@ -18,9 +18,11 @@ st.title("Bernstein–Vazirani problem", anchor=False)
 
 cfg = Configuration()
 be = BackendService()
+be_list = list(be.list_backends())
 
 if 'init' not in st.session_state:
     st.session_state.init = True
+
     st.session_state.transpiler_seed = randint(10 ** 9, 10 ** 10)
     st.session_state.simulator_seed = randint(10 ** 9, 10 ** 10)
     st.session_state.shots = 1000
@@ -38,9 +40,10 @@ with st.sidebar.form("configuration", clear_on_submit=False):
 
     st.subheader("Backend")
 
-    cfg.backend = st.selectbox("Quantum system", options=be.list_backends(), index=0,
-                               format_func=backend_to_name,
-                               help="Choose a quantum simulator backend for the experiment. The number next to each backend name indicates the maximum number of qubits the simulator can handle.")
+    backend_choice = st.selectbox("Quantum system", options=range(len(be_list)), index=0,
+                                  format_func=lambda id: backend_to_name(be_list[id]),
+                                  help="Choose a quantum simulator backend for the experiment. The number next to each backend name indicates the maximum number of qubits the simulator can handle.")
+    cfg.backend = be_list[backend_choice]
 
     cfg.shot_count = st.number_input("Shots", min_value=1, max_value=10 ** 5,
                                      value=st.session_state.shots, step=1,

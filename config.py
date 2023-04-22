@@ -80,9 +80,9 @@ class Configuration:
 
     def reset_partial(self):
         """Reset callable configuration settings."""
-        self.backend: Backend = provider.FakeQasmSimulator()
-        self.noise_config: NoiseConfiguration = NoiseConfiguration()
-        self.transpile_config: TranspileConfiguration = TranspileConfiguration()
+        self.backend = provider.FakeQasmSimulator()
+        self.noise_config = NoiseConfiguration()
+        self.transpile_config = TranspileConfiguration()
 
     def __init__(self):
         self.reset_partial()
