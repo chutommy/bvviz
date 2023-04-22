@@ -59,12 +59,12 @@ class NoiseConfiguration:
 class TranspileConfiguration:
     """Configuration for the transpiler."""
 
-    layout_method: LayoutMethod = LayoutMethod.TRIVIAL
-    routing_method: RoutingMethod = RoutingMethod.NONE
-    translation_method: TranslationMethod = TranslationMethod.TRANSLATOR
+    layout_method: str = LayoutMethod.TRIVIAL
+    routing_method: str = RoutingMethod.NONE
+    translation_method: str = TranslationMethod.TRANSLATOR
 
     approximation_degree: float = 1
-    optimization_level: OptimizationLevel = OptimizationLevel.NO
+    optimization_level: int = OptimizationLevel.NO
 
 
 class Configuration:
@@ -74,6 +74,22 @@ class Configuration:
     simulator_seed: int = 42
     shot_count: int = 1000
 
-    backend: Backend = provider.FakeQasmSimulator()
-    noise_config: NoiseConfiguration = NoiseConfiguration()
-    transpile_config: TranspileConfiguration = TranspileConfiguration()
+    backend: Backend
+    noise_config: NoiseConfiguration
+    transpile_config: TranspileConfiguration
+
+    def reset_partial(self):
+        """Reset callable configuration settings."""
+        self.backend: Backend = provider.FakeQasmSimulator()
+        self.noise_config: NoiseConfiguration = NoiseConfiguration()
+        self.transpile_config: TranspileConfiguration = TranspileConfiguration()
+
+    def __init__(self):
+        self.reset_partial()
+
+    def reset(self):
+        """Resets configuration."""
+        self.transpiler_seed = 0
+        self.simulator_seed = 0
+        self.shot_count = 1000
+        self.reset_partial()
