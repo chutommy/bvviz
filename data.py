@@ -1,6 +1,7 @@
+"""Simplifies regular data manipulation."""
+
 import json
 import re
-import string
 from typing import List
 
 from qiskit.providers import Backend
@@ -14,13 +15,10 @@ class FmtStr:
     def __init__(self, value: str):
         self.value = value
 
-    def __call__(self, **kwargs):
+    def __call__(self, **kwargs) -> str:
         return self.value.format(**kwargs)
 
-    def __str__(self):
-        return self.value
-
-    def __get__(self):
+    def __str__(self) -> str:
         return self.value
 
 
@@ -29,9 +27,9 @@ class Descriptor:
 
     descriptions: dict = None
 
-    def __init__(self):
-        with open('assets/descriptions.json', 'r') as f:
-            descriptions_json = f.read()
+    def __init__(self, path: str):
+        with open(path, 'r', encoding='utf-8') as file:
+            descriptions_json = file.read()
         self.descriptions = json.loads(descriptions_json)
 
     def __getitem__(self, item) -> str | FmtStr:
@@ -39,6 +37,16 @@ class Descriptor:
         if len(args) != 0:
             return FmtStr(self.descriptions[item])
         return self.descriptions[item]
+
+    def cat(self, args: List[str]) -> str:
+        """Concatenates multiple descriptions."""
+        out = ""
+        for arg in args:
+            out += self.descriptions[arg]
+        return out
+
+    def __call__(self) -> dict:
+        return self.descriptions
 
 
 class BackendDB:
