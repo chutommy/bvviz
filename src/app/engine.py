@@ -244,8 +244,6 @@ def preprocess_error_rate(proc, result):
     proc["error_rate_norm"] = f"{2 * incorrect / total / (2 ** len(result.secret) - 1) * 100:.2f} %"
     proc["error_rate_total"] = f"{incorrect / total * 100:.2f} %"
 
-    # find: pie_error_rate_bar_invalid(random_error)
-    # proc["pie_error_rate"], ax1 = plt.subplots(1, 1, figsize=(9, 5), dpi=200)
     proc["pie_error_rate"], (ax1, ax2) = plt.subplots(1, 2, figsize=(9, 5), dpi=200)
     overall_ratios = [incorrect / total, correct / total]
     labels = ['noise', 'target']
@@ -266,21 +264,22 @@ def append_bar_of_pie(ax1, ax2, correct, result, wedges):
     for meas in result.measurements:
         if meas != result.secret:
             counts[diff_letters(meas, result.secret)] += 1
-    correct_ratios = np.asarray([counts[i] for i in range(1, len(result.secret) + 1)])
-    correct_ratios = correct_ratios / sum(correct_ratios)
-    correct_labels = [f"{i} qu" for i in range(1, len(result.secret) + 1)]
+    incorrect_qu = np.asarray([counts[i] for i in range(1, len(result.secret) + 1)])
+    incorrect_ratios = incorrect_qu / sum(incorrect_qu)
+    incorrect_labels = [f"{i} qu" for i in range(1, len(result.secret) + 1)]
     bottom = 1
     width = .2
-    for j, (height, label) in enumerate(reversed([*zip(correct_ratios, correct_labels)])):
-        bottom -= height
-        bar_c = ax2.bar(0, height, width, bottom=bottom, color='#eb4034', label=label,
-                        alpha=0.1 + j / (len(result.secret) + 1))
-        ax2.bar_label(bar_c, labels=[f"{height:.0%}"], label_type='center')
+    for j, (height, label) in enumerate(reversed([*zip(incorrect_ratios, incorrect_labels)])):
+        if round(height, 2) != 0:
+            bottom -= height
+            bar_c = ax2.bar(0, height, width, bottom=bottom, color='#eb4034', label=label,
+                            alpha=0.1 + j / (len(result.secret) + 1))
+            ax2.bar_label(bar_c, labels=[f"{height:.0%}"])
     ax2.set_title('Number of incorrect qubits', pad=15, loc="right")
     ax2.legend()
     ax2.set_xlim(- 2.5 * width, 2.5 * width)
     if correct != 0:
-        plot_connecting_lines(ax1, ax2, correct_ratios, wedges, width)
+        plot_connecting_lines(ax1, ax2, incorrect_ratios, wedges, width)
 
 
 def plot_connecting_lines(ax1, ax2, correct_ratios, wedges, width):

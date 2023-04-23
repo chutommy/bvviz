@@ -203,13 +203,13 @@ def render_quantum_hardware(res: Result, des: Descriptor, quantum_hardware_proc:
     circuit_tabs[1].pyplot(quantum_hardware_proc["circuit_compiled"], clear_figure=True)
 
 
-def render_measurement(res: Result, des: Descriptor, measurement_proc: dict):
+def render_measurement(res: Result, des: Descriptor, proc: dict):
     """Renders measurement section."""
     st.header("Measurements", anchor=False)
 
     meas_tabs = st.tabs(["Counts", "Measurements"])
-    meas_tabs[0].pyplot(measurement_proc['bar_counts'], clear_figure=True)
-    meas_tabs[1].pyplot(measurement_proc['scatter_counts'], clear_figure=True)
+    meas_tabs[0].pyplot(proc['bar_counts'], clear_figure=True)
+    meas_tabs[1].pyplot(proc['scatter_counts'], clear_figure=True)
 
     st.write(des["text_measurements"])
     st.divider()
@@ -218,43 +218,31 @@ def render_measurement(res: Result, des: Descriptor, measurement_proc: dict):
     with meas_cols[0]:
         st.subheader("Metrics")
         metric_cols = st.columns(2)
-        metric_cols[0].metric(":blue[Correct] rate", value=measurement_proc['correct_rate'])
-        metric_cols[0].metric(":blue[Confidence] level", value=measurement_proc['confidence_level'])
+        metric_cols[0].metric(":blue[Correct] rate", value=proc['correct_rate'])
+        metric_cols[0].metric(":blue[Confidence] level", value=proc['confidence_level'])
         metric_cols[1].metric(":red[Error] rate (normalized)",
-                              value=measurement_proc['error_rate_norm'])
+                              value=proc['error_rate_norm'])
         metric_cols[1].metric(":red[Error] rate (total)",
-                              value=measurement_proc['error_rate_total'])
+                              value=proc['error_rate_total'])
         st.caption(f"simulator seed: :blue[{res.snap.configuration.simulator_seed}]")
-    meas_cols[1].pyplot(measurement_proc['bar_counts_minimal'], clear_figure=True)
+    meas_cols[1].pyplot(proc['bar_counts_minimal'], clear_figure=True)
     st.divider()
 
-    # find: pie_error_rate_bar_invalid(random_error)
-    # pie_cols = st.columns([1, 1])
     pie_cols = st.columns([2, 1])
     pie_cols[1].subheader("Error rate", anchor=False)
     pie_cols[1].write(des["text_error_rate"])
-
-    # for _ in range(3):
-    #     try:
-    #         pie_cols[0].pyplot(measurement_proc['pie_error_rate'])
-    #         break
-    #     except ...:
-    #         pass
-    pie_cols[0].pyplot(measurement_proc['pie_error_rate'])
+    pie_cols[0].pyplot(proc['pie_error_rate'])
 
 
-def render_download_buttons(des: Descriptor, measurement_proc: dict):
+def render_download_buttons(des: Descriptor, proc: dict):
     """Renders measurement section."""
     st.subheader("Downloads:", anchor=False)
-    ste.download_button("OpenQASM (qasm)", data=measurement_proc['qu_qasm'],
-                        file_name=f"bernstein_vazirani_{measurement_proc['timestamp']}.qasm",
-                        mime="text/plain")
-    ste.download_button("Counts (JSON)", data=measurement_proc['counts_json'],
-                        file_name=f"bernstein_vazirani_{measurement_proc['timestamp']}.json",
-                        mime="application/json")
-    ste.download_button("Measurements (CSV)", data=measurement_proc['memory_csv'],
-                        file_name=f"bernstein_vazirani_{measurement_proc['timestamp']}.csv",
-                        mime="text/csv")
+    ste.download_button("OpenQASM (qasm)", data=proc['qu_qasm'], mime="text/plain",
+                        file_name=f"bernstein_vazirani_{proc['timestamp']}.qasm")
+    ste.download_button("Counts (JSON)", data=proc['counts_json'], mime="application/json",
+                        file_name=f"bernstein_vazirani_{proc['timestamp']}.json")
+    ste.download_button("Measurements (CSV)", data=proc['memory_csv'], mime="text/csv",
+                        file_name=f"bernstein_vazirani_{proc['timestamp']}.csv")
 
     _ = des
     # st.download_button("OpenQASM (qasm)", data=measurement_proc['qu_qasm'], mime="text/plain",
