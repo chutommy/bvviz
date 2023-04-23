@@ -1,5 +1,4 @@
 import json
-from time import perf_counter_ns
 
 import numpy as np
 import pandas as pd
@@ -7,17 +6,13 @@ import streamlit as st
 from matplotlib import pyplot as plt
 from matplotlib.patches import Patch, ConnectionPatch
 from qiskit.visualization import plot_circuit_layout, plot_gate_map, plot_error_map
-from scipy.interpolate import make_interp_spline, interp1d
-from scipy.ndimage import gaussian_filter1d
-from scipy.stats import gaussian_kde
 
-from bernstein_vazirani import ClassicalOracle, ClassicalSolver, QuantumOracle, QuantumCircuitBuild
-from config import LayoutMethod, RoutingMethod, TranslationMethod, Configuration, OptimizationLevel
-from data import BackendDB, Descriptor
+from bernstein_vazirani import QuantumCircuitBuild
+from config import LayoutMethod, RoutingMethod, TranslationMethod, OptimizationLevel
+from data import Descriptor
 from engine import Engine
-from simulation import Simulator, BackendService
-from utils import str_to_byte, timestamp_str, byte_to_str, method_to_name, optimization_to_name, \
-    backend_to_name, generate_seed, all_measurement_outputs, sort_zipped, diff_letters
+from utils import timestamp_str, method_to_name, optimization_to_name, \
+    backend_to_name, generate_seed, sort_zipped, diff_letters
 
 descriptor = Descriptor('assets/descriptions.json')
 engine = Engine()
@@ -38,10 +33,10 @@ if 'init' not in st.session_state:
     st.session_state.simulator_seed = generate_seed()
     st.session_state.shots = 1000
 
-    st.session_state.reset_rate = 0.006
-    st.session_state.measure_rate = 0.042
-    st.session_state.single_gate_rate = 0.061
-    st.session_state.double_gate_rate = 0.077
+    st.session_state.reset_rate = 0.019
+    st.session_state.measure_rate = 0.154
+    st.session_state.single_gate_rate = 0.146
+    st.session_state.double_gate_rate = 0.179
 
     st.session_state.approximation_degree = 0.99
 
@@ -62,7 +57,7 @@ with st.sidebar.form("configuration", clear_on_submit=False):
     st.divider()
 
     st.subheader("Input", anchor=False)
-    secret_str = st.text_input("Secret string", value="1101", help=descriptor["help_secret_str"])
+    secret_str = st.text_input("Secret string", value="110010", help=descriptor["help_secret_str"])
     secret_placeholder = st.empty()
     st.divider()
 
@@ -230,8 +225,6 @@ circuit_tabs[1].pyplot(fig, clear_figure=True)
 st.divider()
 
 st.header("Measurements", anchor=False)
-st.write(descriptor["text_measurements"])
-
 xs = np.asarray(list(result.counts.keys()))
 ys = np.asarray(list(result.counts.values()))
 xs, ys = sort_zipped(xs, ys)
@@ -245,7 +238,7 @@ fig = plt.figure(figsize=(12, 6), dpi=200)
 ax1 = fig.add_subplot(1, 1, 1)
 bar = ax1.bar(xs, ys, color="#6b6b6b")
 bar[sol_pos].set_color("#8210d8")
-ax1.grid(axis='y', color='grey', linewidth=0.5, alpha=0.3)
+ax1.grid(axis='y', color='grey', linewidth=0.5, alpha=0.4)
 ax1.tick_params(axis='x', which='both', bottom=False, labelbottom=False)
 ax1.set_xlabel("Binary measurement", fontsize=13, labelpad=20)
 ax1.set_ylabel('Count', fontsize=13, labelpad=20)
@@ -253,24 +246,57 @@ other_patch = Patch(color='#6b6b6b', label='noise')
 secret_patch = Patch(color='#8210d8', label='target')
 fig.legend(handles=[other_patch, secret_patch])
 st.pyplot(fig, clear_figure=True)
-st.caption(f"simulator seed: :blue[{result.configuration.simulator_seed}]")
+
+st.write(descriptor["text_measurements"])
 st.divider()
 
-pie_cols = st.columns([1, 3])
-with pie_cols[0]:
+correct = result.counts[secret_str]
+incorrect = result.configuration.shot_count - result.counts[secret_str]
+total = result.configuration.shot_count
+
+counts = np.array(list(result.counts.values()))
+
+meas_cols = st.columns(2)
+with meas_cols[0]:
+    st.subheader("Metrics")
+    metric_cols = st.columns(2)
+
+    with metric_cols[0]:
+        st.metric(":blue[Correct] rate", value=f"{correct / total * 100:.2f} %")
+        try:
+            st.metric(":blue[Confidence] level",
+                      value=f"{(max((1 - 2 * (incorrect / total / (2 ** len(secret_str) - 1)) / (correct / total)), 0) ** 3) / 3 * 100:.2f} %")
+        except ZeroDivisionError:
+            st.metric(":blue[Confidence] level", value=f"{0:.2f} %")
+
+    with metric_cols[1]:
+        st.metric(":red[Error] rate (normalized)",
+                  value=f"{2 * incorrect / total / (2 ** len(secret_str) - 1) * 100:.2f} %")
+        st.metric(":red[Error] rate (total)", value=f"{incorrect / total * 100:.2f} %")
+
+    st.caption(f"simulator seed: :blue[{result.configuration.simulator_seed}]")
+
+with meas_cols[1]:
+    fig = plt.figure(figsize=(12, 6), dpi=200)
+    ax1 = fig.add_subplot(1, 1, 1)
+    bar = ax1.bar(xs, ys, color="#6b6b6b")
+    bar[sol_pos].set_color("#8210d8")
+    ax1.tick_params(axis='x', which='both', bottom=False, labelbottom=False)
+    ax1.axhline(y=(counts.mean() + counts.max()) / 2, color='r', linestyle='-')
+    st.pyplot(fig, clear_figure=True)
+
+st.divider()
+pie_cols = st.columns([2, 1])
+with pie_cols[1]:
     st.subheader("Error rate", anchor=False)
     st.write(descriptor["text_error_rate"])
 
-with pie_cols[1]:
+with pie_cols[0]:
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(9, 5), dpi=200)
     fig.subplots_adjust(wspace=0)
 
     st.write()
     st.write()
-
-    correct = result.counts[secret_str]
-    incorrect = result.configuration.shot_count - result.counts[secret_str]
-    total = result.configuration.shot_count
 
     overall_ratios = [incorrect / total, correct / total]
     labels = ['noise', 'target']
@@ -301,58 +327,60 @@ with pie_cols[1]:
     # Adding from the top matches the legend.
     for j, (height, label) in enumerate(reversed([*zip(correct_ratios, correct_labels)])):
         bottom -= height
-        bc = ax2.bar(0, height, width, bottom=bottom, color='#eb4034', label=label, alpha=0.1 + j / len(secret_str))
+        bc = ax2.bar(0, height, width, bottom=bottom, color='#eb4034', label=label,
+                     alpha=0.1 + j / (len(secret_str) + 1))
         ax2.bar_label(bc, labels=[f"{height:.0%}"], label_type='center')
 
     ax2.set_title('Number of incorrect qubits', pad=15, loc="right")
     ax2.legend()
     ax2.axis('off')
     ax2.set_xlim(- 2.5 * width, 2.5 * width)
-    fig.tight_layout()
 
-    theta1, theta2 = wedges[0].theta1, wedges[0].theta2
-    center, r = wedges[0].center, wedges[0].r
-    bar_height = sum(correct_ratios)
+    if correct:
+        theta1, theta2 = wedges[0].theta1, wedges[0].theta2
+        center, r = wedges[0].center, wedges[0].r
+        bar_height = sum(correct_ratios)
 
-    # draw top connecting line
-    x = r * np.cos(np.pi / 180 * theta2) + center[0]
-    y = r * np.sin(np.pi / 180 * theta2) + center[1]
-    con = ConnectionPatch(xyA=(-width / 2, bar_height), coordsA=ax2.transData,
-                          xyB=(x, y), coordsB=ax1.transData)
-    con.set_color("#000000")
-    con.set_linewidth(0.6)
-    ax2.add_artist(con)
+        # draw top connecting line
+        x = r * np.cos(np.pi / 180 * theta2) + center[0]
+        y = r * np.sin(np.pi / 180 * theta2) + center[1]
+        con = ConnectionPatch(xyA=(-width / 2, bar_height), coordsA=ax2.transData,
+                              xyB=(x, y), coordsB=ax1.transData)
+        con.set_color("#000000")
+        con.set_linewidth(0.6)
+        ax2.add_artist(con)
 
-    # draw bottom connecting line
-    x = r * np.cos(np.pi / 180 * theta1) + center[0]
-    y = r * np.sin(np.pi / 180 * theta1) + center[1]
-    con = ConnectionPatch(xyA=(-width / 2, 0), coordsA=ax2.transData,
-                          xyB=(x, y), coordsB=ax1.transData)
-    con.set_color("#000000")
-    ax2.add_artist(con)
-    con.set_linewidth(0.6)
+        # draw bottom connecting line
+        x = r * np.cos(np.pi / 180 * theta1) + center[0]
+        y = r * np.sin(np.pi / 180 * theta1) + center[1]
+        con = ConnectionPatch(xyA=(-width / 2, 0), coordsA=ax2.transData,
+                              xyB=(x, y), coordsB=ax1.transData)
+        con.set_color("#000000")
+        ax2.add_artist(con)
+        con.set_linewidth(0.6)
 
     st.pyplot(fig)
-st.divider()
 
-download_cols = st.columns(4)
+st.subheader("Downloads:", anchor=False)
 timestamp = timestamp_str()
-download_cols[0].subheader("Downloads:", anchor=False)
+
 qu_qasm = QuantumCircuitBuild() \
     .create_circuit(oracle=result.qu_oracle, random_initialization=False) \
     .circuit.qasm(formatted=False)
-download_cols[1].download_button("OpenQASM (qasm)", data=qu_qasm, mime="text/plain",
-                                 help=descriptor["help_openqasm"], use_container_width=True,
-                                 file_name=f"bernstein_vazirani_{timestamp}.qasm")
-memory_csv = '\n'.join(result.measurements)
-download_cols[2].download_button("Measurements (CSV)", data=memory_csv, mime="text/csv",
-                                 help=descriptor["help_measurement_csv"],
-                                 use_container_width=True,
-                                 file_name=f"bernstein_vazirani_{timestamp}.csv")
+st.download_button("OpenQASM (qasm)", data=qu_qasm, mime="text/plain",
+                   help=descriptor["help_openqasm"], use_container_width=True,
+                   file_name=f"bernstein_vazirani_{timestamp}.qasm")
+
 counts_json = json.dumps(result.counts, indent=2, sort_keys=True)
-download_cols[3].download_button("Counts (JSON)", data=counts_json, mime="application/json",
-                                 help=descriptor["help_counts_json"], use_container_width=True,
-                                 file_name=f"bernstein_vazirani_{timestamp}.json")
+st.download_button("Counts (JSON)", data=counts_json, mime="application/json",
+                   help=descriptor["help_counts_json"], use_container_width=True,
+                   file_name=f"bernstein_vazirani_{timestamp}.json")
+
+memory_csv = '\n'.join(result.measurements)
+st.download_button("Measurements (CSV)", data=memory_csv, mime="text/csv",
+                   help=descriptor["help_measurement_csv"],
+                   use_container_width=True,
+                   file_name=f"bernstein_vazirani_{timestamp}.csv")
 
 # yss = result.measurements
 # ys = [int(i, 2) for i in yss]

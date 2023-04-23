@@ -4,7 +4,6 @@ from dataclasses import dataclass
 from enum import Enum
 
 import qiskit.providers.fake_provider as provider
-from qiskit.providers import Backend
 
 
 # https://qiskit.org/documentation/apidoc/transpiler_passes.html#layout-selection-placement
