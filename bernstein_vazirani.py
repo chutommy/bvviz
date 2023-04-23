@@ -114,6 +114,12 @@ class ClassicalSolver:
 class QuantumCircuitBuild:
     """Represents a quantum circuit building tool for the implementation of the BV algorithm."""
 
+    def __init__(self):
+        self.qreg = QuantumRegister(1)
+        self.creg = ClassicalRegister(1)
+        self.auxreg = QuantumRegister(1)
+        self.circuit = QuantumCircuit()
+
     def allocate_registers(self, complexity: int):
         """Allocates quantum and classical register according to oracle's complexity."""
         self.qreg = QuantumRegister(size=complexity, name="qreg")

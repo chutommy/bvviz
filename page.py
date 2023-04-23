@@ -30,7 +30,7 @@ def init_session_state(d: Descriptor):
         st.session_state.double_gate_rate = 0.179
 
         st.session_state.approximation_degree = 0.99
-        st.session_state.optimizatio_level = 1
+        st.session_state.optimization_level = 1
 
 
 def render_sidebar(e: Engine, cfg: dict, d: Descriptor) -> (str, DeltaGenerator):
@@ -39,7 +39,7 @@ def render_sidebar(e: Engine, cfg: dict, d: Descriptor) -> (str, DeltaGenerator)
         st.subheader("Backend", anchor=False)
 
         cfg["backend_choice"] = st.selectbox("Quantum system", options=range(e.backend_db.size()),
-                                             format_func=lambda id: backend_to_name(e.backend_db[id]),
+                                             format_func=lambda key: backend_to_name(e.backend_db[key]),
                                              index=st.session_state.backend_choice,
                                              help=d["help_quantum_system"])
 
@@ -83,7 +83,7 @@ def render_sidebar(e: Engine, cfg: dict, d: Descriptor) -> (str, DeltaGenerator)
                                           options=[tm.value for tm in TranslationMethod],
                                           index=st.session_state.translation_method, format_func=method_to_name,
                                           help=d["help_translation_method"])
-        cfg["optimization"] = st.select_slider("Optimization level", value=st.session_state.optimizatio_level,
+        cfg["optimization"] = st.select_slider("Optimization level", value=st.session_state.optimization_level,
                                                options=[ol.value for ol in OptimizationLevel],
                                                format_func=optimization_to_name,
                                                help=d["help_optimization_level"])
@@ -138,7 +138,7 @@ def render_basic_metrics(r: Result, d: Descriptor):
         cols2[1].metric(":violet[QU] queries count", value=f"{r.qu_oracle.query_count} x")
 
 
-def render_quantum_hardware(r: Result, d: Descriptor, proc: dict):
+def render_quantum_hardware(r: Result, d: Descriptor, quantum_hardware_proc: dict):
     st.header("Quantum hardware", anchor=False)
     backend_cols = st.columns(2)
 
@@ -158,16 +158,17 @@ def render_quantum_hardware(r: Result, d: Descriptor, proc: dict):
                         help=d["help_qu_bits_cap"])
 
         status_message = ':green[success]' if r.result.success else ':red[fail]'
+        # noinspection PyUnresolvedReferences
         st.caption(f"{r.job.backend()} {r.sim.backend.backend_version} ({status_message})")
 
-    backend_cols[1].table(proc["gates"])
+    backend_cols[1].table(quantum_hardware_proc["gates"])
     st.divider()
 
     gate_cols = st.columns([2, 3])
     with gate_cols[0]:
         tabs = st.tabs(["Transpiled circuit layout", "Device's gate map"])
-        tabs[0].pyplot(proc["fig1"], clear_figure=True)
-        tabs[1].pyplot(proc["fig2"], clear_figure=True)
+        tabs[0].pyplot(quantum_hardware_proc["layout_circuit"], clear_figure=True)
+        tabs[1].pyplot(quantum_hardware_proc["map_gate"], clear_figure=True)
 
     with gate_cols[1]:
         st.subheader("Circuit layout", anchor=False)
@@ -178,11 +179,51 @@ def render_quantum_hardware(r: Result, d: Descriptor, proc: dict):
     with gate_cols2[0]:
         st.subheader("Error map", anchor=False)
         st.write(d["text_error_map"])
-        gate_cols2[1].pyplot(proc["fig3"], clear_figure=True)
+        gate_cols2[1].pyplot(quantum_hardware_proc["map_error"], clear_figure=True)
     st.divider()
 
     st.header("Quantum circuit", anchor=False)
     st.write(d["text_quantum_circuit"])
     circuit_tabs = st.tabs(["Built circuit", "Compiled circuit"])
-    circuit_tabs[0].pyplot(proc["fig4"], clear_figure=True)
-    circuit_tabs[1].pyplot(proc["fig5"], clear_figure=True)
+    circuit_tabs[0].pyplot(quantum_hardware_proc["circuit"], clear_figure=True)
+    circuit_tabs[1].pyplot(quantum_hardware_proc["circuit_compiled"], clear_figure=True)
+
+
+def render_measurement(r: Result, d: Descriptor, measurement_proc: dict):
+    st.header("Measurements", anchor=False)
+
+    meas_tabs = st.tabs(["Counts", "Measurements"])
+    meas_tabs[1].pyplot(measurement_proc['bar_counts'], clear_figure=True)
+    meas_tabs[0].pyplot(measurement_proc['scatter_counts'], clear_figure=True)
+
+    st.write(d["text_measurements"])
+    st.divider()
+
+    meas_cols = st.columns(2)
+    with meas_cols[0]:
+        st.subheader("Metrics")
+        metric_cols = st.columns(2)
+        metric_cols[0].metric(":blue[Correct] rate", value=measurement_proc['correct_rate'])
+        metric_cols[0].metric(":blue[Confidence] level", value=measurement_proc['confidence_level'])
+        metric_cols[1].metric(":red[Error] rate (normalized)", value=measurement_proc['error_rate_norm'])
+        metric_cols[1].metric(":red[Error] rate (total)", value=measurement_proc['error_rate_total'])
+        st.caption(f"simulator seed: :blue[{r.configuration.simulator_seed}]")
+    meas_cols[1].pyplot(measurement_proc['bar_counts_minimal'], clear_figure=True)
+    st.divider()
+
+    pie_cols = st.columns([2, 1])
+    pie_cols[1].subheader("Error rate", anchor=False)
+    pie_cols[1].write(d["text_error_rate"])
+    pie_cols[0].pyplot(measurement_proc['pie_error_rate'])
+
+    st.subheader("Downloads:", anchor=False)
+    st.download_button("OpenQASM (qasm)", data=measurement_proc['qu_qasm'], mime="text/plain",
+                       help=d["help_openqasm"], use_container_width=True,
+                       file_name=f"bernstein_vazirani_{measurement_proc['timestamp']}.qasm")
+    st.download_button("Counts (JSON)", data=measurement_proc['counts_json'], mime="application/json",
+                       help=d["help_counts_json"], use_container_width=True,
+                       file_name=f"bernstein_vazirani_{measurement_proc['timestamp']}.json")
+    st.download_button("Measurements (CSV)", data=measurement_proc['memory_csv'], mime="text/csv",
+                       help=d["help_measurement_csv"],
+                       use_container_width=True,
+                       file_name=f"bernstein_vazirani_{measurement_proc['timestamp']}.csv")

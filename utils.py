@@ -60,13 +60,13 @@ def optimization_to_name(level: int) -> str:
     return OptimizationLevel(level).name.replace("_", " ").capitalize()
 
 
-def all_measurement_outputs(N: int) -> List[str]:
+def all_measurement_outputs(complexity: int) -> List[str]:
     """Returns all possible outcomes of measurement of a system of size N."""
     outs = []
-    tmp_str = list("0" * N)
+    tmp_str = list("0" * complexity)
 
     def update_pos_rec(s: List[str], pos: int):
-        if pos >= N:
+        if pos >= complexity:
             outs.append("".join(tmp_str))
             return
 
@@ -105,3 +105,17 @@ def diff_letters(a: str, b: str) -> int:
 
 def check_secret(secret: str) -> bool:
     return not all(c in '01' for c in secret)
+
+
+def pct_to_str(pct, total):
+    absolute = int(np.round(pct * total / 100))
+    return f"{pct:.2f}%\n({absolute:d} shots)"
+
+
+def find_secret(arr: np.array, secret) -> int:
+    pos = 0
+    for pos, x in enumerate(arr):
+        if secret == x:
+            pos = pos
+            break
+    return pos

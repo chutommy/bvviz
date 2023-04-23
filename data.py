@@ -7,7 +7,7 @@ from qiskit.providers import Backend
 
 
 class FmtStr:
-    """FmtStr represents formattable helper string structure."""
+    """FmtStr represents format-friendly helper string structure."""
 
     def __init__(self, value: str):
         self.value = value
