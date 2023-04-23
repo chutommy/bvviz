@@ -65,15 +65,15 @@ def all_measurement_outputs(complexity: int) -> List[str]:
     outs = []
     tmp_str = list("0" * complexity)
 
-    def update_pos_rec(s: List[str], pos: int):
+    def update_pos_rec(strs: List[str], pos: int):
         if pos >= complexity:
             outs.append("".join(tmp_str))
             return
 
-        update_pos_rec(s, pos + 1)
+        update_pos_rec(strs, pos + 1)
 
         tmp_str[pos] = '1'
-        update_pos_rec(s, pos + 1)
+        update_pos_rec(strs, pos + 1)
         tmp_str[pos] = '0'
 
     update_pos_rec(tmp_str, 0)
@@ -86,36 +86,35 @@ def fill_counts(counts: dict, size: int):
     for meas in all_meas:
         if meas not in counts:
             counts[meas] = 0
-    return
 
 
-def sort_zipped(xs: np.array, ys: np.array) -> (np.array, np.array):
+def sort_zipped(xvalues: np.array, yvalues: np.array) -> (np.array, np.array):
     """Sort two lists based on one of them (xs)."""
-    # xs_sorted = [x for x, _ in sorted(zip(xs, ys))]
-    # ys_sorted = [y for _, y in sorted(zip(xs, ys))]
-    # return xs_sorted, ys_sorted
-    p = xs.argsort()
-    return xs[p], ys[p]
+    order = xvalues.argsort()
+    return xvalues[order], yvalues[order]
 
 
-def diff_letters(a: str, b: str) -> int:
+def diff_letters(str1: str, str2: str) -> int:
     """Return number of different letters in strings a and b."""
-    return sum(a[i] != b[i] for i in range(len(a)))
+    return sum(str1[i] != str2[i] for i in range(len(str1)))
 
 
 def check_secret(secret: str) -> bool:
+    """Verifies that the secret consists of only 0s and 1s."""
     return not all(c in '01' for c in secret)
 
 
 def pct_to_str(pct, total):
+    """Formats percentage to string."""
     absolute = int(np.round(pct * total / 100))
     return f"{pct:.2f}%\n({absolute:d} shots)"
 
 
 def find_secret(arr: np.array, secret) -> int:
+    """Finds position of the secret in the array."""
     pos = 0
-    for pos, x in enumerate(arr):
-        if secret == x:
-            pos = pos
+    for i, val in enumerate(arr):
+        if secret == val:
+            pos = i
             break
     return pos
