@@ -99,8 +99,8 @@ def render_sidebar(eng: Engine, cfg: dict, des: Descriptor) -> (str, DeltaGenera
                                   format="%.2f",
                                   value=st.session_state.approximation_degree, step=0.01,
                                   help=des["help_approximation_degree"], )
-        st.form_submit_button("Execute", type="primary", disabled=False,
-                              use_container_width=True)
+        cfg["submitted"] = st.form_submit_button("Execute", type="primary", disabled=False,
+                                                 use_container_width=True)
 
         return secret_str, secret_placeholder
 
