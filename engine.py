@@ -16,6 +16,8 @@ from utils import str_to_byte, byte_to_str, generate_seed, fill_counts
 class Result:
     """Is an output of an experiment. It possesses a snapshot of the experiment."""
 
+    secret: str
+
     job: Job
     measurements: List[str]
     counts: dict
@@ -64,6 +66,9 @@ class Engine:
         self.configuration.transpile_config.optimization_level = config["optimization"]
         self.configuration.transpile_config.approximation_degree = config["approx"]
 
+    def check_secret_size(self, secret: str):
+        return len(secret) > self.configuration.backend.num_qubits - 1
+
     def run(self, secret_str: str):
         """Runs experiment."""
         secret_seq = str_to_byte(secret_str)
@@ -90,8 +95,10 @@ class Engine:
         result = job.result()
         qu_stop = perf_counter_ns()
 
-        # construct result
+        # construct snapshot
         res = Result
+        res.secret = secret_str
+        res.result = result
 
         res.job = job
         res.measurements = result.get_memory()

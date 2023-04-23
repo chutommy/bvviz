@@ -98,6 +98,10 @@ def sort_zipped(xs: np.array, ys: np.array) -> (np.array, np.array):
     return xs[p], ys[p]
 
 
-def diff_letters(a: str, b: str):
+def diff_letters(a: str, b: str) -> int:
     """Return number of different letters in strings a and b."""
     return sum(a[i] != b[i] for i in range(len(a)))
+
+
+def check_secret(secret: str) -> bool:
+    return not all(c in '01' for c in secret)

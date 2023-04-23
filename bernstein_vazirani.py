@@ -1,7 +1,6 @@
 """This module implements classical and quantum implementations of Bernstein-Vazirani's algorithm.
 The module contains both classical and quantum oracles."""
-
-import dis
+from dis import Bytecode
 from functools import wraps
 from random import random as random_float
 from typing import Callable
@@ -107,7 +106,7 @@ class ClassicalSolver:
     def ops_count(self) -> int:
         """Calculates the number of instructions needed to solve the oracle.
         A line in disassembled solution code counts as one operation."""
-        bytecode = dis.Bytecode(self.solve)
+        bytecode = Bytecode(self.solve)
         count = bytecode.dis().count('\n')
         return count
 

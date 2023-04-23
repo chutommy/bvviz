@@ -1,7 +1,6 @@
 """Handles regular data manipulation."""
-
-import json
-import re
+from json import loads as json_load
+from re import findall
 from typing import List
 
 from qiskit.providers import Backend
@@ -26,10 +25,10 @@ class Descriptor:
     def __init__(self, path: str):
         with open(path, 'r', encoding='utf-8') as file:
             descriptions_json = file.read()
-        self.descriptions = json.loads(descriptions_json)
+        self.descriptions = json_load(descriptions_json)
 
     def __getitem__(self, item) -> str | FmtStr:
-        args = re.findall(r'{(.*?)}', self.descriptions[item])
+        args = findall(r'{(.*?)}', self.descriptions[item])
         if len(args) != 0:
             return FmtStr(self.descriptions[item])
         return self.descriptions[item]
