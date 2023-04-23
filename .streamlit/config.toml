@@ -4,7 +4,7 @@ showWarningOnDirectExecution = true
 dataFrameSerialization = "arrow"
 
 [logger]
-level = "info"
+level = "error"
 messageFormat = "%(asctime)s.%(msecs)03d %(message)s"
 
 [client]

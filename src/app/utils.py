@@ -7,7 +7,7 @@ from typing import List
 import numpy as np
 from qiskit.providers import Backend
 
-from config import OptimizationLevel
+from .config import OptimizationLevel
 
 
 def generate_seed() -> int:
@@ -118,3 +118,8 @@ def find_secret(arr: np.array, secret) -> int:
             pos = i
             break
     return pos
+
+
+def dhash(dictionary: dict):
+    """Computes hash for directory."""
+    return hash(frozenset(dictionary.items()))

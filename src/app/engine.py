@@ -11,11 +11,11 @@ from qiskit import result as q_result
 from qiskit.providers import Job
 from qiskit.visualization import plot_circuit_layout, plot_gate_map, plot_error_map
 
-from bernstein_vazirani import ClassicalOracle, ClassicalSolver, QuantumOracle, QuantumCircuitBuild
-from config import Configuration
-from data import BackendDB
-from simulation import Simulator, BackendService
-from utils import str_to_byte, byte_to_str, generate_seed, fill_counts, sort_zipped, pct_to_str, \
+from .bernstein_vazirani import ClassicalOracle, ClassicalSolver, QuantumOracle, QuantumCircuitBuild
+from .config import Configuration
+from .data import BackendDB
+from .simulation import Simulator, BackendService
+from .utils import str_to_byte, byte_to_str, generate_seed, fill_counts, sort_zipped, pct_to_str, \
     timestamp_str, find_secret
 
 

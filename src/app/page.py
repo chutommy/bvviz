@@ -3,18 +3,15 @@
 import streamlit as st
 from streamlit.delta_generator import DeltaGenerator
 
-from config import LayoutMethod, RoutingMethod, TranslationMethod, OptimizationLevel
-from data import Descriptor
-from engine import Engine, Result
-from utils import backend_to_name, method_to_name, optimization_to_name, generate_seed, check_secret
+from .config import LayoutMethod, RoutingMethod, TranslationMethod, OptimizationLevel
+from .data import Descriptor
+from .engine import Engine, Result
+from .utils import backend_to_name, method_to_name, optimization_to_name, generate_seed, \
+    check_secret
 
 
-def init_session_state(des: Descriptor):
+def init_session_state():
     """Initialize web page session."""
-    st.set_page_config(page_title="Bernstein–Vazirani", page_icon="assets/logo.png",
-                       layout="wide", initial_sidebar_state="auto", menu_items=None)
-    st.markdown(des.cat(["style_hide_header", "style_hide_footer", "style_hide_view_fullscreen"]),
-                unsafe_allow_html=True)
     if 'init' not in st.session_state:
         st.session_state.init = True
 
@@ -236,8 +233,10 @@ def render_measurement(res: Result, des: Descriptor, measurement_proc: dict):
     pie_cols[1].subheader("Error rate", anchor=False)
     pie_cols[1].write(des["text_error_rate"])
     pie_cols[0].pyplot(measurement_proc['pie_error_rate'])
-    st.divider()
 
+
+def render_download_buttons(des: Descriptor, measurement_proc: dict):
+    """Renders measurement section."""
     cols = st.columns([1, 1, 1, 3])
     cols[0].subheader("Downloads:", anchor=False)
     cols[1].download_button("OpenQASM (qasm)", data=measurement_proc['qu_qasm'], mime="text/plain",
