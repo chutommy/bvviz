@@ -177,71 +177,54 @@ with backend_cols[1]:
     st.dataframe(df, use_container_width=True)
 st.divider()
 
-# todo:from here
-
 gate_cols = st.columns([2, 3])
 with gate_cols[0]:
-    gate_layout_tabs = st.tabs(["Transpiled circuit layout", "Device's gate map"])
-
-    fig = plot_circuit_layout(engine.sim.compiled_circuit, engine.sim.backend)
-    gate_layout_tabs[0].pyplot(fig, clear_figure=True)
-
-    fig = plot_gate_map(engine.sim.backend, label_qubits=True)
-    gate_layout_tabs[1].pyplot(fig, clear_figure=True)
+    tabs = st.tabs(["Transpiled circuit layout", "Device's gate map"])
+    fig1 = plot_circuit_layout(engine.sim.compiled_circuit, engine.sim.backend)
+    fig2 = plot_gate_map(engine.sim.backend, label_qubits=True)
+    tabs[0].pyplot(fig1, clear_figure=True)
+    tabs[1].pyplot(fig2, clear_figure=True)
 
 with gate_cols[1]:
     st.subheader("Circuit layout", anchor=False)
     st.write(descriptor["text_circuit_layout"])
-
     st.caption(f"transpiler seed: :blue[{engine.configuration.transpiler_seed}]")
 
 gate_cols2 = st.columns([2, 3])
-
 with gate_cols2[0]:
     st.subheader("Error map", anchor=False)
     st.write(descriptor["text_error_map"])
-
     fig = plot_error_map(engine.sim.backend, figsize=(12, 10), show_title=False)
     gate_cols2[1].pyplot(fig, clear_figure=True)
-
 st.divider()
 
 st.header("Quantum circuit")
-
 st.write(descriptor["text_quantum_circuit"])
-
 circuit_tabs = st.tabs(["Built circuit", "Compiled circuit"])
-
 fig = engine.builder.circuit.draw(output="mpl", scale=1.1, justify="left", fold=-1,
                                   initial_state=False, plot_barriers=True,
                                   idle_wires=True, with_layout=True, cregbundle=True)
 circuit_tabs[0].pyplot(fig, clear_figure=True)
-
 fig = engine.sim.compiled_circuit.draw(output="mpl", scale=1, justify="left", fold=-1,
                                        initial_state=False, plot_barriers=True,
                                        idle_wires=False, with_layout=False, cregbundle=True)
 circuit_tabs[1].pyplot(fig, clear_figure=True)
-
 st.divider()
 
 download_cols = st.columns(4)
 timestamp = timestamp_str()
-
 download_cols[0].subheader("Downloads:", anchor=False)
-
 qu_qasm = QuantumCircuitBuild() \
     .create_circuit(oracle=result.qu_oracle, random_initialization=False) \
     .circuit.qasm(formatted=False)
 download_cols[1].download_button("OpenQASM (qasm)", data=qu_qasm, mime="text/plain",
                                  help=descriptor["help_openqasm"], use_container_width=True,
                                  file_name=f"bernstein_vazirani_{timestamp}.qasm")
-
 memory_csv = '\n'.join(result.measurements)
 download_cols[2].download_button("Measurements (CSV)", data=memory_csv, mime="text/csv",
                                  help=descriptor["help_measurement_csv"],
                                  use_container_width=True,
                                  file_name=f"bernstein_vazirani_{timestamp}.csv")
-
 counts_json = json.dumps(result.counts, indent=2, sort_keys=True)
 download_cols[3].download_button("Counts (JSON)", data=counts_json, mime="application/json",
                                  help=descriptor["help_counts_json"], use_container_width=True,
