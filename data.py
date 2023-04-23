@@ -10,8 +10,6 @@ from qiskit.providers import Backend
 class FmtStr:
     """FmtStr represents formattable helper string structure."""
 
-    value: str = None
-
     def __init__(self, value: str):
         self.value = value
 
@@ -24,8 +22,6 @@ class FmtStr:
 
 class Descriptor:
     """Descriptor handles long texts."""
-
-    descriptions: dict = None
 
     def __init__(self, path: str):
         with open(path, 'r', encoding='utf-8') as file:
@@ -51,8 +47,6 @@ class Descriptor:
 
 class BackendDB:
     """Represents a database of accessible backends."""
-
-    backends: List[Backend] = None
 
     def __init__(self, backends: List[Backend]):
         self.backends = list(backends)

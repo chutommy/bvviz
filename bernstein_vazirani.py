@@ -25,10 +25,6 @@ def count_incrementer(method):
 class ClassicalOracle:
     """Represents an implementation of a classical oracle for the Bernstein-Vazirani problem."""
 
-    secret: np.array = None
-    complexity: int = None
-    query_count: int = None
-
     def __init__(self, secret: np.array):
         self.complexity = len(secret)
         self.secret = secret
@@ -52,10 +48,6 @@ class QuantumOracle:
     """Represents an implementation of a quantum oracle for the Bernstein-Vazirani problem. The
     oracle is not queried like classical oracles, instead it is applied on a given quantum
     circuit with exactly specified operational quantum registers (input-output quantum bits)."""
-
-    secret: np.array = None
-    complexity: int = None
-    query_count: int = None
 
     def __init__(self, secret: np.array):
         self.complexity = len(secret)
@@ -122,11 +114,6 @@ class ClassicalSolver:
 
 class QuantumCircuitBuild:
     """Represents a quantum circuit building tool for the implementation of the BV algorithm."""
-
-    qreg: QuantumRegister = None  # quantum BV query register
-    auxreg: QuantumRegister = None  # auxiliary output qubit register
-    creg: ClassicalRegister = None  # classical measurement register
-    circuit: QuantumCircuit = None
 
     def allocate_registers(self, complexity: int):
         """Allocates quantum and classical register according to oracle's complexity."""

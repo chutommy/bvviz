@@ -2,6 +2,7 @@
 
 from datetime import datetime
 from random import randint
+from typing import List
 
 import numpy as np
 from qiskit.providers import Backend
@@ -57,3 +58,46 @@ def method_to_name(method: str) -> str:
 def optimization_to_name(level: int) -> str:
     """Map the enum title to the value."""
     return OptimizationLevel(level).name.replace("_", " ").capitalize()
+
+
+def all_measurement_outputs(N: int) -> List[str]:
+    """Returns all possible outcomes of measurement of a system of size N."""
+    outs = []
+    tmp_str = list("0" * N)
+
+    def update_pos_rec(s: List[str], pos: int):
+        if pos >= N:
+            outs.append("".join(tmp_str))
+            return
+
+        update_pos_rec(s, pos + 1)
+
+        tmp_str[pos] = '1'
+        update_pos_rec(s, pos + 1)
+        tmp_str[pos] = '0'
+
+    update_pos_rec(tmp_str, 0)
+    return outs
+
+
+def fill_counts(counts: dict, size: int):
+    """Fills counts with non-measured values."""
+    all_meas = all_measurement_outputs(size)
+    for meas in all_meas:
+        if meas not in counts:
+            counts[meas] = 0
+    return
+
+
+def sort_zipped(xs: np.array, ys: np.array) -> (np.array, np.array):
+    """Sort two lists based on one of them (xs)."""
+    # xs_sorted = [x for x, _ in sorted(zip(xs, ys))]
+    # ys_sorted = [y for _, y in sorted(zip(xs, ys))]
+    # return xs_sorted, ys_sorted
+    p = xs.argsort()
+    return xs[p], ys[p]
+
+
+def diff_letters(a: str, b: str):
+    """Return number of different letters in strings a and b."""
+    return sum(a[i] != b[i] for i in range(len(a)))

@@ -14,7 +14,7 @@ from config import LayoutMethod, RoutingMethod, TranslationMethod, Configuration
 from data import BackendDB, Descriptor
 from simulation import Simulator, BackendService
 from utils import str_to_byte, timestamp_str, byte_to_str, method_to_name, optimization_to_name, \
-    backend_to_name, generate_seed
+    backend_to_name, generate_seed, fill_counts
 
 
 @dataclass
@@ -25,10 +25,16 @@ class Result:
     measurements: List[str]
     counts: dict
 
+    configuration: Configuration
+    backend_src: BackendService
+    backend_db: BackendDB
+    solver: ClassicalSolver
+    builder: QuantumCircuitBuild
+    sim: Simulator
+
     cl_oracle: ClassicalOracle
     cl_solution: str
     cl_time: int
-
     qu_oracle: QuantumOracle
     qu_solution: str
     qu_time: int
@@ -37,14 +43,10 @@ class Result:
 class Engine:
     """Represents an instance of an experiment."""
 
-    configuration: Configuration = None
-    backed: BackendService = None
-    backend_db: BackendDB = None
-
     def __init__(self):
         self.configuration = Configuration()
-        self.backed = BackendService()
-        self.backend_db = BackendDB(self.backed.list_backends())
+        self.backend_src = BackendService()
+        self.backend_db = BackendDB(self.backend_src.list_backends())
         self.solver = ClassicalSolver()
         self.builder = QuantumCircuitBuild()
         self.sim = Simulator()
@@ -99,6 +101,7 @@ class Engine:
         res.job = job
         res.measurements = result.get_memory()
         res.counts = result.get_counts(self.builder.circuit)
+        fill_counts(res.counts, len(secret_str))
 
         res.cl_oracle = c_oracle
         res.cl_solution = byte_to_str(solution)
@@ -107,5 +110,12 @@ class Engine:
         res.qu_oracle = q_oracle
         res.qu_solution = max(res.counts, key=res.counts.get)
         res.qu_time = round((qu_stop - qu_start) / 10 ** 9, 3)
+
+        res.configuration = self.configuration
+        res.backend_src = self.backend_src
+        res.backend_db = self.backend_db
+        res.solver = self.solver
+        res.builder = self.builder
+        res.sim = self.sim
 
         return res

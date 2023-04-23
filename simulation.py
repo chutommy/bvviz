@@ -13,8 +13,6 @@ from config import NoiseConfiguration, TranspileConfiguration, TranslationMethod
 class NoiseConfig:
     """Builds a simple custom noise model to imitate real quantum computer."""
 
-    mode: NoiseModel = None
-
     def __init__(self):
         self.model = NoiseModel()
 
@@ -50,9 +48,10 @@ class NoiseConfig:
 class Simulator:
     """Represents a wrapper for the providers' Aer backend simulation providers."""
 
-    backend: Backend = None
-    noise_config: NoiseConfig = None
-    compiled_circuit: QuantumCircuit = None
+    def __init__(self):
+        self.noise_config = None
+        self.backend = None
+        self.compiled_circuit = None
 
     def set_noise(self, config: NoiseConfiguration):
         """Applies noise channels."""
@@ -108,9 +107,6 @@ class Simulator:
 # https://qiskit.org/documentation/apidoc/providers_fake_provider.html
 class BackendService:
     """Backend service provider for builds to mimic the behavior of IBM Quantum systems."""
-
-    provider: FakeProviderForBackendV2 = None
-    backend: Backend = None
 
     def __init__(self):
         self.provider = FakeProviderForBackendV2()
