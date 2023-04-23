@@ -5,7 +5,7 @@ import streamlit as st
 from .data import Descriptor
 from .engine import Engine, preprocess
 from .page import init_session_state, render_sidebar, render_secret_check, render_basic_metrics, \
-    render_quantum_hardware, render_measurement
+    render_quantum_hardware, render_measurement, render_download_buttons
 
 
 def run():
@@ -34,5 +34,5 @@ def run():
     render_quantum_hardware(Res, descriptor, proc)
     st.divider()
     render_measurement(Res, descriptor, proc)
-    # st.divider()
-    # render_download_buttons(descriptor, proc)
+    st.divider()
+    render_download_buttons(descriptor, proc)

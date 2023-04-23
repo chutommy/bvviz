@@ -6,7 +6,7 @@ from typing import List
 
 import numpy as np
 from matplotlib import pyplot as plt
-from matplotlib.patches import Patch
+from matplotlib.patches import Patch, ConnectionPatch
 from qiskit import result as q_result
 from qiskit.providers import Job
 from qiskit.visualization import plot_circuit_layout, plot_gate_map, plot_error_map
@@ -16,7 +16,7 @@ from .config import Configuration
 from .data import BackendDB
 from .simulation import Simulator, BackendService
 from .utils import str_to_byte, byte_to_str, generate_seed, fill_counts, sort_zipped, pct_to_str, \
-    timestamp_str, find_secret
+    timestamp_str, find_secret, diff_letters
 
 
 @dataclass
@@ -195,9 +195,11 @@ def preprocess_measurement(proc, result):
 
     ys1 = [int(i, 2) for i in result.measurements]
     xs1 = list(range(len(ys1)))
-    proc["bar_counts"] = plt.figure(figsize=(12, 6), dpi=200)
-    axis = proc["bar_counts"].add_subplot(1, 1, 1)
+    proc["scatter_counts"] = plt.figure(figsize=(12, 6), dpi=200)
+    axis = proc["scatter_counts"].add_subplot(1, 1, 1)
     axis.scatter(ys1, xs1, alpha=0.1, color="#8210d8")
+    axis.set_xticks(np.sort(list(set(ys1))))
+    axis.grid(which="both", axis='x', color='grey', linewidth=0.5, alpha=0.4)
     axis.tick_params(axis='x', which='both', bottom=False, labelbottom=False)
     axis.set_xlabel("Binary measurement", fontsize=13, labelpad=20)
     axis.set_ylabel('Measurement number', fontsize=13, labelpad=20)
@@ -207,8 +209,8 @@ def preprocess_measurement(proc, result):
     xs2, ys2 = sort_zipped(xs2, ys2)
     pos2 = find_secret(xs2, result.secret)
 
-    proc["scatter_counts"] = plt.figure(figsize=(12, 6), dpi=200)
-    axis = proc["scatter_counts"].add_subplot(1, 1, 1)
+    proc["bar_counts"] = plt.figure(figsize=(12, 6), dpi=200)
+    axis = proc["bar_counts"].add_subplot(1, 1, 1)
     bar_c = axis.bar(xs2, ys2, color="#6b6b6b")
     bar_c[pos2].set_color("#8210d8")
     axis.grid(axis='y', color='grey', linewidth=0.5, alpha=0.4)
@@ -243,56 +245,59 @@ def preprocess_error_rate(proc, result):
     proc["error_rate_total"] = f"{incorrect / total * 100:.2f} %"
 
     # find: pie_error_rate_bar_invalid(random_error)
-    proc["pie_error_rate"], ax1 = plt.subplots(1, 1, figsize=(9, 5), dpi=200)
-    # proc["pie_error_rate"], (ax1, ax2) = plt.subplots(1, 2, figsize=(9, 5), dpi=200)
+    # proc["pie_error_rate"], ax1 = plt.subplots(1, 1, figsize=(9, 5), dpi=200)
+    proc["pie_error_rate"], (ax1, ax2) = plt.subplots(1, 2, figsize=(9, 5), dpi=200)
     overall_ratios = [incorrect / total, correct / total]
     labels = ['noise', 'target']
     wedges, *_ = ax1.pie(overall_ratios, autopct=lambda pct: pct_to_str(pct, total),
                          startangle=-180 * overall_ratios[0], labels=labels,
                          explode=[0, 0.1], colors=["#6b6b6b", "#8210d8"], textprops={"color": "w"})
-    ax1.legend(wedges, labels, title="Measurements", loc="upper left")
-    # ax2.axis('off')
-    # if incorrect != 0:
-    #     counts = {i: 0 for i in range(1, len(result.secret) + 1)}
-    #     for meas in result.measurements:
-    #         if meas != result.secret:
-    #             counts[diff_letters(meas, result.secret)] += 1
-    #
-    #     correct_ratios = np.asarray([counts[i] for i in range(1, len(result.secret) + 1)])
-    #     correct_ratios = correct_ratios / sum(correct_ratios)
-    #     correct_labels = [f"{i} qu" for i in range(1, len(result.secret) + 1)]
-    #     bottom = 1
-    #     width = .2
-    #     for j, (height, label) in enumerate(reversed([*zip(correct_ratios, correct_labels)])):
-    #         bottom -= height
-    #         bar_c = ax2.bar(0, height, width, bottom=bottom, color='#eb4034', label=label,
-    #                         alpha=0.1 + j / (len(result.secret) + 1))
-    #         ax2.bar_label(bar_c, labels=[f"{height:.0%}"], label_type='center')
-    #
-    #     ax2.set_title('Number of incorrect qubits', pad=15, loc="right")
-    #     ax2.legend()
-    #     ax2.set_xlim(- 2.5 * width, 2.5 * width)
-    #
-    #     if correct != 0:
-    #         theta1, theta2 = wedges[0].theta1, wedges[0].theta2
-    #         center, radius = wedges[0].center, wedges[0].r
-    #         bar_height = sum(correct_ratios)
-    #
-    #         # draw top connecting line
-    #         xvalues = radius * np.cos(np.pi / 180 * theta2) + center[0]
-    #         yvalues = radius * np.sin(np.pi / 180 * theta2) + center[1]
-    #         con = CPatch(xyA=(-width / 2, bar_height), coordsA=ax2.transData,
-    #                      xyB=(xvalues, yvalues),
-    #                      coordsB=ax1.transData)
-    #         con.set_color("#000000")
-    #         con.set_linewidth(0.6)
-    #         ax2.add_artist(con)
-    #
-    #         # draw bottom connecting line
-    #         xvalues = radius * np.cos(np.pi / 180 * theta1) + center[0]
-    #         yvalues = radius * np.sin(np.pi / 180 * theta1) + center[1]
-    #         con = CPatch(xyA=(-width / 2, 0), coordsA=ax2.transData, xyB=(xvalues, yvalues),
-    #                      coordsB=ax1.transData)
-    #         con.set_color("#000000")
-    #         ax2.add_artist(con)
-    #         con.set_linewidth(0.6)
+    ax1.legend(wedges, labels, title="Measurements", loc="lower center", bbox_to_anchor=(0, 1))
+
+    # pie_error_rate_bar_invalid(random_error)
+    ax2.axis('off')
+    if incorrect != 0:
+        counts = {i: 0 for i in range(1, len(result.secret) + 1)}
+        for meas in result.measurements:
+            if meas != result.secret:
+                counts[diff_letters(meas, result.secret)] += 1
+
+        correct_ratios = np.asarray([counts[i] for i in range(1, len(result.secret) + 1)])
+        correct_ratios = correct_ratios / sum(correct_ratios)
+        correct_labels = [f"{i} qu" for i in range(1, len(result.secret) + 1)]
+        bottom = 1
+        width = .2
+        for j, (height, label) in enumerate(reversed([*zip(correct_ratios, correct_labels)])):
+            bottom -= height
+            bar_c = ax2.bar(0, height, width, bottom=bottom, color='#eb4034', label=label,
+                            alpha=0.1 + j / (len(result.secret) + 1))
+            ax2.bar_label(bar_c, labels=[f"{height:.0%}"], label_type='center')
+
+        ax2.set_title('Number of incorrect qubits', pad=15, loc="right")
+        ax2.legend()
+        ax2.set_xlim(- 2.5 * width, 2.5 * width)
+
+        if correct != 0:
+            theta1, theta2 = wedges[0].theta1, wedges[0].theta2
+            center, radius = wedges[0].center, wedges[0].r
+            bar_height = sum(correct_ratios)
+
+            # draw top connecting line
+            xvalues = radius * np.cos(np.pi / 180 * theta2) + center[0]
+            yvalues = radius * np.sin(np.pi / 180 * theta2) + center[1]
+            con = ConnectionPatch(xyA=(-width / 2, bar_height), coordsA=ax2.transData,
+                                  xyB=(xvalues, yvalues),
+                                  coordsB=ax1.transData)
+            con.set_color("#000000")
+            con.set_linewidth(0.6)
+            ax2.add_artist(con)
+
+            # draw bottom connecting line
+            xvalues = radius * np.cos(np.pi / 180 * theta1) + center[0]
+            yvalues = radius * np.sin(np.pi / 180 * theta1) + center[1]
+            con = ConnectionPatch(xyA=(-width / 2, 0), coordsA=ax2.transData,
+                                  xyB=(xvalues, yvalues),
+                                  coordsB=ax1.transData)
+            con.set_color("#000000")
+            ax2.add_artist(con)
+            con.set_linewidth(0.6)

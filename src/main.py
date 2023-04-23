@@ -1,5 +1,5 @@
 """Runs the app."""
 
-import app.app
+from app.app import run
 
-app.run()
+run()

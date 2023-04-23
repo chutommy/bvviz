@@ -207,8 +207,8 @@ def render_measurement(res: Result, des: Descriptor, measurement_proc: dict):
     st.header("Measurements", anchor=False)
 
     meas_tabs = st.tabs(["Counts", "Measurements"])
-    meas_tabs[1].pyplot(measurement_proc['bar_counts'], clear_figure=True)
-    meas_tabs[0].pyplot(measurement_proc['scatter_counts'], clear_figure=True)
+    meas_tabs[0].pyplot(measurement_proc['bar_counts'], clear_figure=True)
+    meas_tabs[1].pyplot(measurement_proc['scatter_counts'], clear_figure=True)
 
     st.write(des["text_measurements"])
     st.divider()
@@ -228,8 +228,8 @@ def render_measurement(res: Result, des: Descriptor, measurement_proc: dict):
     st.divider()
 
     # find: pie_error_rate_bar_invalid(random_error)
-    pie_cols = st.columns([1, 1])
-    # pie_cols = st.columns([2, 1])
+    # pie_cols = st.columns([1, 1])
+    pie_cols = st.columns([2, 1])
     pie_cols[1].subheader("Error rate", anchor=False)
     pie_cols[1].write(des["text_error_rate"])
     pie_cols[0].pyplot(measurement_proc['pie_error_rate'])
