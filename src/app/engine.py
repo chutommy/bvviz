@@ -257,47 +257,52 @@ def preprocess_error_rate(proc, result):
     # pie_error_rate_bar_invalid(random_error)
     ax2.axis('off')
     if incorrect != 0:
-        counts = {i: 0 for i in range(1, len(result.secret) + 1)}
-        for meas in result.measurements:
-            if meas != result.secret:
-                counts[diff_letters(meas, result.secret)] += 1
+        append_bar_of_pie(ax1, ax2, correct, result, wedges)
 
-        correct_ratios = np.asarray([counts[i] for i in range(1, len(result.secret) + 1)])
-        correct_ratios = correct_ratios / sum(correct_ratios)
-        correct_labels = [f"{i} qu" for i in range(1, len(result.secret) + 1)]
-        bottom = 1
-        width = .2
-        for j, (height, label) in enumerate(reversed([*zip(correct_ratios, correct_labels)])):
-            bottom -= height
-            bar_c = ax2.bar(0, height, width, bottom=bottom, color='#eb4034', label=label,
-                            alpha=0.1 + j / (len(result.secret) + 1))
-            ax2.bar_label(bar_c, labels=[f"{height:.0%}"], label_type='center')
 
-        ax2.set_title('Number of incorrect qubits', pad=15, loc="right")
-        ax2.legend()
-        ax2.set_xlim(- 2.5 * width, 2.5 * width)
+def append_bar_of_pie(ax1, ax2, correct, result, wedges):
+    """Joins with a bar of wrong qubit count distribution."""
+    counts = {i: 0 for i in range(1, len(result.secret) + 1)}
+    for meas in result.measurements:
+        if meas != result.secret:
+            counts[diff_letters(meas, result.secret)] += 1
+    correct_ratios = np.asarray([counts[i] for i in range(1, len(result.secret) + 1)])
+    correct_ratios = correct_ratios / sum(correct_ratios)
+    correct_labels = [f"{i} qu" for i in range(1, len(result.secret) + 1)]
+    bottom = 1
+    width = .2
+    for j, (height, label) in enumerate(reversed([*zip(correct_ratios, correct_labels)])):
+        bottom -= height
+        bar_c = ax2.bar(0, height, width, bottom=bottom, color='#eb4034', label=label,
+                        alpha=0.1 + j / (len(result.secret) + 1))
+        ax2.bar_label(bar_c, labels=[f"{height:.0%}"], label_type='center')
+    ax2.set_title('Number of incorrect qubits', pad=15, loc="right")
+    ax2.legend()
+    ax2.set_xlim(- 2.5 * width, 2.5 * width)
+    if correct != 0:
+        plot_connecting_lines(ax1, ax2, correct_ratios, wedges, width)
 
-        if correct != 0:
-            theta1, theta2 = wedges[0].theta1, wedges[0].theta2
-            center, radius = wedges[0].center, wedges[0].r
-            bar_height = sum(correct_ratios)
 
-            # draw top connecting line
-            xvalues = radius * np.cos(np.pi / 180 * theta2) + center[0]
-            yvalues = radius * np.sin(np.pi / 180 * theta2) + center[1]
-            con = ConnectionPatch(xyA=(-width / 2, bar_height), coordsA=ax2.transData,
-                                  xyB=(xvalues, yvalues),
-                                  coordsB=ax1.transData)
-            con.set_color("#000000")
-            con.set_linewidth(0.6)
-            ax2.add_artist(con)
-
-            # draw bottom connecting line
-            xvalues = radius * np.cos(np.pi / 180 * theta1) + center[0]
-            yvalues = radius * np.sin(np.pi / 180 * theta1) + center[1]
-            con = ConnectionPatch(xyA=(-width / 2, 0), coordsA=ax2.transData,
-                                  xyB=(xvalues, yvalues),
-                                  coordsB=ax1.transData)
-            con.set_color("#000000")
-            ax2.add_artist(con)
-            con.set_linewidth(0.6)
+def plot_connecting_lines(ax1, ax2, correct_ratios, wedges, width):
+    """Adds connecting lines."""
+    theta1, theta2 = wedges[0].theta1, wedges[0].theta2
+    center, radius = wedges[0].center, wedges[0].r
+    bar_height = sum(correct_ratios)
+    # draw top connecting line
+    xvalues = radius * np.cos(np.pi / 180 * theta2) + center[0]
+    yvalues = radius * np.sin(np.pi / 180 * theta2) + center[1]
+    con = ConnectionPatch(xyA=(-width / 2, bar_height), coordsA=ax2.transData,
+                          xyB=(xvalues, yvalues),
+                          coordsB=ax1.transData)
+    con.set_color("#000000")
+    con.set_linewidth(0.6)
+    ax2.add_artist(con)
+    # draw bottom connecting line
+    xvalues = radius * np.cos(np.pi / 180 * theta1) + center[0]
+    yvalues = radius * np.sin(np.pi / 180 * theta1) + center[1]
+    con = ConnectionPatch(xyA=(-width / 2, 0), coordsA=ax2.transData,
+                          xyB=(xvalues, yvalues),
+                          coordsB=ax1.transData)
+    con.set_color("#000000")
+    ax2.add_artist(con)
+    con.set_linewidth(0.6)

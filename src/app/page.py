@@ -1,6 +1,7 @@
 """Handles web page rendering."""
 
 import streamlit as st
+import streamlit_ext as ste
 from streamlit.delta_generator import DeltaGenerator
 
 from .config import LayoutMethod, RoutingMethod, TranslationMethod, OptimizationLevel
@@ -232,22 +233,39 @@ def render_measurement(res: Result, des: Descriptor, measurement_proc: dict):
     pie_cols = st.columns([2, 1])
     pie_cols[1].subheader("Error rate", anchor=False)
     pie_cols[1].write(des["text_error_rate"])
+
+    # for _ in range(3):
+    #     try:
+    #         pie_cols[0].pyplot(measurement_proc['pie_error_rate'])
+    #         break
+    #     except ...:
+    #         pass
     pie_cols[0].pyplot(measurement_proc['pie_error_rate'])
 
 
 def render_download_buttons(des: Descriptor, measurement_proc: dict):
     """Renders measurement section."""
-    cols = st.columns([1, 1, 1, 3])
-    cols[0].subheader("Downloads:", anchor=False)
-    cols[1].download_button("OpenQASM (qasm)", data=measurement_proc['qu_qasm'], mime="text/plain",
-                            help=des["help_openqasm"], use_container_width=True,
-                            file_name=f"bernstein_vazirani_{measurement_proc['timestamp']}.qasm")
-    cols[2].download_button("Counts (JSON)", data=measurement_proc['counts_json'],
-                            mime="application/json",
-                            help=des["help_counts_json"], use_container_width=True,
-                            file_name=f"bernstein_vazirani_{measurement_proc['timestamp']}.json")
-    cols[3].download_button("Measurements (CSV)", data=measurement_proc['memory_csv'],
-                            mime="text/csv",
-                            help=des["help_measurement_csv"],
-                            use_container_width=True,
-                            file_name=f"bernstein_vazirani_{measurement_proc['timestamp']}.csv")
+    st.subheader("Downloads:", anchor=False)
+    ste.download_button("OpenQASM (qasm)", data=measurement_proc['qu_qasm'],
+                        file_name=f"bernstein_vazirani_{measurement_proc['timestamp']}.qasm",
+                        mime="text/plain")
+    ste.download_button("Counts (JSON)", data=measurement_proc['counts_json'],
+                        file_name=f"bernstein_vazirani_{measurement_proc['timestamp']}.json",
+                        mime="application/json")
+    ste.download_button("Measurements (CSV)", data=measurement_proc['memory_csv'],
+                        file_name=f"bernstein_vazirani_{measurement_proc['timestamp']}.csv",
+                        mime="text/csv")
+
+    _ = des
+    # st.download_button("OpenQASM (qasm)", data=measurement_proc['qu_qasm'], mime="text/plain",
+    #                    help=des["help_openqasm"], use_container_width=True,
+    #                    file_name=f"bernstein_vazirani_{measurement_proc['timestamp']}.qasm")
+    # st.download_button("Counts (JSON)", data=measurement_proc['counts_json'],
+    #                    mime="application/json",
+    #                    help=des["help_counts_json"], use_container_width=True,
+    #                    file_name=f"bernstein_vazirani_{measurement_proc['timestamp']}.json")
+    # st.download_button("Measurements (CSV)", data=measurement_proc['memory_csv'],
+    #                    mime="text/csv",
+    #                    help=des["help_measurement_csv"],
+    #                    use_container_width=True,
+    #                    file_name=f"bernstein_vazirani_{measurement_proc['timestamp']}.csv")
