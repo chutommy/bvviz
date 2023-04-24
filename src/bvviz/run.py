@@ -1,4 +1,5 @@
 """Starting point of the web app."""
+from typing import Any, Dict
 
 import streamlit as st
 import streamlit_ext as ste
@@ -9,11 +10,11 @@ from .page import (init_session_state, render_basic_metrics, render_download_but
                    render_measurement, render_quantum_hardware, render_secret_check, render_sidebar)
 
 
-def run(descriptions_path):
+def run(descriptions_path: str) -> None:
     """Runs the web app."""
     descriptor = Descriptor(descriptions_path)
     engine = Engine()
-    config = {}
+    config: Dict[str, Any] = {}
 
     st.set_page_config(page_title='Bernstein–Vazirani', page_icon='assets/logo.png',
                        layout='wide', initial_sidebar_state='auto', menu_items=None)

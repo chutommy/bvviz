@@ -1,6 +1,6 @@
 """Provides custom configurations of backend simulators and services."""
 
-from typing import List
+from typing import Any
 
 from qiskit import QuantumCircuit, transpile
 from qiskit.providers import Backend, Job
@@ -13,50 +13,40 @@ from .config import NoiseConfiguration, TranslationMethod, TranspileConfiguratio
 class NoiseConfig:
     """Builds a simple custom noise model to imitate real quantum computer."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.model = NoiseModel()
 
-    def apply_reset_error(self, rate: float):
+    def apply_reset_error(self, rate: float) -> None:
         """Applies reset error channel."""
         error_reset = reset_error(1 - rate, rate)
         self.model.add_all_qubit_quantum_error(error_reset, 'reset')
 
-        return self
-
-    def apply_measurement_error(self, rate: float):
+    def apply_measurement_error(self, rate: float) -> None:
         """Applies measurement error channel."""
         error_meas = pauli_error([('X', rate), ('I', 1 - rate)])
         self.model.add_all_qubit_quantum_error(error_meas, 'measure')
 
-        return self
-
-    def apply_single_gate_error(self, rate: float):
+    def apply_single_gate_error(self, rate: float) -> None:
         """Applies single gate error channel."""
         error = depolarizing_error(rate, 1)
         self.model.add_all_qubit_quantum_error(error, ['i', 'h', 'z', 'x'])
 
-        return self
-
-    def apply_double_gate_error(self, rate: float):
+    def apply_double_gate_error(self, rate: float) -> None:
         """Applies double gate error channel."""
         error = depolarizing_error(rate, 2)
         self.model.add_all_qubit_quantum_error(error, ['cx'])
-
-        return self
 
 
 class Simulator:
     """Represents a wrapper for the providers' Aer backend simulation providers."""
 
-    def __init__(self):
-        self.noise_config = None
-        self.backend = None
-        self.compiled_circuit = None
+    def __init__(self) -> None:
+        self.noise_config: NoiseConfig = NoiseConfig()
+        self.backend: Backend = FakeQasmSimulator()
+        self.compiled_circuit: QuantumCircuit = QuantumCircuit()
 
-    def set_noise(self, config: NoiseConfiguration):
+    def set_noise(self, config: NoiseConfiguration) -> None:
         """Applies noise channels."""
-        self.noise_config = NoiseConfig()
-
         if config.reset_rate:
             self.noise_config.apply_reset_error(rate=config.reset_rate)
 
@@ -69,14 +59,11 @@ class Simulator:
         if config.double_gate_rate:
             self.noise_config.apply_double_gate_error(rate=config.double_gate_rate)
 
-        return self
-
-    def set_backend(self, backend: Backend):
+    def set_backend(self, backend: Backend) -> None:
         """Set custom backend."""
         self.backend = backend
-        return self
 
-    def transpile(self, circuit: QuantumCircuit, config: TranspileConfiguration, seed: int):
+    def transpile(self, circuit: QuantumCircuit, config: TranspileConfiguration, seed: int) -> None:
         """Return a compiled quantum circuit on the configured backend provider."""
         self.compiled_circuit = transpile(circuits=circuit,
                                           backend=self.backend,
@@ -87,7 +74,6 @@ class Simulator:
                                           translation_method=TranslationMethod.SYNTHESIS.value,
                                           approximation_degree=config.approximation_degree,
                                           optimization_level=config.optimization_level)
-        return self
 
     def execute(self, shots: int, seed_simulator: int,
                 compiled_circuit: QuantumCircuit = None) -> Job:
@@ -108,19 +94,13 @@ class Simulator:
 class BackendService:
     """Backend service provider for builds to mimic the behavior of IBM Quantum systems."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.provider = FakeProviderForBackendV2()
         self.backend = FakeQasmSimulator()
 
-    def list_backends(self) -> List[Backend]:
+    def list_backends(self) -> Any:
         """Returns available list of provided backends."""
         return self.provider.backends()
-
-    def set_backend(self, backend: Backend):
-        """Set the provider's backend to the given backend instance."""
-        self.backend = backend
-
-        return self
 
     def get_backend(self) -> Backend:
         """Returns service's default quantum backend."""

@@ -1,9 +1,10 @@
 """Provides utility and helper functions."""
 from datetime import datetime
 from random import randint
-from typing import Any, List, Tuple
+from typing import Any, Dict, List, Tuple
 
 import numpy as np
+import numpy.typing as npt
 from qiskit.providers import Backend
 
 from .config import OptimizationLevel
@@ -14,12 +15,12 @@ def generate_seed() -> int:
     return randint(10 ** 14, 10 ** 15)
 
 
-def str_to_byte(string: str) -> np.ndarray:
+def str_to_byte(string: str) -> npt.NDArray[np.byte]:
     """Encode string to numpy array of bytes."""
     return np.array(list(string), dtype=np.byte)
 
 
-def byte_to_str(byte_code: np.ndarray) -> str:
+def byte_to_str(byte_code: npt.NDArray[np.byte]) -> str:
     """Decode numpy array of bytes to string."""
     result = ''
     for bit in byte_code:
@@ -64,7 +65,7 @@ def all_measurement_outputs(complexity: int) -> List[str]:
     outs = []
     tmp_str = list('0' * complexity)
 
-    def update_pos_rec(strs: List[str], pos: int):
+    def update_pos_rec(strs: List[str], pos: int) -> None:
         if pos >= complexity:
             outs.append(''.join(tmp_str))
             return
@@ -79,7 +80,7 @@ def all_measurement_outputs(complexity: int) -> List[str]:
     return outs
 
 
-def fill_counts(counts: dict, size: int):
+def fill_counts(counts: Dict[str, int], size: int) -> None:
     """Fills counts with non-measured values."""
     all_meas = all_measurement_outputs(size)
     for meas in all_meas:
@@ -87,7 +88,8 @@ def fill_counts(counts: dict, size: int):
             counts[meas] = 0
 
 
-def sort_zipped(x_values: np.ndarray, y_values: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+def sort_zipped(x_values: npt.NDArray[Any], y_values: npt.NDArray[Any]) \
+        -> Tuple[npt.NDArray[Any], npt.NDArray[Any]]:
     """Sort two lists based on one of them (xs)."""
     order = x_values.argsort()
     return x_values[order], y_values[order]
@@ -103,13 +105,13 @@ def check_secret(secret: str) -> bool:
     return not all(c in '01' for c in secret)
 
 
-def pct_to_str(pct, total):
+def pct_to_str(pct: float, total: int) -> str:
     """Formats percentage to string."""
     absolute = int(np.round(pct * total / 100))
     return f'{pct:.2f}%\n({absolute:d} shots)'
 
 
-def find_secret(arr: np.ndarray, secret) -> int:
+def find_secret(arr: npt.NDArray[Any], secret: str) -> int:
     """Finds position of the secret in the array."""
     pos = 0
     for i, val in enumerate(arr):
@@ -119,12 +121,12 @@ def find_secret(arr: np.ndarray, secret) -> int:
     return pos
 
 
-def dhash(dictionary: dict):
+def dhash(dictionary: Dict[Any, Any]) -> int:
     """Computes hash for directory."""
     return hash(frozenset(dictionary.items()))
 
 
-def dict_max_value_key(dictionary: dict) -> Any:
+def dict_max_value_key(dictionary: Dict[Any, Any]) -> Any:
     """Returns the key of the max value in the dictionary."""
     solution = ""
     max_count = 0

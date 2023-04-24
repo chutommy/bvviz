@@ -1,7 +1,7 @@
 """Handles regular data manipulation."""
 
 from json import loads
-from typing import List
+from typing import Any, List, SupportsIndex
 
 from qiskit.providers import Backend
 
@@ -9,10 +9,10 @@ from qiskit.providers import Backend
 class FmtStr:
     """FmtStr represents format-friendly helper string structure."""
 
-    def __init__(self, value: str):
+    def __init__(self, value: str) -> None:
         self.value = value
 
-    def __call__(self, **kwargs) -> str:
+    def __call__(self, **kwargs: str) -> str:
         return self.value.format(**kwargs)
 
     def __str__(self) -> str:
@@ -22,12 +22,12 @@ class FmtStr:
 class Descriptor:
     """Descriptor handles long texts."""
 
-    def __init__(self, path: str):
+    def __init__(self, path: str) -> None:
         with open(path, 'r', encoding='utf-8') as file:
             descriptions_json = file.read()
         self.descriptions = loads(descriptions_json)
 
-    def __getitem__(self, item) -> FmtStr:
+    def __getitem__(self, item: str) -> FmtStr:
         # args = findall(r'{(.*?)}', self.descriptions[item])
         # if len(args) != 0:
         #     return FmtStr(self.descriptions[item])
@@ -41,18 +41,18 @@ class Descriptor:
             out += self.descriptions[arg]
         return out
 
-    def __call__(self) -> dict:
+    def __call__(self) -> Any:
         return self.descriptions
 
 
 class BackendDB:
     """Represents a database of accessible backends."""
 
-    def __init__(self, backends: List[Backend]):
+    def __init__(self, backends: List[Backend]) -> None:
         self.backends = list(backends)
         self.cap = len(backends)
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: SupportsIndex) -> Backend:
         return self.backends[key]
 
     def size(self) -> int:

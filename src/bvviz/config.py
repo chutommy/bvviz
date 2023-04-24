@@ -70,7 +70,7 @@ class TranspileConfiguration:
 class Configuration:
     """Configuration for the Bernstein-Vazirani protocol simulator."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.transpiler_seed = 42
         self.simulator_seed = 42
         self.shot_count = 1000
@@ -79,13 +79,13 @@ class Configuration:
         self.noise_config = NoiseConfiguration()
         self.transpile_config = TranspileConfiguration()
 
-    def reset_partial(self):
+    def reset_partial(self) -> None:
         """Reset callable configuration settings."""
         self.backend = FakeQasmSimulator()
         self.noise_config = NoiseConfiguration()
         self.transpile_config = TranspileConfiguration()
 
-    def reset(self):
+    def reset(self) -> None:
         """Resets configuration."""
         self.transpiler_seed = 0
         self.simulator_seed = 0

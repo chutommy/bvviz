@@ -1,5 +1,5 @@
 """Handles web page rendering."""
-from typing import Tuple
+from typing import Any, Dict, Tuple, Type
 
 import streamlit as st
 import streamlit_ext as ste
@@ -11,7 +11,7 @@ from .engine import Engine, Result
 from .utils import backend_name, check_secret, generate_seed, method_name, optimization_name
 
 
-def init_session_state():
+def init_session_state() -> None:
     """Initialize web page session."""
     if 'init' not in st.session_state:
         st.session_state.init = True
@@ -35,7 +35,7 @@ def init_session_state():
         st.session_state.optimization_level = 1
 
 
-def render_sidebar(eng: Engine, cfg: dict, des: Descriptor) -> Tuple[str, DeltaGenerator]:
+def render_sidebar(eng: Engine, cfg: Dict[str, Any], des: Descriptor) -> Tuple[str, DeltaGenerator]:
     """Renders sidebar."""
     with st.sidebar.form('configuration', clear_on_submit=False):
         st.header('Configuration', anchor=False)
@@ -106,20 +106,20 @@ def render_sidebar(eng: Engine, cfg: dict, des: Descriptor) -> Tuple[str, DeltaG
         return secret_str, secret_placeholder
 
 
-def render_secret_check(eng: Engine, des: Descriptor, secret: str, placeholder: DeltaGenerator):
+def render_secret_check(eng: Engine, des: Descriptor, secret: str, plc: DeltaGenerator) -> None:
     """Renders secret warning on invalid secret."""
     if eng.check_secret_size(secret):
-        placeholder.error(des['err_secret_str_length'](str_len=len(secret),
-                                                       qu_num=eng.configuration.backend.num_qubits))
+        plc.error(des['err_secret_str_length'](str_len=str(len(secret)),
+                                               qu_num=eng.configuration.backend.num_qubits))
         st.warning(des['warn_failure']())
         st.stop()
     elif check_secret(secret):
-        placeholder.error(des['err_secret_str_value']())
+        plc.error(des['err_secret_str_value']())
         st.warning(des['warn_failure']())
         st.stop()
 
 
-def render_basic_metrics(res: Result, des: Descriptor):
+def render_basic_metrics(res: Type[Result], des: Descriptor) -> None:
     """Renders basic metrics section."""
     cols = st.columns(2)
 
@@ -150,7 +150,7 @@ def render_basic_metrics(res: Result, des: Descriptor):
         cols2[1].metric(':violet[QU] queries count', value='1 x')
 
 
-def render_quantum_hardware(res: Result, des: Descriptor, ctx: dict):
+def render_quantum_hardware(res: Type[Result], des: Descriptor, ctx: Dict[str, Any]) -> None:
     """Renders quantum hardware section."""
     st.header('Quantum hardware', anchor=False)
     backend_cols = st.columns(2)
@@ -203,7 +203,7 @@ def render_quantum_hardware(res: Result, des: Descriptor, ctx: dict):
     circuit_tabs[1].pyplot(ctx['circuit_compiled'], clear_figure=True)
 
 
-def render_measurement(res: Result, des: Descriptor, ctx: dict):
+def render_measurement(res: Type[Result], des: Descriptor, ctx: Dict[str, Any]) -> None:
     """Renders measurement section."""
     st.header('Measurements', anchor=False)
 
@@ -234,7 +234,7 @@ def render_measurement(res: Result, des: Descriptor, ctx: dict):
     pie_cols[0].pyplot(ctx['pie_error_rate'])
 
 
-def render_download_buttons(des: Descriptor, ctx: dict):
+def render_download_buttons(des: Descriptor, ctx: Dict[str, Any]) -> None:
     """Renders measurement section."""
     st.subheader('Downloads:', anchor=False)
     ste.download_button('OpenQASM (qasm)', data=ctx['qu_qasm'], mime='text/plain',

@@ -6,6 +6,7 @@ from time import perf_counter_ns
 from typing import Any, Dict, List, Type
 
 import numpy as np
+import numpy.typing as npt
 import qiskit
 from matplotlib import pyplot as plt
 from matplotlib.patches import ConnectionPatch, Patch
@@ -70,7 +71,7 @@ class Result:
 class Engine:
     """Represents an instance of an experiment."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.configuration = Configuration()
         self.backend_src = BackendService()
         self.backend_db = BackendDB(self.backend_src.list_backends())
@@ -78,7 +79,7 @@ class Engine:
         self.builder = QuantumCircuitBuild()
         self.sim = Simulator()
 
-    def configure(self, config: dict):
+    def configure(self, config: Dict[str, Any]) -> None:
         """Configures experiment."""
         self.configuration.backend = self.backend_db[config['backend_choice']]
         self.configuration.shot_count = config['shots']
@@ -101,7 +102,7 @@ class Engine:
         size = len(secret)
         return size > self.configuration.backend.num_qubits - 1 or size == 0
 
-    def run(self, secret_str: str):
+    def run(self, secret_str: str) -> Type[Result]:
         """Runs experiment."""
         secret_seq = str_to_byte(secret_str)
         c_oracle = ClassicalOracle(secret=secret_seq)
@@ -155,14 +156,14 @@ class Engine:
         return res
 
 
-def preprocess(result: Result) -> dict:
+def preprocess(result: Type[Result]) -> Dict[str, Any]:
     """Preprocess all figures and computationally long tasks."""
     ctx: Dict[str, Any] = {}
 
     ctx['timestamp'] = timestamp_str()
-    ctx['qu_qasm'] = QuantumCircuitBuild() \
-        .create_circuit(oracle=result.qu_result.oracle, random_initialization=False) \
-        .circuit.qasm(formatted=False)
+    new_build = QuantumCircuitBuild()
+    new_build.create_circuit(oracle=result.qu_result.oracle, random_initialization=False)
+    ctx['qu_qasm'] = new_build.circuit.qasm(formatted=False)
     ctx['counts_json'] = dumps(result.counts, indent=2, sort_keys=True)
     ctx['memory_csv'] = '\n'.join(result.measurements)
 
@@ -194,7 +195,7 @@ def preprocess(result: Result) -> dict:
     return ctx
 
 
-def preprocess_measurement(ctx, result):
+def preprocess_measurement(ctx: Dict[str, Any], result: Type[Result]) -> None:
     """Preprocesses measurement section."""
 
     xs1 = np.array([int(i, 2) for i in result.measurements])
@@ -216,8 +217,8 @@ def preprocess_measurement(ctx, result):
     secret_patch = Patch(color='#8210d8', label='target')
     axis.legend(handles=[other_patch, secret_patch], loc='upper right')
 
-    xs2 = np.array(list(result.counts.keys()))
-    ys2 = np.array(list(result.counts.values()))
+    xs2 = np.array(list(result.counts.keys()), dtype=str)
+    ys2 = np.array(list(result.counts.values()), dtype=int)
     xs2, ys2 = sort_zipped(xs2, ys2)
     pos2 = find_secret(xs2, result.secret)
 
@@ -245,7 +246,7 @@ def preprocess_measurement(ctx, result):
     preprocess_error_rate(ctx, result)
 
 
-def preprocess_error_rate(ctx, result):
+def preprocess_error_rate(ctx: Dict[str, Any], result: Type[Result]) -> None:
     """Preprocesses error rate section."""
 
     correct = result.counts[result.secret]
@@ -272,7 +273,8 @@ def preprocess_error_rate(ctx, result):
         preprocess_bar_of_pie(ax1, ax2, correct, result, wedges)
 
 
-def preprocess_bar_of_pie(ax1, ax2, correct, result, wedges):
+def preprocess_bar_of_pie(ax1: Any, ax2: Any, correct: int, result: Type[Result],
+                          wedges: Any) -> None:
     """Joins with a bar of wrong qubit count distribution."""
     # pylint: disable-msg=too-many-locals
     counts = {i: 0 for i in range(1, len(result.secret) + 1)}
@@ -297,7 +299,8 @@ def preprocess_bar_of_pie(ax1, ax2, correct, result, wedges):
         preprocess_connecting_lines(ax1, ax2, incorrect_ratios, wedges, width)
 
 
-def preprocess_connecting_lines(ax1, ax2, correct_ratios, wedges, width):
+def preprocess_connecting_lines(ax1: Any, ax2: Any, correct_ratios: npt.NDArray[np.float64],
+                                wedges: Any, width: float) -> None:
     """Adds connecting lines."""
     theta1, theta2 = wedges[0].theta1, wedges[0].theta2
     center, radius = wedges[0].center, wedges[0].r
