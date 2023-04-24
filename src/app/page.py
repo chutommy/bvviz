@@ -147,7 +147,7 @@ def render_basic_metrics(res: Result, des: Descriptor):
 
         cols2 = st.columns(2)
         cols2[0].metric(":violet[QU] time", value=f"{res.qu_result.time} s")
-        cols2[1].metric(":violet[QU] queries count", value=f"{res.qu_result.oracle.query_count} x")
+        cols2[1].metric(":violet[QU] queries count", value=f"1 x")
 
 
 def render_quantum_hardware(res: Result, des: Descriptor, quantum_hardware_proc: dict):
@@ -161,13 +161,13 @@ def render_quantum_hardware(res: Result, des: Descriptor, quantum_hardware_proc:
         cols1 = st.columns(2)
         cols1[0].metric("Classical bits", value=f"{res.snap.builder.circuit.num_clbits} b",
                         help=des["help_cl_bits"])
-        cols1[1].metric("Quantum bits", value=f"{res.snap.builder.circuit.size()} qu",
+        cols1[1].metric("Quantum bits", value=f"{res.snap.builder.circuit.num_qubits} qu",
                         help=des["help_qu_bits"])
 
         cols2 = st.columns(2)
-        cols2[0].metric("Quantum gates", value=f"{res.snap.builder.circuit.num_qubits}",
+        cols2[0].metric("Quantum gates", value=f"{res.snap.builder.circuit.size()}",
                         help=des["help_qu_gates"])
-        cols2[1].metric("Quantum bits (cap)",
+        cols2[1].metric("Quantum bits (total)",
                         value=f"{res.snap.configuration.backend.num_qubits} qu",
                         help=des["help_qu_bits_cap"])
 

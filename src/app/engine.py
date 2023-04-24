@@ -193,16 +193,23 @@ def preprocess(result: Result) -> dict:
 def preprocess_measurement(proc, result):
     """Preprocesses measurement section."""
 
-    ys1 = [int(i, 2) for i in result.measurements]
-    xs1 = list(range(len(ys1)))
+    xs1 = np.array([int(i, 2) for i in result.measurements])
+    ys1 = np.array(list(range(len(xs1))))
+    secret_dec = int(result.secret, 2)
+    xs1_secret = xs1 == secret_dec
+    xs1_not_secret = xs1 != secret_dec
     proc["scatter_counts"] = plt.figure(figsize=(12, 6), dpi=200)
     axis = proc["scatter_counts"].add_subplot(1, 1, 1)
-    axis.scatter(ys1, xs1, alpha=0.1, color="#8210d8")
-    axis.set_xticks(np.sort(list(set(ys1))))
+    axis.scatter(xs1[xs1_not_secret], ys1[xs1_not_secret], alpha=0.1, color="#6b6b6b")
+    axis.scatter(xs1[xs1_secret], ys1[xs1_secret], alpha=0.1, color="#8210d8")
+    axis.set_xticks(np.sort(list(set(xs1))))
     axis.grid(which="both", axis='x', color='grey', linewidth=0.5, alpha=0.4)
     axis.tick_params(axis='x', which='both', bottom=False, labelbottom=False)
     axis.set_xlabel("Binary measurement", fontsize=13, labelpad=20)
     axis.set_ylabel('Measurement number', fontsize=13, labelpad=20)
+    other_patch = Patch(color='#6b6b6b', label='noise')
+    secret_patch = Patch(color='#8210d8', label='target')
+    axis.legend(handles=[other_patch, secret_patch], loc="upper right")
 
     xs2 = np.asarray(list(result.counts.keys()))
     ys2 = np.asarray(list(result.counts.values()))
@@ -219,7 +226,7 @@ def preprocess_measurement(proc, result):
     axis.set_ylabel('Count', fontsize=13, labelpad=20)
     other_patch = Patch(color='#6b6b6b', label='noise')
     secret_patch = Patch(color='#8210d8', label='target')
-    axis.legend(handles=[other_patch, secret_patch])
+    axis.legend(handles=[other_patch, secret_patch], loc="upper right")
 
     proc["bar_counts_minimal"] = plt.figure(figsize=(12, 5), dpi=200)
     axis = proc["bar_counts_minimal"].add_subplot(1, 1, 1)
