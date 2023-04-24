@@ -9,9 +9,9 @@ from .page import init_session_state, render_sidebar, render_secret_check, rende
     render_quantum_hardware, render_measurement, render_download_buttons
 
 
-def run():
+def run(descriptions_path):
     """Runs the web app."""
-    descriptor = Descriptor('assets/descriptions.json')
+    descriptor = Descriptor(descriptions_path)
     engine = Engine()
     config = {}
 
@@ -31,11 +31,11 @@ def run():
     render_secret_check(engine, descriptor, secret_str, secret_placeholder)
 
     result = engine.run(secret_str)
-    proc = preprocess(result)
+    ctx = preprocess(result)
     render_basic_metrics(result, descriptor)
     st.divider()
-    render_download_buttons(descriptor, proc)
+    render_download_buttons(descriptor, ctx)
     st.divider()
-    render_quantum_hardware(result, descriptor, proc)
+    render_quantum_hardware(result, descriptor, ctx)
     st.divider()
-    render_measurement(result, descriptor, proc)
+    render_measurement(result, descriptor, ctx)

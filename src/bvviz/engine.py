@@ -154,30 +154,30 @@ class Engine:
 
 def preprocess(result: Result) -> dict:
     """Preprocess all figures and computationally long tasks."""
-    proc = {}
+    ctx = {}
 
-    proc["timestamp"] = timestamp_str()
-    proc["qu_qasm"] = QuantumCircuitBuild() \
+    ctx["timestamp"] = timestamp_str()
+    ctx["qu_qasm"] = QuantumCircuitBuild() \
         .create_circuit(oracle=result.qu_result.oracle, random_initialization=False) \
         .circuit.qasm(formatted=False)
-    proc["counts_json"] = json_dumps(result.counts, indent=2, sort_keys=True)
-    proc["memory_csv"] = '\n'.join(result.measurements)
+    ctx["counts_json"] = json_dumps(result.counts, indent=2, sort_keys=True)
+    ctx["memory_csv"] = '\n'.join(result.measurements)
 
     gates = {"instruction": [], "count": []}
     for instruction, count in result.snap.builder.circuit.count_ops().items():
         gates["instruction"].append(instruction)
         gates["count"].append(count)
-    proc["gates"] = gates
-    proc["layout_circuit"] = plot_circuit_layout(result.snap.sim.compiled_circuit,
+    ctx["gates"] = gates
+    ctx["layout_circuit"] = plot_circuit_layout(result.snap.sim.compiled_circuit,
                                                  result.snap.sim.backend)
-    proc["map_gate"] = plot_gate_map(result.snap.sim.backend, label_qubits=True)
-    proc["map_error"] = plot_error_map(result.snap.sim.backend, figsize=(12, 10), show_title=False)
-    proc["circuit"] = result.snap.builder.circuit.draw(output="mpl", scale=1.1, justify="left",
+    ctx["map_gate"] = plot_gate_map(result.snap.sim.backend, label_qubits=True)
+    ctx["map_error"] = plot_error_map(result.snap.sim.backend, figsize=(12, 10), show_title=False)
+    ctx["circuit"] = result.snap.builder.circuit.draw(output="mpl", scale=1.1, justify="left",
                                                        fold=-1,
                                                        initial_state=False, plot_barriers=True,
                                                        idle_wires=True, with_layout=True,
                                                        cregbundle=True)
-    proc["circuit_compiled"] = result.snap.sim.compiled_circuit.draw(output="mpl", scale=1,
+    ctx["circuit_compiled"] = result.snap.sim.compiled_circuit.draw(output="mpl", scale=1,
                                                                      justify="left",
                                                                      fold=-1,
                                                                      initial_state=False,
@@ -186,12 +186,12 @@ def preprocess(result: Result) -> dict:
                                                                      with_layout=False,
                                                                      cregbundle=True)
 
-    preprocess_measurement(proc, result)
+    preprocess_measurement(ctx, result)
 
-    return proc
+    return ctx
 
 
-def preprocess_measurement(proc, result):
+def preprocess_measurement(ctx, result):
     """Preprocesses measurement section."""
 
     xs1 = np.array([int(i, 2) for i in result.measurements])
@@ -199,8 +199,8 @@ def preprocess_measurement(proc, result):
     secret_dec = int(result.secret, 2)
     xs1_secret = xs1 == secret_dec
     xs1_not_secret = xs1 != secret_dec
-    proc["scatter_counts"] = plt.figure(figsize=(12, 6), dpi=200)
-    axis = proc["scatter_counts"].add_subplot(1, 1, 1)
+    ctx["scatter_counts"] = plt.figure(figsize=(12, 6), dpi=200)
+    axis = ctx["scatter_counts"].add_subplot(1, 1, 1)
     axis.scatter(xs1[xs1_not_secret], ys1[xs1_not_secret], alpha=0.1, color="#6b6b6b")
     axis.scatter(xs1[xs1_secret], ys1[xs1_secret], alpha=0.1, color="#8210d8")
     axis.set_xticks(np.sort(list(set(xs1))))
@@ -218,8 +218,8 @@ def preprocess_measurement(proc, result):
     xs2, ys2 = sort_zipped(xs2, ys2)
     pos2 = find_secret(xs2, result.secret)
 
-    proc["bar_counts"] = plt.figure(figsize=(12, 6), dpi=200)
-    axis = proc["bar_counts"].add_subplot(1, 1, 1)
+    ctx["bar_counts"] = plt.figure(figsize=(12, 6), dpi=200)
+    axis = ctx["bar_counts"].add_subplot(1, 1, 1)
     bar_c = axis.bar(xs2, ys2, color="#6b6b6b")
     bar_c[pos2].set_color("#8210d8")
     axis.grid(axis='y', color='grey', linewidth=0.5, alpha=0.4)
@@ -231,30 +231,30 @@ def preprocess_measurement(proc, result):
     secret_patch = Patch(color='#8210d8', label='target')
     axis.legend(handles=[other_patch, secret_patch], loc="upper right")
 
-    proc["bar_counts_minimal"] = plt.figure(figsize=(12, 5), dpi=200)
-    axis = proc["bar_counts_minimal"].add_subplot(1, 1, 1)
+    ctx["bar_counts_minimal"] = plt.figure(figsize=(12, 5), dpi=200)
+    axis = ctx["bar_counts_minimal"].add_subplot(1, 1, 1)
     bar_c = axis.bar(xs2, ys2, color="#6b6b6b")
     bar_c[pos2].set_color("#8210d8")
     axis.tick_params(axis='x', which='both', bottom=False, labelbottom=False)
     counts = np.array(list(result.counts.values()))
     axis.axhline(y=(counts.mean() + counts.max(initial=0.5)) / 2, color='r', linestyle='-')
 
-    preprocess_error_rate(proc, result)
+    preprocess_error_rate(ctx, result)
 
 
-def preprocess_error_rate(proc, result):
+def preprocess_error_rate(ctx, result):
     """Preprocesses error rate section."""
 
     correct = result.counts[result.secret]
     incorrect = result.snap.configuration.shot_count - result.counts[result.secret]
     total = result.snap.configuration.shot_count
 
-    proc["correct_rate"] = f"{correct / total * 100:.2f} %"
-    proc["confidence_level"] = "max likelihood" if incorrect == 0 else f"{correct / incorrect:.2f}"
-    proc["error_rate_norm"] = f"{2 * incorrect / total / (2 ** len(result.secret) - 1) * 100:.2f} %"
-    proc["error_rate_total"] = f"{incorrect / total * 100:.2f} %"
+    ctx["correct_rate"] = f"{correct / total * 100:.2f} %"
+    ctx["confidence_level"] = "max likelihood" if incorrect == 0 else f"{correct / incorrect:.2f}"
+    ctx["error_rate_norm"] = f"{2 * incorrect / total / (2 ** len(result.secret) - 1) * 100:.2f} %"
+    ctx["error_rate_total"] = f"{incorrect / total * 100:.2f} %"
 
-    proc["pie_error_rate"], (ax1, ax2) = plt.subplots(1, 2, figsize=(9, 5), dpi=200)
+    ctx["pie_error_rate"], (ax1, ax2) = plt.subplots(1, 2, figsize=(9, 5), dpi=200)
     overall_ratios = [incorrect / total, correct / total]
     labels = ['noise', 'target']
     wedges, *_ = ax1.pie(overall_ratios, autopct=lambda pct: pct_to_str(pct, total),
