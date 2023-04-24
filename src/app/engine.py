@@ -7,6 +7,7 @@ from typing import List
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.patches import Patch, ConnectionPatch
+from matplotlib.ticker import MaxNLocator
 from qiskit import result as q_result
 from qiskit.providers import Job
 from qiskit.visualization import plot_circuit_layout, plot_gate_map, plot_error_map
@@ -205,14 +206,15 @@ def preprocess_measurement(proc, result):
     axis.set_xticks(np.sort(list(set(xs1))))
     axis.grid(which="both", axis='x', color='grey', linewidth=0.5, alpha=0.4)
     axis.tick_params(axis='x', which='both', bottom=False, labelbottom=False)
+    axis.yaxis.set_major_locator(MaxNLocator(integer=True))
     axis.set_xlabel("Binary measurement", fontsize=13, labelpad=20)
     axis.set_ylabel('Measurement number', fontsize=13, labelpad=20)
     other_patch = Patch(color='#6b6b6b', label='noise')
     secret_patch = Patch(color='#8210d8', label='target')
     axis.legend(handles=[other_patch, secret_patch], loc="upper right")
 
-    xs2 = np.asarray(list(result.counts.keys()))
-    ys2 = np.asarray(list(result.counts.values()))
+    xs2 = np.array(list(result.counts.keys()))
+    ys2 = np.array(list(result.counts.values()))
     xs2, ys2 = sort_zipped(xs2, ys2)
     pos2 = find_secret(xs2, result.secret)
 
@@ -222,6 +224,7 @@ def preprocess_measurement(proc, result):
     bar_c[pos2].set_color("#8210d8")
     axis.grid(axis='y', color='grey', linewidth=0.5, alpha=0.4)
     axis.tick_params(axis='x', which='both', bottom=False, labelbottom=False)
+    axis.yaxis.set_major_locator(MaxNLocator(integer=True))
     axis.set_xlabel("Binary measurement", fontsize=13, labelpad=20)
     axis.set_ylabel('Count', fontsize=13, labelpad=20)
     other_patch = Patch(color='#6b6b6b', label='noise')
@@ -233,7 +236,7 @@ def preprocess_measurement(proc, result):
     bar_c = axis.bar(xs2, ys2, color="#6b6b6b")
     bar_c[pos2].set_color("#8210d8")
     axis.tick_params(axis='x', which='both', bottom=False, labelbottom=False)
-    counts = np.asarray(list(result.counts.values()))
+    counts = np.array(list(result.counts.values()))
     axis.axhline(y=(counts.mean() + counts.max(initial=0.5)) / 2, color='r', linestyle='-')
 
     preprocess_error_rate(proc, result)
@@ -271,7 +274,7 @@ def append_bar_of_pie(ax1, ax2, correct, result, wedges):
     for meas in result.measurements:
         if meas != result.secret:
             counts[diff_letters(meas, result.secret)] += 1
-    incorrect_qu = np.asarray([counts[i] for i in range(1, len(result.secret) + 1)])
+    incorrect_qu = np.array([counts[i] for i in range(1, len(result.secret) + 1)])
     incorrect_ratios = incorrect_qu / sum(incorrect_qu)
     incorrect_labels = [f"{i} qu" for i in range(1, len(result.secret) + 1)]
     bottom = 1
