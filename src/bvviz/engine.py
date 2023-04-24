@@ -174,12 +174,11 @@ def preprocess(result: Type[Result]) -> Dict[str, Any]:
     ctx['gates'] = gates
     ctx['layout_circuit'] = plot_circuit_layout(result.snap.sim.compiled_circuit,
                                                 result.snap.sim.backend)
-    ctx['map_gate'] = plot_gate_map(result.snap.sim.backend, label_qubits=True)
-    ctx['map_error'] = plot_error_map(result.snap.sim.backend, figsize=(12, 10), show_title=False)
+    ctx['map_gate'] = plot_gate_map(result.snap.sim.backend, label_qubits=True, figsize=(12, 6))
+    ctx['map_error'] = plot_error_map(result.snap.sim.backend, figsize=(12, 6), show_title=False)
     ctx['circuit'] = result.snap.builder.circuit.draw(output='mpl', scale=1.1, justify='left',
-                                                      fold=-1,
                                                       initial_state=False, plot_barriers=True,
-                                                      idle_wires=True, with_layout=True,
+                                                      idle_wires=True, with_layout=True, fold=-1,
                                                       cregbundle=True)
     ctx['circuit_compiled'] = result.snap.sim.compiled_circuit.draw(output='mpl', scale=1,
                                                                     justify='left',
@@ -203,7 +202,7 @@ def preprocess_measurement(ctx: Dict[str, Any], result: Type[Result]) -> None:
     secret_dec = int(result.secret, 2)
     xs1_secret = xs1 == secret_dec
     xs1_not_secret = xs1 != secret_dec
-    ctx['scatter_counts'] = plt.figure(figsize=(12, 6), dpi=200)
+    ctx['scatter_counts'] = plt.figure(figsize=(15, 10))
     axis = ctx['scatter_counts'].add_subplot(1, 1, 1)
     axis.scatter(xs1[xs1_not_secret], ys1[xs1_not_secret], alpha=0.1, color='#6b6b6b')
     axis.scatter(xs1[xs1_secret], ys1[xs1_secret], alpha=0.1, color='#8210d8')
@@ -222,7 +221,7 @@ def preprocess_measurement(ctx: Dict[str, Any], result: Type[Result]) -> None:
     xs2, ys2 = sort_zipped(xs2, ys2)
     pos2 = find_secret(xs2, result.secret)
 
-    ctx['bar_counts'] = plt.figure(figsize=(12, 6), dpi=200)
+    ctx['bar_counts'] = plt.figure(figsize=(15, 10))
     axis = ctx['bar_counts'].add_subplot(1, 1, 1)
     bar_c = axis.bar(xs2, ys2, color='#6b6b6b')
     bar_c[pos2].set_color('#8210d8')
@@ -235,7 +234,7 @@ def preprocess_measurement(ctx: Dict[str, Any], result: Type[Result]) -> None:
     secret_patch = Patch(color='#8210d8', label='target')
     axis.legend(handles=[other_patch, secret_patch], loc='upper right')
 
-    ctx['bar_counts_minimal'] = plt.figure(figsize=(12, 5), dpi=200)
+    ctx['bar_counts_minimal'] = plt.figure(figsize=(8, 4))
     axis = ctx['bar_counts_minimal'].add_subplot(1, 1, 1)
     bar_c = axis.bar(xs2, ys2, color='#6b6b6b')
     bar_c[pos2].set_color('#8210d8')
@@ -259,7 +258,7 @@ def preprocess_error_rate(ctx: Dict[str, Any], result: Type[Result]) -> None:
     ctx['error_rate_norm'] = f'{err_rate_norm * 100:.2f} %'
     ctx['error_rate_total'] = f'{incorrect / total * 100:.2f} %'
 
-    ctx['pie_error_rate'], (ax1, ax2) = plt.subplots(1, 2, figsize=(9, 5), dpi=200)
+    ctx['pie_error_rate'], (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5))
     overall_ratios = [incorrect / total, correct / total]
     labels = ['noise', 'target']
     wedges, *_ = ax1.pie(overall_ratios, autopct=lambda pct: pct_to_str(pct, total),
@@ -293,7 +292,7 @@ def preprocess_bar_of_pie(ax1: Any, ax2: Any, correct: int, result: Type[Result]
                             alpha=0.1 + j / (len(result.secret) + 1))
             ax2.bar_label(bar_c, labels=[f'{height:.0%}'])
     ax2.set_title('Number of incorrect qubits', pad=15, loc='right')
-    ax2.legend()
+    ax2.legend(loc='upper right')
     ax2.set_xlim(- 2.5 * width, 2.5 * width)
     if correct != 0:
         preprocess_connecting_lines(ax1, ax2, incorrect_ratios, wedges, width)
