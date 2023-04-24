@@ -2,12 +2,12 @@
 
 from typing import List
 
-from qiskit import transpile, QuantumCircuit
+from qiskit import QuantumCircuit, transpile
 from qiskit.providers import Backend, Job
 from qiskit.providers.fake_provider import FakeProviderForBackendV2, FakeQasmSimulator
-from qiskit_aer.noise import NoiseModel, pauli_error, depolarizing_error, reset_error
+from qiskit_aer.noise import depolarizing_error, NoiseModel, pauli_error, reset_error
 
-from .config import NoiseConfiguration, TranspileConfiguration, TranslationMethod
+from .config import NoiseConfiguration, TranslationMethod, TranspileConfiguration
 
 
 class NoiseConfig:

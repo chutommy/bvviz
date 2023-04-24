@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from enum import Enum
 
-import qiskit.providers.fake_provider as provider
+from qiskit.providers.fake_provider import FakeQasmSimulator
 
 
 # https://qiskit.org/documentation/apidoc/transpiler_passes.html#layout-selection-placement
@@ -75,13 +75,13 @@ class Configuration:
         self.simulator_seed = 42
         self.shot_count = 1000
         self.reset_partial()
-        self.backend = provider.FakeQasmSimulator()
+        self.backend = FakeQasmSimulator()
         self.noise_config = NoiseConfiguration()
         self.transpile_config = TranspileConfiguration()
 
     def reset_partial(self):
         """Reset callable configuration settings."""
-        self.backend = provider.FakeQasmSimulator()
+        self.backend = FakeQasmSimulator()
         self.noise_config = NoiseConfiguration()
         self.transpile_config = TranspileConfiguration()
 

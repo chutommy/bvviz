@@ -4,11 +4,10 @@ import streamlit as st
 import streamlit_ext as ste
 from streamlit.delta_generator import DeltaGenerator
 
-from .config import LayoutMethod, RoutingMethod, TranslationMethod, OptimizationLevel
+from .config import LayoutMethod, OptimizationLevel, RoutingMethod, TranslationMethod
 from .data import Descriptor
 from .engine import Engine, Result
-from .utils import backend_to_name, method_to_name, optimization_to_name, generate_seed, \
-    check_secret
+from .utils import backend_name, check_secret, generate_seed, method_name, optimization_name
 
 
 def init_session_state():
@@ -42,8 +41,8 @@ def render_sidebar(eng: Engine, cfg: dict, des: Descriptor) -> (str, DeltaGenera
         st.subheader('Backend', anchor=False)
 
         cfg['backend_choice'] = st.selectbox('Quantum system', options=range(eng.backend_db.size()),
-                                             format_func=lambda key: backend_to_name(
-                                                 eng.backend_db[key]),
+                                             format_func=lambda key: backend_name(
+                                                     eng.backend_db[key]),
                                              index=st.session_state.backend_choice,
                                              help=des['help_quantum_system'])
 
@@ -80,21 +79,21 @@ def render_sidebar(eng: Engine, cfg: dict, des: Descriptor) -> (str, DeltaGenera
         st.subheader('Transpiler', anchor=False)
         cfg['layout'] = st.selectbox('Layout method', options=[lm.value for lm in LayoutMethod],
                                      index=st.session_state.layout_method,
-                                     format_func=method_to_name,
+                                     format_func=method_name,
                                      help=des['help_layout_method'])
         cfg['routing'] = st.selectbox('Routing method', options=[rm.value for rm in RoutingMethod],
                                       index=st.session_state.routing_method,
-                                      format_func=method_to_name,
+                                      format_func=method_name,
                                       help=des['help_routing_method'])
         cfg['translation'] = st.selectbox('Translation method',
                                           options=[tm.value for tm in TranslationMethod],
                                           index=st.session_state.translation_method,
-                                          format_func=method_to_name,
+                                          format_func=method_name,
                                           help=des['help_translation_method'])
         cfg['optimization'] = st.select_slider('Optimization level',
                                                value=st.session_state.optimization_level,
                                                options=[ol.value for ol in OptimizationLevel],
-                                               format_func=optimization_to_name,
+                                               format_func=optimization_name,
                                                help=des['help_optimization_level'])
         cfg['approx'] = st.slider('Approximation degree', min_value=0.9, max_value=1.0,
                                   format='%.2f',

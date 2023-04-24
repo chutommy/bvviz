@@ -5,8 +5,8 @@ import streamlit_ext as ste
 
 from .data import Descriptor
 from .engine import Engine, preprocess
-from .page import init_session_state, render_sidebar, render_secret_check, render_basic_metrics, \
-    render_quantum_hardware, render_measurement, render_download_buttons
+from .page import (init_session_state, render_basic_metrics, render_download_buttons,
+                   render_measurement, render_quantum_hardware, render_secret_check, render_sidebar)
 
 
 def run(descriptions_path):

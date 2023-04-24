@@ -1,12 +1,13 @@
 """This module implements classical and quantum implementations of Bernstein-Vazirani's algorithm.
 The module contains both classical and quantum oracles."""
+
 from dis import Bytecode
 from functools import wraps
-from random import random as random_float
+from random import random
 from typing import Callable
 
 import numpy as np
-from qiskit import QuantumRegister, ClassicalRegister, QuantumCircuit
+from qiskit import ClassicalRegister, QuantumCircuit, QuantumRegister
 from qiskit.quantum_info import random_statevector
 
 
@@ -126,7 +127,7 @@ class QuantumCircuitBuild:
         self.creg = ClassicalRegister(size=complexity, name='creg')
         self.auxreg = QuantumRegister(size=1, name='auxreg')
         self.circuit = QuantumCircuit(self.qreg, self.auxreg, self.creg,
-                                      name='cirq', global_phase=random_float())
+                                      name='cirq', global_phase=random() * np.pi)
 
         return self
 

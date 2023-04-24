@@ -37,7 +37,7 @@ def timestamp_str(time: datetime = datetime.now()) -> str:
     return time.strftime('%Y_%m_%d_%H-%M-%S')
 
 
-def backend_to_name(backend: Backend) -> str:
+def backend_name(backend: Backend) -> str:
     """Extract the name and number of qubits from the provider's fake backend system identifier."""
     # fake_######_v2
     name = backend.name
@@ -49,13 +49,13 @@ def backend_to_name(backend: Backend) -> str:
     return f'{name.capitalize()} ({backend.num_qubits})'
 
 
-def method_to_name(method: str) -> str:
+def method_name(method: str) -> str:
     """Returns a formatted name of the method."""
     # fake_######_v2
     return method.replace('_', ' ').capitalize()
 
 
-def optimization_to_name(level: int) -> str:
+def optimization_name(level: int) -> str:
     """Map the enum title to the value."""
     return OptimizationLevel(level).name.replace('_', ' ').capitalize()
 

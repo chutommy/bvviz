@@ -1,5 +1,6 @@
 """Handles regular data manipulation."""
-from json import loads as json_load
+
+from json import loads
 from re import findall
 from typing import List
 
@@ -25,7 +26,7 @@ class Descriptor:
     def __init__(self, path: str):
         with open(path, 'r', encoding='utf-8') as file:
             descriptions_json = file.read()
-        self.descriptions = json_load(descriptions_json)
+        self.descriptions = loads(descriptions_json)
 
     def __getitem__(self, item) -> str | FmtStr:
         args = findall(r'{(.*?)}', self.descriptions[item])
