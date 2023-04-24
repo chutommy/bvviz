@@ -169,22 +169,22 @@ def preprocess(result: Result) -> dict:
         gates["count"].append(count)
     ctx["gates"] = gates
     ctx["layout_circuit"] = plot_circuit_layout(result.snap.sim.compiled_circuit,
-                                                 result.snap.sim.backend)
+                                                result.snap.sim.backend)
     ctx["map_gate"] = plot_gate_map(result.snap.sim.backend, label_qubits=True)
     ctx["map_error"] = plot_error_map(result.snap.sim.backend, figsize=(12, 10), show_title=False)
     ctx["circuit"] = result.snap.builder.circuit.draw(output="mpl", scale=1.1, justify="left",
-                                                       fold=-1,
-                                                       initial_state=False, plot_barriers=True,
-                                                       idle_wires=True, with_layout=True,
-                                                       cregbundle=True)
+                                                      fold=-1,
+                                                      initial_state=False, plot_barriers=True,
+                                                      idle_wires=True, with_layout=True,
+                                                      cregbundle=True)
     ctx["circuit_compiled"] = result.snap.sim.compiled_circuit.draw(output="mpl", scale=1,
-                                                                     justify="left",
-                                                                     fold=-1,
-                                                                     initial_state=False,
-                                                                     plot_barriers=True,
-                                                                     idle_wires=False,
-                                                                     with_layout=False,
-                                                                     cregbundle=True)
+                                                                    justify="left",
+                                                                    fold=-1,
+                                                                    initial_state=False,
+                                                                    plot_barriers=True,
+                                                                    idle_wires=False,
+                                                                    with_layout=False,
+                                                                    cregbundle=True)
 
     preprocess_measurement(ctx, result)
 
