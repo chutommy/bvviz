@@ -147,7 +147,7 @@ def render_basic_metrics(res: Result, des: Descriptor):
 
         cols2 = st.columns(2)
         cols2[0].metric(":violet[QU] time", value=f"{res.qu_result.time} s")
-        cols2[1].metric(":violet[QU] queries count", value=f"1 x")
+        cols2[1].metric(":violet[QU] queries count", value="1 x")
 
 
 def render_quantum_hardware(res: Result, des: Descriptor, ctx: dict):
@@ -219,7 +219,7 @@ def render_measurement(res: Result, des: Descriptor, ctx: dict):
         st.subheader("Metrics")
         metric_cols = st.columns(2)
         metric_cols[0].metric(":blue[Correct] rate", value=ctx['correct_rate'])
-        metric_cols[0].metric(":blue[Confidence] level", value=ctx['confidence_level'])
+        metric_cols[0].metric(":blue[Confidence] ratio", value=ctx['confidence_ratio'])
         metric_cols[1].metric(":red[Error] rate (normalized)",
                               value=ctx['error_rate_norm'])
         metric_cols[1].metric(":red[Error] rate (total)",

@@ -237,7 +237,7 @@ def preprocess_measurement(ctx, result):
     bar_c[pos2].set_color("#8210d8")
     axis.tick_params(axis='x', which='both', bottom=False, labelbottom=False)
     counts = np.array(list(result.counts.values()))
-    axis.axhline(y=(counts.mean() + counts.max(initial=0.5)) / 2, color='r', linestyle='-')
+    axis.axhline(y=(counts.mean() + np.max(counts, initial=0.5)) / 2, color='r', linestyle='-')
 
     preprocess_error_rate(ctx, result)
 
@@ -249,9 +249,10 @@ def preprocess_error_rate(ctx, result):
     incorrect = result.snap.configuration.shot_count - result.counts[result.secret]
     total = result.snap.configuration.shot_count
 
+    err_rate_norm = np.e * incorrect / total / (2 ** len(result.secret))
     ctx["correct_rate"] = f"{correct / total * 100:.2f} %"
-    ctx["confidence_level"] = "max likelihood" if incorrect == 0 else f"{correct / incorrect:.2f}"
-    ctx["error_rate_norm"] = f"{2 * incorrect / total / (2 ** len(result.secret) - 1) * 100:.2f} %"
+    ctx["confidence_ratio"] = "max" if incorrect == 0 else f"{correct / total / err_rate_norm:.2f}"
+    ctx["error_rate_norm"] = f"{err_rate_norm * 100:.2f} %"
     ctx["error_rate_total"] = f"{incorrect / total * 100:.2f} %"
 
     ctx["pie_error_rate"], (ax1, ax2) = plt.subplots(1, 2, figsize=(9, 5), dpi=200)
@@ -270,6 +271,7 @@ def preprocess_error_rate(ctx, result):
 
 def preprocess_bar_of_pie(ax1, ax2, correct, result, wedges):
     """Joins with a bar of wrong qubit count distribution."""
+    # pylint: disable-msg=too-many-locals
     counts = {i: 0 for i in range(1, len(result.secret) + 1)}
     for meas in result.measurements:
         if meas != result.secret:
@@ -278,7 +280,7 @@ def preprocess_bar_of_pie(ax1, ax2, correct, result, wedges):
     incorrect_ratios = incorrect_qu / sum(incorrect_qu)
     incorrect_labels = [f"{i} qu" for i in range(1, len(result.secret) + 1)]
     bottom = 1
-    width = .2
+    width = 0.2
     for j, (height, label) in enumerate(reversed([*zip(incorrect_ratios, incorrect_labels)])):
         if round(height, 2) > 0.02:
             bottom -= height
