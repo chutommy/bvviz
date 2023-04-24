@@ -1,5 +1,5 @@
 """Runs the app."""
 
-from app.app import run
+from bvviz.app import run
 
 run()
