@@ -265,10 +265,10 @@ def preprocess_error_rate(proc, result):
     # pie_error_rate_bar_invalid(random_error)
     ax2.axis('off')
     if incorrect != 0:
-        append_bar_of_pie(ax1, ax2, correct, result, wedges)
+        preprocess_bar_of_pie(ax1, ax2, correct, result, wedges)
 
 
-def append_bar_of_pie(ax1, ax2, correct, result, wedges):
+def preprocess_bar_of_pie(ax1, ax2, correct, result, wedges):
     """Joins with a bar of wrong qubit count distribution."""
     counts = {i: 0 for i in range(1, len(result.secret) + 1)}
     for meas in result.measurements:
@@ -280,7 +280,7 @@ def append_bar_of_pie(ax1, ax2, correct, result, wedges):
     bottom = 1
     width = .2
     for j, (height, label) in enumerate(reversed([*zip(incorrect_ratios, incorrect_labels)])):
-        if round(height, 2) != 0:
+        if round(height, 2) > 0.02:
             bottom -= height
             bar_c = ax2.bar(0, height, width, bottom=bottom, color='#eb4034', label=label,
                             alpha=0.1 + j / (len(result.secret) + 1))
@@ -289,10 +289,10 @@ def append_bar_of_pie(ax1, ax2, correct, result, wedges):
     ax2.legend()
     ax2.set_xlim(- 2.5 * width, 2.5 * width)
     if correct != 0:
-        plot_connecting_lines(ax1, ax2, incorrect_ratios, wedges, width)
+        preprocess_connecting_lines(ax1, ax2, incorrect_ratios, wedges, width)
 
 
-def plot_connecting_lines(ax1, ax2, correct_ratios, wedges, width):
+def preprocess_connecting_lines(ax1, ax2, correct_ratios, wedges, width):
     """Adds connecting lines."""
     theta1, theta2 = wedges[0].theta1, wedges[0].theta2
     center, radius = wedges[0].center, wedges[0].r
