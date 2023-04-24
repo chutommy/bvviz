@@ -15,15 +15,15 @@ def run(descriptions_path):
     engine = Engine()
     config = {}
 
-    st.set_page_config(page_title="Bernstein–Vazirani", page_icon="assets/logo.png",
-                       layout="wide", initial_sidebar_state="auto", menu_items=None)
-    st.write(descriptor.cat(["style_hide_header",
-                             "style_hide_footer",
-                             "style_hide_view_fullscreen"]), unsafe_allow_html=True)
-    ste.set_width("84em")
+    st.set_page_config(page_title='Bernstein–Vazirani', page_icon='assets/logo.png',
+                       layout='wide', initial_sidebar_state='auto', menu_items=None)
+    st.write(descriptor.cat(['style_hide_header',
+                             'style_hide_footer',
+                             'style_hide_view_fullscreen']), unsafe_allow_html=True)
+    ste.set_width('84em')
 
     init_session_state()
-    st.title("Bernstein–Vazirani Quantum Protocol", anchor=False)
+    st.title('Bernstein–Vazirani Quantum Protocol', anchor=False)
     st.divider()
 
     secret_str, secret_placeholder = render_sidebar(engine, config, descriptor)

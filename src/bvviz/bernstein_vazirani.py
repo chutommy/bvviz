@@ -70,9 +70,9 @@ class QuantumOracle:
         """Constructs an oracle within the given quantum circuit."""
         # ensure correct size of quantum registers
         if in_qreg.size != self.complexity:
-            raise ValueError("Invalid input register size.")
+            raise ValueError('Invalid input register size.')
         if out_qreg.size != 1:
-            raise ValueError("Invalid output register size.")
+            raise ValueError('Invalid output register size.')
 
         for i in range(self.complexity):
             if self.secret[self.complexity - i - 1]:
@@ -122,11 +122,11 @@ class QuantumCircuitBuild:
 
     def allocate_registers(self, complexity: int):
         """Allocates quantum and classical register according to oracle's complexity."""
-        self.qreg = QuantumRegister(size=complexity, name="qreg")
-        self.creg = ClassicalRegister(size=complexity, name="creg")
-        self.auxreg = QuantumRegister(size=1, name="auxreg")
+        self.qreg = QuantumRegister(size=complexity, name='qreg')
+        self.creg = ClassicalRegister(size=complexity, name='creg')
+        self.auxreg = QuantumRegister(size=1, name='auxreg')
         self.circuit = QuantumCircuit(self.qreg, self.auxreg, self.creg,
-                                      name="cirq", global_phase=random_float())
+                                      name='cirq', global_phase=random_float())
 
         return self
 

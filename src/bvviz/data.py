@@ -35,7 +35,7 @@ class Descriptor:
 
     def cat(self, args: List[str]) -> str:
         """Concatenates multiple descriptions."""
-        out = ""
+        out = ''
         for arg in args:
             out += self.descriptions[arg]
         return out

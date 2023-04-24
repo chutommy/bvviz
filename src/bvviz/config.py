@@ -10,30 +10,30 @@ import qiskit.providers.fake_provider as provider
 class LayoutMethod(Enum):
     """Name of layout selection pass method."""
 
-    TRIVIAL = "trivial"
-    DENSE = "dense"
-    NOISE_ADAPTIVE = "noise_adaptive"
-    SABRE = "sabre"
+    TRIVIAL = 'trivial'
+    DENSE = 'dense'
+    NOISE_ADAPTIVE = 'noise_adaptive'
+    SABRE = 'sabre'
 
 
 # https://qiskit.org/documentation/apidoc/transpiler_passes.html#routing
 class RoutingMethod(Enum):
     """Name of routing pass method."""
 
-    BASIC = "basic"
-    LOOKAHEAD = "lookahead"
-    STOCHASTIC = "stochastic"
-    SABRE = "sabre"
-    # NONE = "none"
+    BASIC = 'basic'
+    LOOKAHEAD = 'lookahead'
+    STOCHASTIC = 'stochastic'
+    SABRE = 'sabre'
+    # NONE = 'none'
 
 
 # https://qiskit.org/documentation/apidoc/transpiler_passes.html#basis-change
 class TranslationMethod(Enum):
     """Name of translation pass method."""
 
-    UNROLLER = "unroller"
-    TRANSLATOR = "translator"
-    SYNTHESIS = "synthesis"
+    UNROLLER = 'unroller'
+    TRANSLATOR = 'translator'
+    SYNTHESIS = 'synthesis'
 
 
 class OptimizationLevel(Enum):
