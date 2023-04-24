@@ -3,8 +3,10 @@
 from dataclasses import dataclass
 from json import dumps
 from time import perf_counter_ns
+from typing import Any, Dict, List, Type
 
 import numpy as np
+import qiskit
 from matplotlib import pyplot as plt
 from matplotlib.patches import ConnectionPatch, Patch
 from matplotlib.ticker import MaxNLocator
@@ -15,8 +17,8 @@ from .bernstein_vazirani import ClassicalOracle, ClassicalSolver, QuantumCircuit
 from .config import Configuration
 from .data import BackendDB
 from .simulation import BackendService, Simulator
-from .utils import (byte_to_str, diff_letters, fill_counts, find_secret, generate_seed, pct_to_str,
-                    sort_zipped, str_to_byte, timestamp_str)
+from .utils import (byte_to_str, dict_max_value_key, diff_letters, fill_counts, find_secret,
+                    generate_seed, pct_to_str, sort_zipped, str_to_byte, timestamp_str)
 
 
 @dataclass
@@ -25,7 +27,7 @@ class CLResult:
 
     oracle: ClassicalOracle
     solution: str
-    time: int
+    time: float
 
 
 @dataclass
@@ -34,7 +36,7 @@ class QUResult:
 
     oracle: QuantumOracle
     solution: str
-    time: int
+    time: float
 
 
 @dataclass
@@ -53,15 +55,16 @@ class EngineSnapshot:
 class Result:
     """Is an output of an experiment. It possesses a snapshot of the experiment."""
 
-    secret = ""
-    cl_result = CLResult
-    qu_result = QUResult
-    snap = EngineSnapshot
+    secret: str
 
     job = Job()
-    measurements = []
-    counts = {}
-    result = None
+    measurements: List[str]
+    counts: Dict[str, int]
+    result: qiskit.result
+
+    cl_result: Type[CLResult] = CLResult
+    qu_result: Type[QUResult] = QUResult
+    snap: Type[EngineSnapshot] = EngineSnapshot
 
 
 class Engine:
@@ -95,7 +98,8 @@ class Engine:
 
     def check_secret_size(self, secret: str) -> bool:
         """Verifies that secret is of correct size."""
-        return len(secret) > self.configuration.backend.num_qubits - 1
+        size = len(secret)
+        return size > self.configuration.backend.num_qubits - 1 or size == 0
 
     def run(self, secret_str: str):
         """Runs experiment."""
@@ -138,7 +142,7 @@ class Engine:
         res.cl_result.time = round((cl_stop - cl_start) / 10 ** 9, 2)
 
         res.qu_result.oracle = q_oracle
-        res.qu_result.solution = max(res.counts, key=res.counts.get)
+        res.qu_result.solution = dict_max_value_key(res.counts)
         res.qu_result.time = round((qu_stop - qu_start) / 10 ** 9, 3)
 
         res.snap.configuration = self.configuration
@@ -153,7 +157,7 @@ class Engine:
 
 def preprocess(result: Result) -> dict:
     """Preprocess all figures and computationally long tasks."""
-    ctx = {}
+    ctx: Dict[str, Any] = {}
 
     ctx['timestamp'] = timestamp_str()
     ctx['qu_qasm'] = QuantumCircuitBuild() \
@@ -162,7 +166,7 @@ def preprocess(result: Result) -> dict:
     ctx['counts_json'] = dumps(result.counts, indent=2, sort_keys=True)
     ctx['memory_csv'] = '\n'.join(result.measurements)
 
-    gates = {'instruction': [], 'count': []}
+    gates: Dict[str, List[Any]] = {'instruction': [], 'count': []}
     for instruction, count in result.snap.builder.circuit.count_ops().items():
         gates['instruction'].append(instruction)
         gates['count'].append(count)

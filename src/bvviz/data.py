@@ -1,7 +1,6 @@
 """Handles regular data manipulation."""
 
 from json import loads
-from re import findall
 from typing import List
 
 from qiskit.providers import Backend
@@ -28,11 +27,12 @@ class Descriptor:
             descriptions_json = file.read()
         self.descriptions = loads(descriptions_json)
 
-    def __getitem__(self, item) -> str | FmtStr:
-        args = findall(r'{(.*?)}', self.descriptions[item])
-        if len(args) != 0:
-            return FmtStr(self.descriptions[item])
-        return self.descriptions[item]
+    def __getitem__(self, item) -> FmtStr:
+        # args = findall(r'{(.*?)}', self.descriptions[item])
+        # if len(args) != 0:
+        #     return FmtStr(self.descriptions[item])
+        # return self.descriptions[item]
+        return FmtStr(self.descriptions[item])
 
     def cat(self, args: List[str]) -> str:
         """Concatenates multiple descriptions."""

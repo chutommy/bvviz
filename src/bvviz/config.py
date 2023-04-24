@@ -59,12 +59,12 @@ class NoiseConfiguration:
 class TranspileConfiguration:
     """Configuration for the transpiler."""
 
-    layout_method: str = LayoutMethod.TRIVIAL
-    routing_method: str = RoutingMethod.BASIC
-    translation_method: str = TranslationMethod.TRANSLATOR
+    layout_method: str = LayoutMethod.TRIVIAL.value
+    routing_method: str = RoutingMethod.BASIC.value
+    translation_method: str = TranslationMethod.TRANSLATOR.value
 
     approximation_degree: float = 1
-    optimization_level: int = OptimizationLevel.NO
+    optimization_level: int = OptimizationLevel.NO.value
 
 
 class Configuration:

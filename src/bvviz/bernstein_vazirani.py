@@ -25,7 +25,7 @@ def count_incrementer(method):
 class ClassicalOracle:
     """Represents an implementation of a classical oracle for the Bernstein-Vazirani problem."""
 
-    def __init__(self, secret: np.array):
+    def __init__(self, secret: np.ndarray):
         self.complexity = len(secret)
         self.secret = secret
         self.query_count = 0
@@ -37,7 +37,7 @@ class ClassicalOracle:
             and self.query_count >= 0
 
     @count_incrementer
-    def query(self, inp: np.array) -> bool:
+    def query(self, inp: np.ndarray) -> bool:
         """Apply the classical BV function."""
         product = np.dot(self.secret, inp)
         out_bit = product % 2
@@ -49,7 +49,7 @@ class QuantumOracle:
     oracle is not queried like classical oracles, instead it is applied on a given quantum
     circuit with exactly specified operational quantum registers (input-output quantum bits)."""
 
-    def __init__(self, secret: np.array):
+    def __init__(self, secret: np.ndarray):
         self.complexity = len(secret)
         self.secret = secret
         self.query_count = 0
@@ -86,7 +86,7 @@ class ClassicalSolver:
     """Implements a classical solution to the BV problem."""
 
     @staticmethod
-    def solve(oracle: ClassicalOracle) -> np.array:
+    def solve(oracle: ClassicalOracle) -> np.ndarray:
         """Queries over all positional bits to determine the secret value of all indices."""
         solution = np.empty(oracle.complexity, dtype=np.byte)
 

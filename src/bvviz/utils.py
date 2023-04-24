@@ -1,8 +1,7 @@
 """Provides utility and helper functions."""
-
 from datetime import datetime
 from random import randint
-from typing import List
+from typing import Any, List, Tuple
 
 import numpy as np
 from qiskit.providers import Backend
@@ -15,12 +14,12 @@ def generate_seed() -> int:
     return randint(10 ** 14, 10 ** 15)
 
 
-def str_to_byte(string: str) -> np.array:
+def str_to_byte(string: str) -> np.ndarray:
     """Encode string to numpy array of bytes."""
     return np.array(list(string), dtype=np.byte)
 
 
-def byte_to_str(byte_code: np.array) -> str:
+def byte_to_str(byte_code: np.ndarray) -> str:
     """Decode numpy array of bytes to string."""
     result = ''
     for bit in byte_code:
@@ -88,10 +87,10 @@ def fill_counts(counts: dict, size: int):
             counts[meas] = 0
 
 
-def sort_zipped(xvalues: np.array, yvalues: np.array) -> (np.array, np.array):
+def sort_zipped(x_values: np.ndarray, y_values: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
     """Sort two lists based on one of them (xs)."""
-    order = xvalues.argsort()
-    return xvalues[order], yvalues[order]
+    order = x_values.argsort()
+    return x_values[order], y_values[order]
 
 
 def diff_letters(str1: str, str2: str) -> int:
@@ -110,7 +109,7 @@ def pct_to_str(pct, total):
     return f'{pct:.2f}%\n({absolute:d} shots)'
 
 
-def find_secret(arr: np.array, secret) -> int:
+def find_secret(arr: np.ndarray, secret) -> int:
     """Finds position of the secret in the array."""
     pos = 0
     for i, val in enumerate(arr):
@@ -123,3 +122,14 @@ def find_secret(arr: np.array, secret) -> int:
 def dhash(dictionary: dict):
     """Computes hash for directory."""
     return hash(frozenset(dictionary.items()))
+
+
+def dict_max_value_key(dictionary: dict) -> Any:
+    """Returns the key of the max value in the dictionary."""
+    solution = ""
+    max_count = 0
+    for key, val in dictionary.items():
+        if val > max_count:
+            max_count = val
+            solution = key
+    return solution

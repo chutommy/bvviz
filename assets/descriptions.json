@@ -2,7 +2,7 @@
   "style_hide_header": "<style> header {visibility: hidden} </style>",
   "style_hide_footer": "<style> footer {visibility: hidden;} </style>",
   "style_hide_view_fullscreen": "<style> button[title='View fullscreen'] {visibility: hidden} </style>",
-  "err_secret_str_length": "The length of the secret string ({str_len}) exceeds the number of qubits in the backend simulator minus one ({qu_num} - 1).",
+  "err_secret_str_length": "The length of the secret string ({str_len}) cannot be 0 or cannot exceed the number of qubits in the backend simulator minus one ({qu_num} - 1).",
   "err_secret_str_value": "The secret string should only consist of 0s and 1s.",
   "warn_failure": "Execution failed due to invalid configuration settings. Please ensure all values are valid and fully compatible with the selected backend before taking the next step.",
   "text_circuit_layout": "This is the layout of a circuit transpiled for the target backend. You can see a visual representation of the physical qubits that were used and how they were connected, providing important information for understanding how the quantum circuit is mapped onto the hardware.\n\nBy analyzing the layout, you can gain insights into the performance of the circuit on the target hardware, as well as the potential for optimization or further refinement. Overall, the layout provides a valuable tool for understanding and visualizing the complex interactions between the quantum circuit and the underlying hardware.",
