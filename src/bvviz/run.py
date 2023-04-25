@@ -4,6 +4,7 @@ from typing import Any, Dict
 
 import streamlit as st
 import streamlit_ext as ste
+from matplotlib import pyplot as plt
 
 from .data import Descriptor
 from .engine import Engine, preprocess
@@ -51,4 +52,5 @@ def run(settings_path: str) -> None:
         render_measurement(result, descriptor, ctx)
         st.divider()
         render_footer(descriptor, ctx)
+        plt.close('all')
         tmp.empty()

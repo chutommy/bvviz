@@ -7,8 +7,9 @@ import numpy.typing as npt
 import pytest
 from qiskit.providers import Backend
 
-from src.bvviz.utils import generate_seed, str_to_byte, byte_to_str, timestamp_str, backend_name, method_name, \
-    all_measurement_outputs, fill_counts, sort_zipped, diff_letters, check_secret, find_secret, dict_max_value_key
+from src.bvviz.utils import generate_seed, str_to_byte, byte_to_str, timestamp_str, backend_name, \
+    method_name, all_measurement_outputs, fill_counts, sort_zipped, diff_letters, check_secret, \
+    find_secret, dict_max_value_key
 
 
 def test_generate_seed():
@@ -17,7 +18,7 @@ def test_generate_seed():
         assert generate_seed() != generate_seed()
 
 
-@pytest.mark.parametrize('string, bytes', [
+@pytest.mark.parametrize('string, arr', [
     ('0', np.array([0], dtype=np.byte)),
     ('1', np.array([1], dtype=np.byte)),
     ('1010', np.array([1, 0, 1, 0], dtype=np.byte)),
@@ -25,11 +26,11 @@ def test_generate_seed():
     ('1111', np.array([1, 1, 1, 1], dtype=np.byte)),
     ('10101010', np.array([1, 0, 1, 0, 1, 0, 1, 0], dtype=np.byte)),
 ])
-def test_str_to_byte(string: str, bytes: npt.NDArray[np.byte]):
-    assert (str_to_byte(string) == bytes).all()
+def test_str_to_byte(string: str, arr: npt.NDArray[np.byte]):
+    assert (str_to_byte(string) == arr).all()
 
 
-@pytest.mark.parametrize('bytes, string', [
+@pytest.mark.parametrize('arr, string', [
     (np.array([0], dtype=np.byte), '0'),
     (np.array([1], dtype=np.byte), '1'),
     (np.array([1, 0, 1, 0], dtype=np.byte), '1010'),
@@ -37,11 +38,11 @@ def test_str_to_byte(string: str, bytes: npt.NDArray[np.byte]):
     (np.array([1, 1, 1, 1], dtype=np.byte), '1111'),
     (np.array([1, 0, 1, 0, 1, 0, 1, 0], dtype=np.byte), '10101010'),
 ])
-def test_byte_to_str(bytes: npt.NDArray[np.byte], string: str):
-    assert byte_to_str(bytes) == string
+def test_byte_to_str(arr: npt.NDArray[np.byte], string: str):
+    assert byte_to_str(arr) == string
 
 
-@pytest.mark.parametrize('dt, string', [
+@pytest.mark.parametrize('dtime, string', [
     (datetime(2022, 11, 7, 21, 11, 53), '2022_11_07_21-11-53'),
     (datetime(2023, 6, 26, 11, 13, 23), '2023_06_26_11-13-23'),
     (datetime(2024, 10, 6, 10, 21, 33), '2024_10_06_10-21-33'),
@@ -49,8 +50,8 @@ def test_byte_to_str(bytes: npt.NDArray[np.byte], string: str):
     (datetime(2011, 3, 26, 23, 8, 34), '2011_03_26_23-08-34'),
     (datetime(2013, 4, 30, 19, 1, 48), '2013_04_30_19-01-48'),
 ])
-def test_timestamp_str(dt: datetime, string: str):
-    assert timestamp_str(dt) == string
+def test_timestamp_str(dtime: datetime, string: str):
+    assert timestamp_str(dtime) == string
 
 
 @pytest.mark.parametrize('origname, qubits, name', [

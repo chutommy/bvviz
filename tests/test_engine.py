@@ -1,6 +1,7 @@
 from typing import Dict, Any
 
 import pytest
+from matplotlib import pyplot as plt
 
 from src.bvviz.engine import Engine, preprocess
 
@@ -84,15 +85,43 @@ from src.bvviz.engine import Engine, preprocess
         'optimization': 1,
         'approx': 0.321
     },
+    {
+        'backend_choice': 0,
+        'shots': 1,
+        'reset_err': 0,
+        'meas_err': 0,
+        'single_err': 0,
+        'double_err': 0,
+        'layout': 'trivial',
+        'routing': 'basic',
+        'translation': 'unroller',
+        'optimization': 0,
+        'approx': 0,
+    },
+    {
+        'backend_choice': 0,
+        'shots': 1,
+        'reset_err': 1,
+        'meas_err': 1,
+        'single_err': 1,
+        'double_err': 1,
+        'layout': 'trivial',
+        'routing': 'basic',
+        'translation': 'unroller',
+        'optimization': 1,
+        'approx': 1,
+    },
 ])
 def test_engine(config: Dict[str, Any]):
     engine = Engine()
     engine.configure(config)
-    assert engine.check_secret_size('10101')
-    result = engine.run('10101')
+    assert engine.check_secret_size('110101')
+    result = engine.run('110101')
     assert result is not None
+    # pylint: disable=W0718
     try:
         mem = preprocess(result)
         assert mem is not None
     except Exception as exc:
         assert False, exc
+    plt.close('all')
