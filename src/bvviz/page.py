@@ -11,28 +11,28 @@ from .engine import Engine, Result
 from .utils import backend_name, check_secret, generate_seed, method_name, optimization_name
 
 
-def init_session_state() -> None:
+def init_session_state(init) -> None:
     """Initialize web page session."""
     if 'init' not in st.session_state:
         st.session_state.init = True
 
-        st.session_state.backend_choice = 0
-        st.session_state.layout_method = 2
-        st.session_state.routing_method = 1
-        st.session_state.translation_method = 1
-        st.session_state.secret = '11010'
+        st.session_state.backend_choice = init['backend_choice']
+        st.session_state.layout_method = init['layout_method']
+        st.session_state.routing_method = init['routing_method']
+        st.session_state.translation_method = init['translation_method']
+        st.session_state.secret = init['secret']
 
         st.session_state.transpiler_seed = generate_seed()
         st.session_state.simulator_seed = generate_seed()
-        st.session_state.shots = 1000
+        st.session_state.shots = init['shots']
 
-        st.session_state.reset_rate = 0.019
-        st.session_state.measure_rate = 0.154
-        st.session_state.single_gate_rate = 0.146
-        st.session_state.double_gate_rate = 0.179
+        st.session_state.reset_rate = init['reset_rate']
+        st.session_state.measure_rate = init['measure_rate']
+        st.session_state.single_gate_rate = init['single_gate_rate']
+        st.session_state.double_gate_rate = init['double_gate_rate']
 
-        st.session_state.approximation_degree = 0.99
-        st.session_state.optimization_level = 1
+        st.session_state.approximation_degree = init['approximation_degree']
+        st.session_state.optimization_level = init['optimization_level']
 
 
 def render_sidebar(eng: Engine, cfg: Dict[str, Any], des: Descriptor) -> Tuple[str, DeltaGenerator]:

@@ -1,0 +1,20 @@
+{
+  "title": "Bernstein–Vazirani",
+  "page_icon": "assets/logo.png",
+  "page_width": "84em",
+  "descriptions": "assets/descriptions.json",
+  "init": {
+    "backend_choice": 0,
+    "layout_method": 2,
+    "routing_method": 1,
+    "translation_method": 1,
+    "secret": "1011",
+    "shots": 1000,
+    "reset_rate": 0.019,
+    "measure_rate": 0.154,
+    "single_gate_rate": 0.146,
+    "double_gate_rate": 0.179,
+    "approximation_degree": 0.99,
+    "optimization_level": 1
+  }
+}
