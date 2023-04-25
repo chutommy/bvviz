@@ -23,8 +23,8 @@ def run(descriptions_path: str) -> None:
                              'style_hide_footer',
                              'style_hide_view_fullscreen']), unsafe_allow_html=True)
     ste.set_width('84em')
-
     init_session_state()
+
     st.title('Bernstein–Vazirani Quantum Protocol', anchor=False)
     render_introduction(descriptor)
     st.divider()
@@ -33,12 +33,19 @@ def run(descriptions_path: str) -> None:
     engine.configure(config)
     render_secret_check(engine, descriptor, secret_str, secret_placeholder)
 
-    result = engine.run(secret_str)
-    ctx = preprocess(result)
-    render_basic_metrics(result, descriptor)
-    st.divider()
-    render_quantum_hardware(result, descriptor, ctx)
-    st.divider()
-    render_measurement(result, descriptor, ctx)
-    st.divider()
-    render_footer(descriptor, ctx)
+    with st.spinner(descriptor['info_wait_compute']()):
+        tmp = st.divider()
+        result = engine.run(secret_str)
+        ctx = preprocess(result)
+        tmp.empty()
+
+    with st.spinner(descriptor['info_wait_render']()):
+        tmp = st.divider()
+        render_basic_metrics(result, descriptor)
+        st.divider()
+        render_quantum_hardware(result, descriptor, ctx)
+        st.divider()
+        render_measurement(result, descriptor, ctx)
+        st.divider()
+        render_footer(descriptor, ctx)
+        tmp.empty()
