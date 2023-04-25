@@ -45,19 +45,18 @@ def backend_name(backend: Backend) -> str:
         name = name[5:]
     if name.endswith('_v2'):
         name = name[:-3]
-        name = name.replace('_', ' ')
-    return f'{name.capitalize()} ({backend.num_qubits})'
+    name = name.replace('_', ' ')
+    return f'{name.title()} ({backend.num_qubits})'
 
 
 def method_name(method: str) -> str:
     """Returns a formatted name of the method."""
-    # fake_######_v2
-    return method.replace('_', ' ').capitalize()
+    return method.replace('_', ' ').title()
 
 
 def optimization_name(level: int) -> str:
     """Map the enum title to the value."""
-    return OptimizationLevel(level).name.replace('_', ' ').capitalize()
+    return OptimizationLevel(level).name.replace('_', ' ').title()
 
 
 def all_measurement_outputs(complexity: int) -> List[str]:
@@ -102,7 +101,7 @@ def diff_letters(str1: str, str2: str) -> int:
 
 def check_secret(secret: str) -> bool:
     """Verifies that the secret consists of only 0s and 1s."""
-    return not all(c in '01' for c in secret)
+    return all(c in '01' for c in secret)
 
 
 def pct_to_str(pct: float, total: int) -> str:
@@ -113,17 +112,10 @@ def pct_to_str(pct: float, total: int) -> str:
 
 def find_secret(arr: npt.NDArray[Any], secret: str) -> int:
     """Finds position of the secret in the array."""
-    pos = 0
     for i, val in enumerate(arr):
         if secret == val:
-            pos = i
-            break
-    return pos
-
-
-def dhash(dictionary: Dict[Any, Any]) -> int:
-    """Computes hash for directory."""
-    return hash(frozenset(dictionary.items()))
+            return i
+    return len(arr)
 
 
 def dict_max_value_key(dictionary: Dict[Any, Any]) -> Any:

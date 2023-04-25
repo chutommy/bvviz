@@ -108,12 +108,12 @@ def render_sidebar(eng: Engine, cfg: Dict[str, Any], des: Descriptor) -> Tuple[s
 
 def render_secret_check(eng: Engine, des: Descriptor, secret: str, plc: DeltaGenerator) -> None:
     """Renders secret warning on invalid secret."""
-    if eng.check_secret_size(secret):
+    if not eng.check_secret_size(secret):
         plc.error(des['err_secret_str_length'](str_len=str(len(secret)),
                                                qu_num=eng.configuration.backend.num_qubits))
         st.warning(des['warn_failure']())
         st.stop()
-    elif check_secret(secret):
+    elif not check_secret(secret):
         plc.error(des['err_secret_str_value']())
         st.warning(des['warn_failure']())
         st.stop()
@@ -267,7 +267,7 @@ def render_footer(des: Descriptor, ctx: Dict[str, Any]) -> None:
 
     <div id="page-container"> <div class="footer"> <p style='font-size: 1em'>
         Powered by <a href="https://qiskit.org/" target="_blank">Qiskit</a>.<br 'style= top:3px;'>
-        Created using <a href="https://streamlit.io/" target="_blank">Streamlit</a>.<br 'style= top:3px;'>
+        Made with <a href="https://streamlit.io/" target="_blank">Streamlit</a>.<br 'style= top:3px;'>
         Designed and developed by <a href="https://github.com/chutommy" target="_blank">Tommy Chu</a>.<br 'style= top:3px;'>
         © 2023 MIT License
         <!-- © 2023 <a href="https://github.com/chutommy" target="_blank">MIT License</a> --> 
