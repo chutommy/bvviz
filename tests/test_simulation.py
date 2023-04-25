@@ -58,4 +58,8 @@ def test_simulator(complexity: int, shots: int, seed: int):
 def test_backend_service():
     src = BackendService()
     assert len(src.list_backends()) != 0
-    assert src.get_backend() is not None
+    try:
+        backend = src.get_backend()
+        assert backend is not None
+    except Exception as exc:
+        assert False, exc
