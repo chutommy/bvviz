@@ -18,21 +18,29 @@ class NoiseConfig:
 
     def apply_reset_error(self, rate: float) -> None:
         """Applies reset error channel."""
+        if rate < 0 or rate > 1:
+            raise ValueError('invalid error rate')
         error_reset = reset_error(1 - rate, rate)
         self.model.add_all_qubit_quantum_error(error_reset, 'reset')
 
     def apply_measurement_error(self, rate: float) -> None:
         """Applies measurement error channel."""
+        if rate < 0 or rate > 1:
+            raise ValueError('invalid error rate')
         error_meas = pauli_error([('X', rate), ('I', 1 - rate)])
         self.model.add_all_qubit_quantum_error(error_meas, 'measure')
 
     def apply_single_gate_error(self, rate: float) -> None:
         """Applies single gate error channel."""
+        if rate < 0 or rate > 1:
+            raise ValueError('invalid error rate')
         error = depolarizing_error(rate, 1)
         self.model.add_all_qubit_quantum_error(error, ['i', 'h', 'z', 'x'])
 
     def apply_double_gate_error(self, rate: float) -> None:
         """Applies double gate error channel."""
+        if rate < 0 or rate > 1:
+            raise ValueError('invalid error rate')
         error = depolarizing_error(rate, 2)
         self.model.add_all_qubit_quantum_error(error, ['cx'])
 
