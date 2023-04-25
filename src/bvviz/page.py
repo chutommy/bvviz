@@ -11,7 +11,7 @@ from .engine import Engine, Result
 from .utils import backend_name, check_secret, generate_seed, method_name, optimization_name
 
 
-def init_session_state(init) -> None:
+def init_session_state(init: Dict[str, Any]) -> None:
     """Initialize web page session."""
     if 'init' not in st.session_state:
         st.session_state.init = True
@@ -258,7 +258,7 @@ def render_footer(des: Descriptor, ctx: Dict[str, Any]) -> None:
                             file_name=f'bernstein_vazirani_{ctx["timestamp"]}.csv')
 
     st.divider()
-    ft = """
+    footer = '''
     <style>
     a { display: inline; text-align: left; background-color: transparent; }
     a:link , a:visited { color: #7e3dad; text-decoration: none; }
@@ -272,8 +272,8 @@ def render_footer(des: Descriptor, ctx: Dict[str, Any]) -> None:
         © 2023 MIT License
         <!-- © 2023 <a href="https://github.com/chutommy" target="_blank">MIT License</a> --> 
     </p> </div> </div>
-    """
-    st.write(ft, unsafe_allow_html=True)
+    '''
+    st.write(footer, unsafe_allow_html=True)
 
     # st.download_button('OpenQASM (qasm)', data=ctx['qu_qasm'], mime='text/plain',
     #                    help=des['help_openqasm'], use_container_width=True(),
