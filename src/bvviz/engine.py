@@ -7,11 +7,11 @@ from typing import Any, Dict, List, Type
 
 import numpy as np
 import numpy.typing as npt
-import qiskit
 from matplotlib import pyplot as plt
 from matplotlib.patches import ConnectionPatch, Patch
 from matplotlib.ticker import MaxNLocator
 from qiskit.providers import Job
+from qiskit.result import Result as QiResult
 from qiskit.visualization import plot_circuit_layout, plot_error_map, plot_gate_map
 
 from .bernstein_vazirani import ClassicalOracle, ClassicalSolver, QuantumCircuitBuild, QuantumOracle
@@ -61,7 +61,7 @@ class Result:
     job = Job()
     measurements: List[str]
     counts: Dict[str, int]
-    result: qiskit.result
+    result: QiResult
 
     cl_result: Type[CLResult] = CLResult
     qu_result: Type[QUResult] = QUResult
@@ -160,6 +160,11 @@ def preprocess(result: Type[Result]) -> Dict[str, Any]:
     """Preprocess all figures and computationally long tasks."""
     ctx: Dict[str, Any] = {}
 
+    gates: Dict[str, List[Any]] = {'instruction': [], 'count': []}
+    for instruction, count in result.snap.builder.circuit.count_ops().items():
+        gates['instruction'].append(instruction)
+        gates['count'].append(count)
+    ctx['gates'] = gates
     ctx['timestamp'] = timestamp_str()
     new_build = QuantumCircuitBuild()
     new_build.create_circuit(oracle=result.qu_result.oracle, random_initialization=False)
@@ -167,11 +172,6 @@ def preprocess(result: Type[Result]) -> Dict[str, Any]:
     ctx['counts_json'] = dumps(result.counts, indent=2, sort_keys=True)
     ctx['memory_csv'] = '\n'.join(result.measurements)
 
-    gates: Dict[str, List[Any]] = {'instruction': [], 'count': []}
-    for instruction, count in result.snap.builder.circuit.count_ops().items():
-        gates['instruction'].append(instruction)
-        gates['count'].append(count)
-    ctx['gates'] = gates
     ctx['layout_circuit'] = plot_circuit_layout(result.snap.sim.compiled_circuit,
                                                 result.snap.sim.backend)
     ctx['map_gate'] = plot_gate_map(result.snap.sim.backend, label_qubits=True, figsize=(12, 6))
@@ -305,19 +305,19 @@ def preprocess_connecting_lines(ax1: Any, ax2: Any, correct_ratios: npt.NDArray[
     center, radius = wedges[0].center, wedges[0].r
     bar_height = sum(correct_ratios)
     # draw top connecting line
-    xvalues = radius * np.cos(np.pi / 180 * theta2) + center[0]
-    yvalues = radius * np.sin(np.pi / 180 * theta2) + center[1]
+    x_values = radius * np.cos(np.pi / 180 * theta2) + center[0]
+    y_values = radius * np.sin(np.pi / 180 * theta2) + center[1]
     con = ConnectionPatch(xyA=(-width / 2, bar_height), coordsA=ax2.transData,
-                          xyB=(xvalues, yvalues),
+                          xyB=(x_values, y_values),
                           coordsB=ax1.transData)
     con.set_color('#000000')
     con.set_linewidth(0.6)
     ax2.add_artist(con)
     # draw bottom connecting line
-    xvalues = radius * np.cos(np.pi / 180 * theta1) + center[0]
-    yvalues = radius * np.sin(np.pi / 180 * theta1) + center[1]
+    x_values = radius * np.cos(np.pi / 180 * theta1) + center[0]
+    y_values = radius * np.sin(np.pi / 180 * theta1) + center[1]
     con = ConnectionPatch(xyA=(-width / 2, 0), coordsA=ax2.transData,
-                          xyB=(xvalues, yvalues),
+                          xyB=(x_values, y_values),
                           coordsB=ax1.transData)
     con.set_color('#000000')
     ax2.add_artist(con)

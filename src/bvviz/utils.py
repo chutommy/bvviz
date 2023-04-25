@@ -128,7 +128,7 @@ def dhash(dictionary: Dict[Any, Any]) -> int:
 
 def dict_max_value_key(dictionary: Dict[Any, Any]) -> Any:
     """Returns the key of the max value in the dictionary."""
-    solution = ""
+    solution = ''
     max_count = 0
     for key, val in dictionary.items():
         if val > max_count:

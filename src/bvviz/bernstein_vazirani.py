@@ -11,15 +11,15 @@ import numpy.typing as npt
 from qiskit import ClassicalRegister, QuantumCircuit, QuantumRegister
 from qiskit.quantum_info import random_statevector
 
-Param = ParamSpec("Param")
-RetType = TypeVar("RetType")
+Param = ParamSpec('Param')
+Return = TypeVar('Return')
 
 
-def count_incrementer(method: Callable[Param, RetType]) -> Any:
+def count_incrementer(method: Callable[Param, Return]) -> Any:
     """Increments the Oracles' query counter by one."""
 
     @wraps(method)
-    def _impl(self: Any, *method_args: Any, **method_kwargs: Any) -> RetType:
+    def _impl(self: Any, *method_args: Any, **method_kwargs: Any) -> Return:
         self.query_count += 1
         return method(self, *method_args, **method_kwargs)
 

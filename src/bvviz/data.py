@@ -13,6 +13,8 @@ class FmtStr:
         self.value = value
 
     def __call__(self, **kwargs: str) -> str:
+        if not kwargs:
+            return self.value
         return self.value.format(**kwargs)
 
     def __str__(self) -> str:

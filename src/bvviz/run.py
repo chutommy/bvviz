@@ -6,8 +6,9 @@ import streamlit_ext as ste
 
 from .data import Descriptor
 from .engine import Engine, preprocess
-from .page import (init_session_state, render_basic_metrics, render_download_buttons,
-                   render_measurement, render_quantum_hardware, render_secret_check, render_sidebar)
+from .page import (init_session_state, render_basic_metrics, render_footer,
+                   render_introduction, render_measurement, render_quantum_hardware,
+                   render_secret_check, render_sidebar)
 
 
 def run(descriptions_path: str) -> None:
@@ -25,6 +26,7 @@ def run(descriptions_path: str) -> None:
 
     init_session_state()
     st.title('Bernstein–Vazirani Quantum Protocol', anchor=False)
+    render_introduction(descriptor)
     st.divider()
 
     secret_str, secret_placeholder = render_sidebar(engine, config, descriptor)
@@ -35,8 +37,8 @@ def run(descriptions_path: str) -> None:
     ctx = preprocess(result)
     render_basic_metrics(result, descriptor)
     st.divider()
-    render_download_buttons(descriptor, ctx)
-    st.divider()
     render_quantum_hardware(result, descriptor, ctx)
     st.divider()
     render_measurement(result, descriptor, ctx)
+    st.divider()
+    render_footer(descriptor, ctx)

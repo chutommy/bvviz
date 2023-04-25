@@ -150,6 +150,13 @@ def render_basic_metrics(res: Type[Result], des: Descriptor) -> None:
         cols2[1].metric(':violet[QU] queries count', value='1 x')
 
 
+def render_introduction(des: Descriptor) -> None:
+    """Renders introduction section."""
+    st.subheader('Introduction', anchor=False)
+    st.write(des['text_introduction']())
+    st.expander('Bernstein-Vazirani problem in details').write(des['text_bv_explanation']())
+
+
 def render_quantum_hardware(res: Type[Result], des: Descriptor, ctx: Dict[str, Any]) -> None:
     """Renders quantum hardware section."""
     st.header('Quantum hardware', anchor=False)
@@ -234,17 +241,40 @@ def render_measurement(res: Type[Result], des: Descriptor, ctx: Dict[str, Any]) 
     pie_cols[0].pyplot(ctx['pie_error_rate'])
 
 
-def render_download_buttons(des: Descriptor, ctx: Dict[str, Any]) -> None:
+def render_footer(des: Descriptor, ctx: Dict[str, Any]) -> None:
     """Renders measurement section."""
-    st.subheader('Downloads:', anchor=False)
-    ste.download_button('OpenQASM (qasm)', data=ctx['qu_qasm'], mime='text/plain',
-                        file_name=f'bernstein_vazirani_{ctx["timestamp"]}.qasm')
-    ste.download_button('Counts (JSON)', data=ctx['counts_json'], mime='application/json',
-                        file_name=f'bernstein_vazirani_{ctx["timestamp"]}.json')
-    ste.download_button('Measurements (CSV)', data=ctx['memory_csv'], mime='text/csv',
-                        file_name=f'bernstein_vazirani_{ctx["timestamp"]}.csv')
+    cols = st.columns([4, 1])
+    with cols[0]:
+        st.subheader('Disclaimer:', anchor=False)
+        st.write(des['text_disclaimer']())
 
-    _ = des
+    with cols[1]:
+        st.subheader('Downloads:', anchor=False)
+        ste.download_button('OpenQASM (qasm)', data=ctx['qu_qasm'], mime='text/plain',
+                            file_name=f'bernstein_vazirani_{ctx["timestamp"]}.qasm')
+        ste.download_button('Counts (JSON)', data=ctx['counts_json'], mime='application/json',
+                            file_name=f'bernstein_vazirani_{ctx["timestamp"]}.json')
+        ste.download_button('Measurements (CSV)', data=ctx['memory_csv'], mime='text/csv',
+                            file_name=f'bernstein_vazirani_{ctx["timestamp"]}.csv')
+
+    st.divider()
+    ft = """
+    <style>
+    a { display: inline; text-align: left; background-color: transparent; }
+    a:link , a:visited { color: #7e3dad; text-decoration: none; }
+    a:hover,  a:active { color: #8300e0; text-decoration: underline; }
+    </style>
+
+    <div id="page-container"> <div class="footer"> <p style='font-size: 1em'>
+        Powered by <a href="https://qiskit.org/" target="_blank">Qiskit</a>.<br 'style= top:3px;'>
+        Created using <a href="https://streamlit.io/" target="_blank">Streamlit</a>.<br 'style= top:3px;'>
+        Designed and developed by <a href="https://github.com/chutommy" target="_blank">Tommy Chu</a>.<br 'style= top:3px;'>
+        © 2023 MIT License
+        <!-- © 2023 <a href="https://github.com/chutommy" target="_blank">MIT License</a> --> 
+    </p> </div> </div>
+    """
+    st.write(ft, unsafe_allow_html=True)
+
     # st.download_button('OpenQASM (qasm)', data=ctx['qu_qasm'], mime='text/plain',
     #                    help=des['help_openqasm'], use_container_width=True(),
     #                    file_name=f'bernstein_vazirani_{ctx['timestamp']}.qasm')
