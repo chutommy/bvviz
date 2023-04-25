@@ -151,12 +151,12 @@ def test_find_secret(arr: list[str], key: str, pos: int):
     assert find_secret(np.array(arr, dtype=str), key) == pos
 
 
-@pytest.mark.parametrize('dict, key', [
+@pytest.mark.parametrize('dictionary, key', [
     ({0: 0, 1: 1, 2: 2, 3: 3}, 3),
     ({0: 1, 1: 3, 2: 2, 3: 3}, 1),
     ({0: 2, 1: 5, 2: 2, 3: 3}, 1),
     ({0: 3, 1: 4, 2: 2, 3: 3}, 1),
     ({0: 4, 1: 1, 2: 5, 3: 3}, 2),
 ])
-def test_dict_max_value_key(dict: Dict[int, int], key: int):
-    assert dict_max_value_key(dict) == key
+def test_dict_max_value_key(dictionary: Dict[int, int], key: int):
+    assert dict_max_value_key(dictionary) == key

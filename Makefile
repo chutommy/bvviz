@@ -5,7 +5,7 @@ lint:
 	mypy --strict --ignore-missing-imports --disable-error-code no-untyped-def tests/
 
 test:
-	pytest --cov=src/bvviz -v -s -n auto tests/
+	pytest --cov=src/bvviz -v -s tests/
 
 run:
 	streamlit run app.py
