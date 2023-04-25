@@ -74,7 +74,6 @@ class Configuration:
         self.transpiler_seed = 42
         self.simulator_seed = 42
         self.shot_count = 1000
-        self.reset_partial()
         self.backend = FakeQasmSimulator()
         self.noise_config = NoiseConfiguration()
         self.transpile_config = TranspileConfiguration()
@@ -87,7 +86,7 @@ class Configuration:
 
     def reset(self) -> None:
         """Resets configuration."""
-        self.transpiler_seed = 0
-        self.simulator_seed = 0
+        self.transpiler_seed = 1
+        self.simulator_seed = 1
         self.shot_count = 1000
         self.reset_partial()

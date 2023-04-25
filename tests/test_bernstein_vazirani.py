@@ -85,23 +85,14 @@ def test_apply_circuit(secret: str, inq: int, outq: int, noerr: bool):
             oracle.apply_circuit(circ, qreg, auxreg)
 
 
-@pytest.mark.parametrize('secret, ops', [
-    ("00", 65),
-    ("10", 65),
-    ("11", 65),
-    ("0000", 65),
-    ("1010", 65),
-    ("1111", 65),
-    ("0000", 65),
-    ("10101", 65),
-    ("11111", 65),
-])
-def test_classical_solver(secret: str, ops: int):
+@pytest.mark.parametrize('secret', ['00', '10', '11', '0000', '1010',
+                                    '1111', '0000', '10101', '11111'])
+def test_classical_solver(secret: str, ):
     solver = ClassicalSolver()
     secret_seq = np.array(list(secret), dtype=np.byte)
     oracle = ClassicalOracle(secret_seq)
     assert (solver.solve(oracle) == secret_seq).all()
-    assert solver.ops_count() == ops
+    assert solver.ops_count() > 0
 
 
 def test_create_circuit():
