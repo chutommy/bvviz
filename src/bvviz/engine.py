@@ -119,6 +119,7 @@ class Engine:
         cl_start = perf_counter_ns()
         solution = self.solver.solve(oracle=c_oracle)
         cl_stop = perf_counter_ns()
+        cl_time = round((cl_stop - cl_start) / 10 ** 9, 2)
 
         # quantum algorithm
         qu_start = perf_counter_ns()
@@ -127,8 +128,10 @@ class Engine:
         # noinspection PyUnresolvedReferences
         result = job.result()
         qu_stop = perf_counter_ns()
+        qu_time = round((qu_stop - qu_start) / 10 ** 9, 3)
 
-        # construct snapshot
+        # construct runtime snapshot
+        # create Result data structure
         res = Result
         res.secret = secret_str
         res.result = result
@@ -140,11 +143,11 @@ class Engine:
 
         res.cl_result.oracle = c_oracle
         res.cl_result.solution = byte_to_str(solution)
-        res.cl_result.time = round((cl_stop - cl_start) / 10 ** 9, 2)
+        res.cl_result.time = cl_time
 
         res.qu_result.oracle = q_oracle
         res.qu_result.solution = dict_max_value_key(res.counts)
-        res.qu_result.time = round((qu_stop - qu_start) / 10 ** 9, 3)
+        res.qu_result.time = qu_time
 
         res.snap.configuration = self.configuration
         res.snap.backend_src = self.backend_src
@@ -160,6 +163,7 @@ def preprocess(result: Type[Result]) -> Dict[str, Any]:
     """Preprocess all figures and computationally long tasks."""
     ctx: Dict[str, Any] = {}
 
+    # calculate experiment metrics
     gates: Dict[str, List[Any]] = {'instruction': [], 'count': []}
     for instruction, count in result.snap.builder.circuit.count_ops().items():
         gates['instruction'].append(instruction)
@@ -172,10 +176,13 @@ def preprocess(result: Type[Result]) -> Dict[str, Any]:
     ctx['counts_json'] = dumps(result.counts, indent=2, sort_keys=True)
     ctx['memory_csv'] = '\n'.join(result.measurements)
 
+    # draw quantum device maps
     ctx['layout_circuit'] = plot_circuit_layout(result.snap.sim.compiled_circuit,
                                                 result.snap.sim.backend)
     ctx['map_gate'] = plot_gate_map(result.snap.sim.backend, label_qubits=True, figsize=(12, 6))
     ctx['map_error'] = plot_error_map(result.snap.sim.backend, figsize=(12, 6), show_title=False)
+
+    # draw circuit visualizations
     ctx['circuit'] = result.snap.builder.circuit.draw(output='mpl', scale=1.1, justify='left',
                                                       initial_state=False, plot_barriers=True,
                                                       idle_wires=True, with_layout=True, fold=-1,
@@ -197,6 +204,7 @@ def preprocess(result: Type[Result]) -> Dict[str, Any]:
 def preprocess_measurement(ctx: Dict[str, Any], result: Type[Result]) -> None:
     """Preprocesses measurement section."""
 
+    # draw measurements chart
     xs1 = np.array([int(i, 2) for i in result.measurements])
     ys1 = np.array(list(range(len(xs1))))
     secret_dec = int(result.secret, 2)
@@ -216,6 +224,7 @@ def preprocess_measurement(ctx: Dict[str, Any], result: Type[Result]) -> None:
     secret_patch = Patch(color='#8210d8', label='target')
     axis.legend(handles=[other_patch, secret_patch], loc='upper right')
 
+    # draw counts chart
     xs2 = np.array(list(result.counts.keys()), dtype=str)
     ys2 = np.array(list(result.counts.values()), dtype=int)
     xs2, ys2 = sort_zipped(xs2, ys2)
@@ -234,6 +243,7 @@ def preprocess_measurement(ctx: Dict[str, Any], result: Type[Result]) -> None:
     secret_patch = Patch(color='#8210d8', label='target')
     axis.legend(handles=[other_patch, secret_patch], loc='upper right')
 
+    # draw simplified counts bar plot
     ctx['bar_counts_minimal'] = plt.figure(figsize=(8, 4))
     axis = ctx['bar_counts_minimal'].add_subplot(1, 1, 1)
     bar_c = axis.bar(xs2, ys2, color='#6b6b6b')
@@ -252,12 +262,14 @@ def preprocess_error_rate(ctx: Dict[str, Any], result: Type[Result]) -> None:
     incorrect = result.snap.configuration.shot_count - result.counts[result.secret]
     total = result.snap.configuration.shot_count
 
+    # calculate measurement metrics
     err_rate_norm = np.e * incorrect / total / (2 ** len(result.secret))
     ctx['correct_rate'] = f'{correct / total * 100:.2f} %'
     ctx['confidence_ratio'] = 'max' if incorrect == 0 else f'{correct / total / err_rate_norm:.2f}'
     ctx['error_rate_norm'] = f'{err_rate_norm * 100:.2f} %'
     ctx['error_rate_total'] = f'{incorrect / total * 100:.2f} %'
 
+    # draw error rate chart
     ctx['pie_error_rate'], (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5))
     overall_ratios = [incorrect / total, correct / total]
     labels = ['noise', 'target']
@@ -266,7 +278,6 @@ def preprocess_error_rate(ctx: Dict[str, Any], result: Type[Result]) -> None:
                          explode=[0, 0.1], colors=['#6b6b6b', '#8210d8'], textprops={'color': 'w'})
     ax1.legend(wedges, labels, title='Measurements', loc='lower center', bbox_to_anchor=(0, 1))
 
-    # pie_error_rate_bar_invalid(random_error)
     ax2.axis('off')
     if incorrect != 0:
         preprocess_bar_of_pie(ax1, ax2, correct, result, wedges)
@@ -276,6 +287,8 @@ def preprocess_bar_of_pie(ax1: Any, ax2: Any, correct: int, result: Type[Result]
                           wedges: Any) -> None:
     """Joins with a bar of wrong qubit count distribution."""
     # pylint: disable-msg=too-many-locals
+
+    # computes bar ratios
     counts = {i: 0 for i in range(1, len(result.secret) + 1)}
     for meas in result.measurements:
         if meas != result.secret:
@@ -285,6 +298,8 @@ def preprocess_bar_of_pie(ax1: Any, ax2: Any, correct: int, result: Type[Result]
     incorrect_labels = [f'{i} qu' for i in range(1, len(result.secret) + 1)]
     bottom = 1
     width = 0.2
+
+    # draw bar of pie
     for j, (height, label) in enumerate(reversed([*zip(incorrect_ratios, incorrect_labels)])):
         if round(height, 2) > 0.02:
             bottom -= height
@@ -294,6 +309,7 @@ def preprocess_bar_of_pie(ax1: Any, ax2: Any, correct: int, result: Type[Result]
     ax2.set_title('Number of incorrect qubits', pad=15, loc='right')
     ax2.legend(loc='upper right')
     ax2.set_xlim(- 2.5 * width, 2.5 * width)
+
     if correct != 0:
         preprocess_connecting_lines(ax1, ax2, incorrect_ratios, wedges, width)
 
@@ -301,9 +317,12 @@ def preprocess_bar_of_pie(ax1: Any, ax2: Any, correct: int, result: Type[Result]
 def preprocess_connecting_lines(ax1: Any, ax2: Any, correct_ratios: npt.NDArray[np.float64],
                                 wedges: Any, width: float) -> None:
     """Adds connecting lines."""
+
+    # compute connecting lines starting points/angles
     theta1, theta2 = wedges[0].theta1, wedges[0].theta2
     center, radius = wedges[0].center, wedges[0].r
     bar_height = sum(correct_ratios)
+
     # draw top connecting line
     x_values = radius * np.cos(np.pi / 180 * theta2) + center[0]
     y_values = radius * np.sin(np.pi / 180 * theta2) + center[1]
@@ -313,6 +332,7 @@ def preprocess_connecting_lines(ax1: Any, ax2: Any, correct_ratios: npt.NDArray[
     con.set_color('#000000')
     con.set_linewidth(0.6)
     ax2.add_artist(con)
+
     # draw bottom connecting line
     x_values = radius * np.cos(np.pi / 180 * theta1) + center[0]
     y_values = radius * np.sin(np.pi / 180 * theta1) + center[1]

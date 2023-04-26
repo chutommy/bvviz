@@ -39,7 +39,7 @@ def timestamp_str(time: datetime = datetime.now()) -> str:
 
 def backend_name(backend: Backend) -> str:
     """Extract the name and number of qubits from the provider's fake backend system identifier."""
-    # fake_######_v2
+    # common format: fake_######_v2
     name = backend.name
     if name.startswith('fake_'):
         name = name[5:]

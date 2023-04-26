@@ -79,6 +79,7 @@ class QuantumOracle:
         if out_qreg.size != 1:
             raise ValueError('Invalid output register size.')
 
+        # apply secret sequence
         for i in range(self.complexity):
             if self.secret[self.complexity - i - 1]:
                 circuit.cx(in_qreg[i], out_qreg[0])
@@ -92,6 +93,7 @@ class ClassicalSolver:
         """Queries over all positional bits to determine the secret value of all indices."""
         solution = np.empty(oracle.complexity, dtype=np.byte)
 
+        # construct secret sequence
         for i in range(oracle.complexity):
             # create a query with a single on-bit at exposing input index
             input_val = np.zeros(shape=oracle.complexity, dtype=np.byte)
