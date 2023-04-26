@@ -38,12 +38,12 @@ def init_session_state(init: Dict[str, Any]) -> None:
 def render_sidebar(eng: Engine, cfg: Dict[str, Any], des: Descriptor) -> Tuple[str, DeltaGenerator]:
     """Renders sidebar."""
     with st.sidebar.form('configuration', clear_on_submit=False):
-        st.header('Configuration', anchor=False)
-        st.subheader('Backend', anchor=False)
+        st.header('Experiment configuration', anchor=False)
+        st.subheader('Quantum backend', anchor=False)
 
-        cfg['backend_choice'] = st.selectbox('Quantum system', options=range(eng.backend_db.size()),
+        cfg['backend_choice'] = st.selectbox('System', options=range(eng.backend_db.size()),
                                              format_func=lambda key: backend_name(
-                                                     eng.backend_db[key]),
+                                                 eng.backend_db[key]),
                                              index=st.session_state.backend_choice,
                                              help=des['help_quantum_system']())
 
@@ -51,7 +51,7 @@ def render_sidebar(eng: Engine, cfg: Dict[str, Any], des: Descriptor) -> Tuple[s
                                        value=st.session_state.shots, help=des['help_shots']())
         st.divider()
 
-        st.subheader('Input', anchor=False)
+        st.subheader('Protocol input', anchor=False)
         secret_str = st.text_input('Secret string', value=st.session_state.secret,
                                    help=des['help_secret_str']())
         secret_placeholder = st.empty()
@@ -152,7 +152,7 @@ def render_basic_metrics(res: Type[Result], des: Descriptor) -> None:
 
 def render_introduction(des: Descriptor) -> None:
     """Renders introduction section."""
-    st.subheader('Introduction', anchor=False)
+    st.subheader('About the Experiment', anchor=False)
     st.write(des['text_introduction']())
     st.expander('Bernstein-Vazirani problem in details').write(des['text_bv_explanation']())
 
@@ -212,7 +212,7 @@ def render_quantum_hardware(res: Type[Result], des: Descriptor, ctx: Dict[str, A
 
 def render_measurement(res: Type[Result], des: Descriptor, ctx: Dict[str, Any]) -> None:
     """Renders measurement section."""
-    st.header('Measurements', anchor=False)
+    st.header('Experiment results', anchor=False)
 
     meas_tabs = st.tabs(['Counts', 'Measurements'])
     meas_tabs[0].pyplot(ctx['bar_counts'], clear_figure=True)

@@ -41,7 +41,7 @@ def run(settings_path: str) -> None:
 
     with st.spinner(descriptor['info_wait_render']()):
         tmp = st.divider()
-        st.title('Bernstein–Vazirani Quantum Protocol', anchor=False)
+        st.title('Visualisation of Bernstein–Vazirani Quantum Protocol', anchor=False)
         render_introduction(descriptor)
         st.divider()
         render_basic_metrics(result, descriptor)
