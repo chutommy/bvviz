@@ -57,7 +57,7 @@ def method_name(method: str) -> str:
     return method.replace('_', ' ').title()
 
 
-def optimization_name(level: int) -> str:
+def optimization_name(level: int) -> Any:
     """Maps the enum title to the value."""
     return OptimizationLevel(level).name.replace('_', ' ').title()
 

@@ -47,7 +47,7 @@ def test_noise_config(rate: float, good: bool):
 ])
 def test_simulator(complexity: int, shots: int, seed: int):
     sim = Simulator()
-    # pylint: disable=W0718
+    # pylint: disable=W0703
     try:
         sim.set_noise(NoiseConfiguration())
         sim.transpile(QuantumCircuit(QuantumRegister(complexity)), TranspileConfiguration(), seed)
@@ -59,7 +59,7 @@ def test_simulator(complexity: int, shots: int, seed: int):
 def test_backend_service():
     src = BackendService()
     assert len(src.list_backends()) != 0
-    # pylint: disable=W0718
+    # pylint: disable=W0703
     try:
         backend = src.get_backend()
         assert backend is not None

@@ -98,16 +98,16 @@ def test_fill_counts(dict1: Dict[str, int], dict2: Dict[str, int], size: int):
     assert dict1 == dict2
 
 
-@pytest.mark.parametrize('xvalues, yvalues, xvalues2, yvalues2', [
+@pytest.mark.parametrize('xs1, ys1, xs2, ys2', [
     ([3, 2, 1], [1, 2, 3], [1, 2, 3], [3, 2, 1]),
     ([3, 2, 1], [4, 5, 6], [1, 2, 3], [6, 5, 4]),
     ([1, 2, 3], [1, 2, 3], [1, 2, 3], [1, 2, 3]),
     ([3, 1, 2], [1, 2, 3], [1, 2, 3], [2, 3, 1]),
 ])
-def test_sort_zipped(xvalues: list[int], yvalues: list[int], xvalues2: list[int], yvalues2: list[int]):
-    xout, yout = sort_zipped(np.array(xvalues), np.array(yvalues))
-    assert (xout == xvalues2).all()
-    assert (yout == yvalues2).all()
+def test_sort_zipped(xs1: list[int], ys1: list[int], xs2: list[int], ys2: list[int]):
+    xout, yout = sort_zipped(np.array(xs1), np.array(ys1))
+    assert (xout == xs2).all()
+    assert (yout == ys2).all()
 
 
 @pytest.mark.parametrize('str1, str2, diff', [

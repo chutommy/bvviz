@@ -118,7 +118,7 @@ def test_engine(config: Dict[str, Any]):
     assert engine.check_secret_size('110101')
     result = engine.run('110101')
     assert result is not None
-    # pylint: disable=W0718
+    # pylint: disable=W0703
     try:
         mem = preprocess(result)
         assert mem is not None

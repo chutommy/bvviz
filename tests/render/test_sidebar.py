@@ -1,7 +1,9 @@
-from seleniumbase import BaseCase
+import streamlit_mock
 
 
-class UITester(BaseCase):
-    # todo: https://github.com/streamlit/streamlit/issues/6482
-    def test_swag_labs(self):
-        self.open("http://localhost:8080/")
+def test_sidebar():
+    sm = streamlit_mock.StreamlitMock()
+
+    results = sm.run("app.py")
+
+    results = sm.get_results()
