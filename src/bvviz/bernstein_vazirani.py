@@ -15,7 +15,7 @@ Return = TypeVar('Return')
 
 
 def count_incrementer(method: Callable[Param, Return]) -> Any:
-    """Increments the Oracles' query counter by one."""
+    """Decorator for incrementing the Oracles' query counter by one."""
 
     @wraps(method)
     def _impl(self: Any, *method_args: Any, **method_kwargs: Any) -> Return:
@@ -34,14 +34,13 @@ class ClassicalOracle:
         self.query_count = 0
 
     def validate(self) -> bool:
-        """Validate integrity of the oracle."""
-        return self.secret is not None \
-            and self.complexity == len(self.secret) \
-            and self.query_count >= 0
+        """Validates the integrity of the oracle."""
+        return self.secret is not None and self.complexity == len(
+            self.secret) and self.query_count >= 0
 
     @count_incrementer
     def query(self, inp: npt.NDArray[np.byte]) -> Any:
-        """Apply the classical BV function."""
+        """Applies the classical BV function and returns the output."""
         product = np.dot(self.secret, inp)
         out_bit = product % 2
         return out_bit
@@ -58,20 +57,18 @@ class QuantumOracle:
         self.query_count = 0
 
     def validate(self) -> bool:
-        """Validate integrity of the oracle."""
-        return self.secret is not None \
-            and self.complexity == len(self.secret) \
-            and self.query_count >= 0
+        """Validates the integrity of the oracle."""
+        return self.secret is not None and self.complexity == len(
+            self.secret) and self.query_count >= 0
 
     def used(self) -> bool:
         """Checks whether the oracle was already used or not."""
         return self.query_count != 0
 
     @count_incrementer
-    def apply_circuit(self, circuit: QuantumCircuit,
-                      in_qreg: QuantumRegister,
+    def apply_circuit(self, circuit: QuantumCircuit, in_qreg: QuantumRegister,
                       out_qreg: QuantumRegister) -> None:
-        """Constructs an oracle within the given quantum circuit."""
+        """Constructs an oracle on top of the given quantum circuit."""
         # ensure correct size of quantum registers
         if in_qreg.size != self.complexity:
             raise ValueError('Invalid input register size.')
@@ -129,8 +126,8 @@ class QuantumCircuitBuild:
         self.qreg = QuantumRegister(size=complexity, name='qreg')
         self.creg = ClassicalRegister(size=complexity, name='creg')
         self.auxreg = QuantumRegister(size=1, name='auxreg')
-        self.circuit = QuantumCircuit(self.qreg, self.auxreg, self.creg,
-                                      name='cirq', global_phase=random() * np.pi)
+        self.circuit = QuantumCircuit(self.qreg, self.auxreg, self.creg, name='cirq',
+                                      global_phase=random() * np.pi)
 
     # noinspection PyUnresolvedReferences
     def simulate_random_initial_state(self) -> None:
@@ -142,7 +139,7 @@ class QuantumCircuitBuild:
         self.circuit.initialize(random_statevector(2), self.auxreg)
 
     def reset_registers(self) -> None:
-        """Introduces quantum registers into ket zeroes."""
+        """Introduces quantum registers into direc-ket zeroes."""
         for qubit in self.qreg:
             self.circuit.reset(qubit)
         self.circuit.reset(self.auxreg)
@@ -161,7 +158,7 @@ class QuantumCircuitBuild:
         self.circuit.h(self.auxreg)
 
     def measure(self) -> None:
-        """Apply measurement of quantum query register on the classical register."""
+        """Applies measurement of quantum query register on the classical register."""
         for qubit in self.qreg:
             self.circuit.h(qubit)
 
@@ -177,9 +174,7 @@ class QuantumCircuitBuild:
 
         self.circuit.barrier()
         # noinspection PyArgumentList
-        oracle.apply_circuit(circuit=self.circuit,
-                             in_qreg=self.qreg,
-                             out_qreg=self.auxreg)
+        oracle.apply_circuit(circuit=self.circuit, in_qreg=self.qreg, out_qreg=self.auxreg)
         self.circuit.barrier()
 
         self.measure()

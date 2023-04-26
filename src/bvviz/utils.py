@@ -17,12 +17,12 @@ def generate_seed() -> int:
 
 
 def str_to_byte(string: str) -> npt.NDArray[np.byte]:
-    """Encode string to numpy array of bytes."""
+    """Encodes string to numpy array of bytes."""
     return np.array(list(string), dtype=np.byte)
 
 
 def byte_to_str(byte_code: npt.NDArray[np.byte]) -> str:
-    """Decode numpy array of bytes to string."""
+    """Decodes numpy array of bytes to string."""
     result = ''
     for bit in byte_code:
         if bit == 0:
@@ -34,12 +34,12 @@ def byte_to_str(byte_code: npt.NDArray[np.byte]) -> str:
 
 
 def timestamp_str(time: datetime = datetime.now()) -> str:
-    """Return string formatted time (filename-friendly)."""
+    """Returns string formatted time (filename-friendly)."""
     return time.strftime('%Y_%m_%d_%H-%M-%S')
 
 
 def backend_name(backend: Backend) -> str:
-    """Extract the name and number of qubits from the provider's fake backend system identifier."""
+    """Extracts the name and number of qubits from the provider's fake backend system identifier."""
     # common format: fake_######_v2
     name = backend.name
     if name.startswith('fake_'):
@@ -56,7 +56,7 @@ def method_name(method: str) -> str:
 
 
 def optimization_name(level: int) -> str:
-    """Map the enum title to the value."""
+    """Maps the enum title to the value."""
     return OptimizationLevel(level).name.replace('_', ' ').title()
 
 
@@ -90,13 +90,13 @@ def fill_counts(counts: Dict[str, int], size: int) -> None:
 
 def sort_zipped(x_values: npt.NDArray[Any], y_values: npt.NDArray[Any]) \
         -> Tuple[npt.NDArray[Any], npt.NDArray[Any]]:
-    """Sort two lists based on one of them (xs)."""
+    """Sorts two lists based on one of them (xs)."""
     order = x_values.argsort()
     return x_values[order], y_values[order]
 
 
 def diff_letters(str1: str, str2: str) -> int:
-    """Return number of different letters in strings a and b."""
+    """Returns a number of different letters in strings a and b."""
     return sum(str1[i] != str2[i] for i in range(len(str1)))
 
 

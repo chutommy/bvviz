@@ -11,7 +11,7 @@ from .config import NoiseConfiguration, TranslationMethod, TranspileConfiguratio
 
 
 class NoiseConfig:
-    """Builds a simple custom noise model to imitate real quantum computer."""
+    """Builds a custom noise model to imitate real quantum computer."""
 
     def __init__(self) -> None:
         self.model = NoiseModel()
@@ -68,11 +68,11 @@ class Simulator:
             self.noise_config.apply_double_gate_error(rate=config.double_gate_rate)
 
     def set_backend(self, backend: Backend) -> None:
-        """Set custom backend."""
+        """Sets custom backend."""
         self.backend = backend
 
     def transpile(self, circuit: QuantumCircuit, config: TranspileConfiguration, seed: int) -> None:
-        """Return a compiled quantum circuit on the configured backend provider."""
+        """Returns a compiled quantum circuit on the configured backend provider."""
         self.compiled_circuit = transpile(circuits=circuit,
                                           backend=self.backend,
                                           seed_transpiler=seed,
@@ -100,14 +100,14 @@ class Simulator:
 
 # https://qiskit.org/documentation/apidoc/providers_fake_provider.html
 class BackendService:
-    """Backend service provider for builds to mimic the behavior of IBM Quantum systems."""
+    """Provides builds to mimic the behavior of IBM Quantum systems."""
 
     def __init__(self) -> None:
         self.provider = FakeProviderForBackendV2()
         self.backend = FakeQasmSimulator()
 
     def list_backends(self) -> Any:
-        """Returns available list of provided backends."""
+        """Returns available list of available backends."""
         return self.provider.backends()
 
     def get_backend(self) -> Backend:

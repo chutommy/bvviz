@@ -13,7 +13,7 @@ from .utils import backend_name, check_secret, generate_seed, method_name, optim
 
 
 def init_session_state(init: Dict[str, Any]) -> None:
-    """Initialize web page session."""
+    """Initializes a web page session."""
     if 'init' not in st.session_state:
         st.session_state.init = True
 
@@ -243,7 +243,7 @@ def render_measurement(res: Type[Result], des: Descriptor, ctx: Dict[str, Any]) 
 
 
 def render_footer(des: Descriptor, ctx: Dict[str, Any]) -> None:
-    """Renders measurement section."""
+    """Renders footer section."""
     cols = st.columns([4, 1])
     with cols[0]:
         st.subheader('Disclaimer:', anchor=False)

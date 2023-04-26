@@ -8,7 +8,7 @@ from qiskit.providers.fake_provider import FakeQasmSimulator
 
 # https://qiskit.org/documentation/apidoc/transpiler_passes.html#layout-selection-placement
 class LayoutMethod(Enum):
-    """Name of layout selection pass method."""
+    """Name of the layout selection pass method."""
 
     TRIVIAL = 'trivial'
     DENSE = 'dense'
@@ -18,18 +18,17 @@ class LayoutMethod(Enum):
 
 # https://qiskit.org/documentation/apidoc/transpiler_passes.html#routing
 class RoutingMethod(Enum):
-    """Name of routing pass method."""
+    """Name of the routing pass method."""
 
     BASIC = 'basic'
     LOOKAHEAD = 'lookahead'
     STOCHASTIC = 'stochastic'
-    SABRE = 'sabre'
-    # NONE = 'none'
+    SABRE = 'sabre'  # NONE = 'none'
 
 
 # https://qiskit.org/documentation/apidoc/transpiler_passes.html#basis-change
 class TranslationMethod(Enum):
-    """Name of translation pass method."""
+    """Name of the translation pass method."""
 
     UNROLLER = 'unroller'
     TRANSLATOR = 'translator'
@@ -37,7 +36,7 @@ class TranslationMethod(Enum):
 
 
 class OptimizationLevel(Enum):
-    """The level of optimized circuits."""
+    """The level of the circuit optimization."""
 
     NO = 0
     LIGHT = 1
@@ -47,7 +46,7 @@ class OptimizationLevel(Enum):
 
 @dataclass
 class NoiseConfiguration:
-    """Configuration for the noise model."""
+    """Configuration of the noise model."""
 
     reset_rate: float = 0
     measure_rate: float = 0
@@ -57,7 +56,7 @@ class NoiseConfiguration:
 
 @dataclass
 class TranspileConfiguration:
-    """Configuration for the transpiler."""
+    """Configuration of the transpiler."""
 
     layout_method: str = LayoutMethod.TRIVIAL.value
     routing_method: str = RoutingMethod.BASIC.value
@@ -68,7 +67,7 @@ class TranspileConfiguration:
 
 
 class Configuration:
-    """Configuration for the Bernstein-Vazirani protocol simulator."""
+    """Configuration of the Bernstein-Vazirani protocol simulator."""
 
     def __init__(self) -> None:
         self.transpiler_seed = 42
@@ -79,7 +78,7 @@ class Configuration:
         self.transpile_config = TranspileConfiguration()
 
     def reset_partial(self) -> None:
-        """Reset callable configuration settings."""
+        """Resets callable configuration settings."""
         self.backend = FakeQasmSimulator()
         self.noise_config = NoiseConfiguration()
         self.transpile_config = TranspileConfiguration()

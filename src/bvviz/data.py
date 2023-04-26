@@ -7,7 +7,7 @@ from qiskit.providers import Backend
 
 
 class FmtStr:
-    """FmtStr represents format-friendly helper string structure."""
+    """Represents format-friendly helper string structure."""
 
     def __init__(self, value: str) -> None:
         self.value = value
@@ -22,7 +22,7 @@ class FmtStr:
 
 
 class Descriptor:
-    """Descriptor handles long texts."""
+    """Handles external string values."""
 
     def __init__(self, path: str) -> None:
         with open(path, 'r', encoding='utf-8') as file:

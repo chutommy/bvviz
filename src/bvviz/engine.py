@@ -54,7 +54,7 @@ class EngineSnapshot:
 
 @dataclass
 class Result:
-    """Is an output of an experiment. It possesses a snapshot of the experiment."""
+    """Is an output of an experiment. It stores a snapshot of the experiment."""
 
     secret: str
 
@@ -69,7 +69,7 @@ class Result:
 
 
 class Engine:
-    """Represents an instance of an experiment."""
+    """Handles incoming experiments."""
 
     def __init__(self) -> None:
         self.configuration = Configuration()
@@ -80,7 +80,7 @@ class Engine:
         self.sim = Simulator()
 
     def configure(self, config: Dict[str, Any]) -> None:
-        """Configures experiment."""
+        """Configures current experiment."""
         self.configuration.backend = self.backend_db[config['backend_choice']]
         self.configuration.shot_count = config['shots']
         self.configuration.simulator_seed = generate_seed()
@@ -98,7 +98,7 @@ class Engine:
         self.configuration.transpile_config.approximation_degree = config['approx']
 
     def check_secret_size(self, secret: str) -> bool:
-        """Verifies that secret is of correct size."""
+        """Verifies that secret is of a correct size."""
         size = len(secret)
         return size <= self.configuration.backend.num_qubits - 1 and size != 0
 
@@ -160,7 +160,7 @@ class Engine:
 
 
 def preprocess(result: Type[Result]) -> Dict[str, Any]:
-    """Preprocess all figures and computationally long tasks."""
+    """Preprocess all figures and computationally demanding tasks."""
     ctx: Dict[str, Any] = {}
 
     # calculate experiment metrics
@@ -188,8 +188,7 @@ def preprocess(result: Type[Result]) -> Dict[str, Any]:
                                                       idle_wires=True, with_layout=True, fold=-1,
                                                       cregbundle=True)
     ctx['circuit_compiled'] = result.snap.sim.compiled_circuit.draw(output='mpl', scale=1,
-                                                                    justify='left',
-                                                                    fold=-1,
+                                                                    justify='left', fold=-1,
                                                                     initial_state=False,
                                                                     plot_barriers=True,
                                                                     idle_wires=False,
@@ -203,7 +202,6 @@ def preprocess(result: Type[Result]) -> Dict[str, Any]:
 
 def preprocess_measurement(ctx: Dict[str, Any], result: Type[Result]) -> None:
     """Preprocesses measurement section."""
-
     # draw measurements chart
     xs1 = np.array([int(i, 2) for i in result.measurements])
     ys1 = np.array(list(range(len(xs1))))
@@ -257,7 +255,6 @@ def preprocess_measurement(ctx: Dict[str, Any], result: Type[Result]) -> None:
 
 def preprocess_error_rate(ctx: Dict[str, Any], result: Type[Result]) -> None:
     """Preprocesses error rate section."""
-
     correct = result.counts[result.secret]
     incorrect = result.snap.configuration.shot_count - result.counts[result.secret]
     total = result.snap.configuration.shot_count
@@ -274,8 +271,8 @@ def preprocess_error_rate(ctx: Dict[str, Any], result: Type[Result]) -> None:
     overall_ratios = [incorrect / total, correct / total]
     labels = ['noise', 'target']
     wedges, *_ = ax1.pie(overall_ratios, autopct=lambda pct: pct_to_str(pct, total),
-                         startangle=-180 * overall_ratios[0], labels=labels,
-                         explode=[0, 0.1], colors=['#6b6b6b', '#8210d8'], textprops={'color': 'w'})
+                         startangle=-180 * overall_ratios[0], labels=labels, explode=[0, 0.1],
+                         colors=['#6b6b6b', '#8210d8'], textprops={'color': 'w'})
     ax1.legend(wedges, labels, title='Measurements', loc='lower center', bbox_to_anchor=(0, 1))
 
     ax2.axis('off')
@@ -285,9 +282,8 @@ def preprocess_error_rate(ctx: Dict[str, Any], result: Type[Result]) -> None:
 
 def preprocess_bar_of_pie(ax1: Any, ax2: Any, correct: int, result: Type[Result],
                           wedges: Any) -> None:
-    """Joins with a bar of wrong qubit count distribution."""
+    """Joins pie chart with a bar of wrong qubit count distribution."""
     # pylint: disable-msg=too-many-locals
-
     # computes bar ratios
     counts = {i: 0 for i in range(1, len(result.secret) + 1)}
     for meas in result.measurements:
@@ -317,7 +313,6 @@ def preprocess_bar_of_pie(ax1: Any, ax2: Any, correct: int, result: Type[Result]
 def preprocess_connecting_lines(ax1: Any, ax2: Any, correct_ratios: npt.NDArray[np.float64],
                                 wedges: Any, width: float) -> None:
     """Adds connecting lines."""
-
     # compute connecting lines starting points/angles
     theta1, theta2 = wedges[0].theta1, wedges[0].theta2
     center, radius = wedges[0].center, wedges[0].r
@@ -327,8 +322,7 @@ def preprocess_connecting_lines(ax1: Any, ax2: Any, correct_ratios: npt.NDArray[
     x_values = radius * np.cos(np.pi / 180 * theta2) + center[0]
     y_values = radius * np.sin(np.pi / 180 * theta2) + center[1]
     con = ConnectionPatch(xyA=(-width / 2, bar_height), coordsA=ax2.transData,
-                          xyB=(x_values, y_values),
-                          coordsB=ax1.transData)
+                          xyB=(x_values, y_values), coordsB=ax1.transData)
     con.set_color('#000000')
     con.set_linewidth(0.6)
     ax2.add_artist(con)
@@ -336,8 +330,7 @@ def preprocess_connecting_lines(ax1: Any, ax2: Any, correct_ratios: npt.NDArray[
     # draw bottom connecting line
     x_values = radius * np.cos(np.pi / 180 * theta1) + center[0]
     y_values = radius * np.sin(np.pi / 180 * theta1) + center[1]
-    con = ConnectionPatch(xyA=(-width / 2, 0), coordsA=ax2.transData,
-                          xyB=(x_values, y_values),
+    con = ConnectionPatch(xyA=(-width / 2, 0), coordsA=ax2.transData, xyB=(x_values, y_values),
                           coordsB=ax1.transData)
     con.set_color('#000000')
     ax2.add_artist(con)
