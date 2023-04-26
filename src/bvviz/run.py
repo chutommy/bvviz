@@ -1,4 +1,5 @@
-"""Starting point of the web app."""
+"""This module implements the app initialization process."""
+
 from json import loads
 from typing import Any, Dict
 

@@ -1,4 +1,5 @@
-"""Handles web page rendering."""
+"""This module implements streamlit web page rendering functionalities."""
+
 from typing import Any, Dict, Tuple, Type
 
 import streamlit as st

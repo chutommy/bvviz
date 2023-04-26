@@ -1,5 +1,4 @@
-"""This module implements classical and quantum implementations of Bernstein-Vazirani's algorithm.
-The module contains both classical and quantum oracles."""
+"""This module implements classical and quantum solutions of Bernstein-Vazirani's algorithm."""
 
 from dis import Bytecode
 from functools import wraps

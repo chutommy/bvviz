@@ -1,4 +1,4 @@
-"""Provides custom configurations of backend simulators and services."""
+"""Provides custom simulators and simulation services."""
 
 from typing import Any
 

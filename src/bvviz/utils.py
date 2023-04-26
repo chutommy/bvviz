@@ -1,4 +1,5 @@
-"""Provides utility and helper functions."""
+"""Provides common utility and helper functions."""
+
 from datetime import datetime
 from random import randint
 from typing import Any, Dict, List, Tuple

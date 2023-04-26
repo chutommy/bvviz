@@ -1,4 +1,4 @@
-"""Provides configuration for the app engine."""
+"""This module provides configuration for the app engine."""
 
 from dataclasses import dataclass
 from enum import Enum

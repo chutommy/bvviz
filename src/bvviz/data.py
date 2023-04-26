@@ -1,4 +1,4 @@
-"""Handles regular data manipulation."""
+"""This module implements helper functions and classes for docs data handling."""
 
 from json import loads
 from typing import Any, List, SupportsIndex

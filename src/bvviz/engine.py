@@ -1,4 +1,4 @@
-"""Powers the experiments."""
+"""This module implements the quantum experiment engine."""
 
 from dataclasses import dataclass
 from json import dumps
