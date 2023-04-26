@@ -98,16 +98,16 @@ def test_fill_counts(dict1: Dict[str, int], dict2: Dict[str, int], size: int):
     assert dict1 == dict2
 
 
-@pytest.mark.parametrize('xvals, yvals, xvals2, yvals2', [
+@pytest.mark.parametrize('xvalues, yvalues, xvalues2, yvalues2', [
     ([3, 2, 1], [1, 2, 3], [1, 2, 3], [3, 2, 1]),
     ([3, 2, 1], [4, 5, 6], [1, 2, 3], [6, 5, 4]),
     ([1, 2, 3], [1, 2, 3], [1, 2, 3], [1, 2, 3]),
     ([3, 1, 2], [1, 2, 3], [1, 2, 3], [2, 3, 1]),
 ])
-def test_sort_zipped(xvals: list[int], yvals: list[int], xvals2: list[int], yvals2: list[int]):
-    xout, yout = sort_zipped(np.array(xvals), np.array(yvals))
-    assert (xout == xvals2).all()
-    assert (yout == yvals2).all()
+def test_sort_zipped(xvalues: list[int], yvalues: list[int], xvalues2: list[int], yvalues2: list[int]):
+    xout, yout = sort_zipped(np.array(xvalues), np.array(yvalues))
+    assert (xout == xvalues2).all()
+    assert (yout == yvalues2).all()
 
 
 @pytest.mark.parametrize('str1, str2, diff', [
@@ -129,7 +129,7 @@ def test_diff_letters(str1: str, str2: str, diff: int):
     ('1000101', True),
     ('1101001', True),
     ('1111111', True),
-    ('011' * 20, True),
+    ('0110101010', True),
     ('foo', False),
     ('bar', False),
     ('1001foo', False),

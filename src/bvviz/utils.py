@@ -41,12 +41,14 @@ def timestamp_str(time: datetime = datetime.now()) -> str:
 def backend_name(backend: Backend) -> str:
     """Extracts the name and number of qubits from the provider's fake backend system identifier."""
     # common format: fake_######_v2
+    # noinspection PyUnresolvedReferences
     name = backend.name
     if name.startswith('fake_'):
         name = name[5:]
     if name.endswith('_v2'):
         name = name[:-3]
     name = name.replace('_', ' ')
+    # noinspection PyUnresolvedReferences
     return f'{name.title()} ({backend.num_qubits})'
 
 
