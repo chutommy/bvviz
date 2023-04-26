@@ -30,5 +30,5 @@ def test_descriptor():
 @pytest.mark.parametrize('size', [0, 1, 2, 3, 10, 100, 1000])
 def test_backend_db(size: int):
     backends = [Mock(spec=Backend) for _ in range(size)]
-    db = BackendDB(backends)
-    assert db.size() == size
+    database = BackendDB(backends)
+    assert database.size() == size
