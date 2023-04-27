@@ -97,7 +97,7 @@ def render_sidebar(eng: Engine, cfg: Dict[str, Any], des: Descriptor) -> Tuple[s
                                                options=[ol.value for ol in OptimizationLevel],
                                                format_func=optimization_name,
                                                help=des['help_optimization_level']())
-        cfg['approx'] = st.slider('Approximation degree', min_value=0.9, max_value=1.0,
+        cfg['approx'] = st.slider('Approximation degree', min_value=0.0, max_value=1.0,
                                   format='%.2f',
                                   value=st.session_state.approximation_degree, step=0.01,
                                   help=des['help_approximation_degree']())
@@ -130,11 +130,14 @@ def render_basic_metrics(res: Type[Result], des: Descriptor) -> None:
         cols1 = st.columns(2)
         cols1[0].metric(':orange[CL] solution', value=res.cl_result.solution, delta='OK',
                         help=des['help_classical_solution']())
-        cols1[1].metric(':orange[CL] byte instructions', value=res.snap.solver.ops_count())
+        cols1[1].metric(':orange[CL] byte instructions', value=res.snap.solver.ops_count(),
+                        help=des['help_classical_instructions']())
 
         cols2 = st.columns(2)
-        cols2[0].metric(':orange[CL] time', value=f'{res.cl_result.time} s')
-        cols2[1].metric(':orange[CL] queries count', value=f'{res.cl_result.oracle.query_count} x')
+        cols2[0].metric(':orange[CL] time', value=f'{res.cl_result.time} s',
+                        help=des['help_classical_time']())
+        cols2[1].metric(':orange[CL] queries count', value=f'{res.cl_result.oracle.query_count} x',
+                        help=des['help_classical_queries_count']())
 
     with cols[1]:
         st.caption(':violet[Quantum] approach')
@@ -144,11 +147,14 @@ def render_basic_metrics(res: Type[Result], des: Descriptor) -> None:
                         delta='OK' if good_solution else 'BAD',
                         delta_color='normal' if good_solution else 'inverse',
                         help=des['help_quantum_solution']())
-        cols1[1].metric(':violet[QU] shots', value=res.snap.configuration.shot_count)
+        cols1[1].metric(':violet[QU] shots', value=res.snap.configuration.shot_count,
+                        help=des['help_quantum_shots']())
 
         cols2 = st.columns(2)
-        cols2[0].metric(':violet[QU] time', value=f'{res.qu_result.time} s')
-        cols2[1].metric(':violet[QU] queries count', value='1 x')
+        cols2[0].metric(':violet[QU] time', value=f'{res.qu_result.time} s',
+                        help=des['help_quantum_time']())
+        cols2[1].metric(':violet[QU] queries count', value='1 x',
+                        help=des['help_quantum_queries_count']())
 
 
 def render_introduction(des: Descriptor) -> None:
@@ -213,7 +219,7 @@ def render_quantum_hardware(res: Type[Result], des: Descriptor, ctx: Dict[str, A
 
 def render_measurement(res: Type[Result], des: Descriptor, ctx: Dict[str, Any]) -> None:
     """Renders measurement section."""
-    st.header('Experiment results', anchor=False)
+    st.header('Experimental results', anchor=False)
 
     meas_tabs = st.tabs(['Counts', 'Measurements'])
     meas_tabs[0].pyplot(ctx['bar_counts'], clear_figure=True)
@@ -226,12 +232,14 @@ def render_measurement(res: Type[Result], des: Descriptor, ctx: Dict[str, Any]) 
     with meas_cols[0]:
         st.subheader('Metrics')
         metric_cols = st.columns(2)
-        metric_cols[0].metric(':blue[Correct] rate', value=ctx['correct_rate'])
-        metric_cols[0].metric(':blue[Confidence] ratio', value=ctx['confidence_ratio'])
-        metric_cols[1].metric(':red[Error] rate (normalized)',
-                              value=ctx['error_rate_norm'])
-        metric_cols[1].metric(':red[Error] rate (total)',
-                              value=ctx['error_rate_total'])
+        metric_cols[0].metric(':blue[Correct] rate', value=ctx['correct_rate'],
+                              help=des['help_correct_rate']())
+        metric_cols[0].metric(':blue[Confidence] ratio', value=ctx['confidence_ratio'],
+                              help=des['help_confidence_ratio']())
+        metric_cols[1].metric(':red[Error] rate (normalized)', value=ctx['error_rate_norm'],
+                              help=des['help_error_rate_norm']())
+        metric_cols[1].metric(':red[Error] rate (total)', value=ctx['error_rate_total'],
+                              help=des['help_error_rate_total']())
         st.caption(f'simulator seed: :blue[{res.snap.configuration.simulator_seed}]')
     meas_cols[1].pyplot(ctx['bar_counts_minimal'], clear_figure=True)
     st.divider()
@@ -248,6 +256,7 @@ def render_footer(des: Descriptor, ctx: Dict[str, Any]) -> None:
     with cols[0]:
         st.subheader('Disclaimer:', anchor=False)
         st.write(des['text_disclaimer']())
+        st.expander('About experimental results').write(des['text_disclaimer_results']())
 
     with cols[1]:
         st.subheader('Downloads:', anchor=False)
