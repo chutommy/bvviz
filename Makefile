@@ -6,7 +6,10 @@ lint:
 	mypy --strict --ignore-missing-imports --disable-error-code no-untyped-def --disable-error-code no-untyped-call tests/
 
 test:
-	pytest --cov=src/bvviz -v -s tests/
+	pytest --cov=src/bvviz -v -s --ignore=tests/e2e tests/
+
+	streamlit run app.py --server.headless true &
+	pytest -k e2eTest --headed
 
 run:
 	streamlit run app.py

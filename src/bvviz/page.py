@@ -251,12 +251,18 @@ def render_footer(des: Descriptor, ctx: Dict[str, Any]) -> None:
 
     with cols[1]:
         st.subheader('Downloads:', anchor=False)
+        # ste.download_button('OpenQASM (qasm)', data=ctx['qu_qasm'], mime='text/plain',
+        #                     file_name=f'bernstein_vazirani_{ctx["timestamp"]}.qasm')
+        # ste.download_button('Counts (JSON)', data=ctx['counts_json'], mime='application/json',
+        #                     file_name=f'bernstein_vazirani_{ctx["timestamp"]}.json')
+        # ste.download_button('Measurements (CSV)', data=ctx['memory_csv'], mime='text/csv',
+        #                     file_name=f'bernstein_vazirani_{ctx["timestamp"]}.csv')
         ste.download_button('OpenQASM (qasm)', data=ctx['qu_qasm'], mime='text/plain',
-                            file_name=f'bernstein_vazirani_{ctx["timestamp"]}.qasm')
+                            file_name=f'bernstein_vazirani.qasm')
         ste.download_button('Counts (JSON)', data=ctx['counts_json'], mime='application/json',
-                            file_name=f'bernstein_vazirani_{ctx["timestamp"]}.json')
+                            file_name=f'bernstein_vazirani.json')
         ste.download_button('Measurements (CSV)', data=ctx['memory_csv'], mime='text/csv',
-                            file_name=f'bernstein_vazirani_{ctx["timestamp"]}.csv')
+                            file_name=f'bernstein_vazirani.csv')
 
     st.divider()
     footer = '''
