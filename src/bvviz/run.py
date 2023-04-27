@@ -43,7 +43,7 @@ def run(settings_path: str) -> None:
 
     with st.spinner(descriptor['info_wait_render']()):
         tmp = st.divider()
-        st.title('Visualisation of :violet[Bernstein-Vazirani] Quantum Protocol', anchor=False)
+        st.title('Visualization of :violet[Bernstein-Vazirani] Quantum Protocol', anchor=False)
         st.caption('by Tommy Chu')
         render_introduction(descriptor)
         st.divider()
