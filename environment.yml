@@ -279,4 +279,3 @@ dependencies:
       - websockets==11.0.2
       - wheel==0.40.0
       - wsproto==1.2.0
-prefix: /home/chutommy/miniconda3/envs/bvviz
