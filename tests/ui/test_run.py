@@ -1,7 +1,7 @@
 from seleniumbase import BaseCase
 
 
-class e2eTest(BaseCase):
+class uiTest(BaseCase):
     def test_run(self):
         self.open('http://localhost:8080/')
         # self.activate_demo_mode()
