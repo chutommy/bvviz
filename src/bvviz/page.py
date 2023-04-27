@@ -161,8 +161,12 @@ def render_introduction(des: Descriptor) -> None:
     """Renders introduction section."""
     st.subheader('About the :violet[Experiment]', anchor=False)
     st.write(des['text_introduction']())
-    st.expander(':violet[Bernstein-Vazirani] problem in details').write(
-        des['text_bv_explanation']())
+    with st.expander('About the Bernstein-Vazirani problem'):
+        cols = st.columns([3, 2])
+        cols[0].write(des['text_bv_explanation']())
+        cols[1].image('assets/images/bv2.png',
+                      caption='Bernstein-Vazirani oracle (image source: Qiskit)',
+                      output_format='PNG')
 
 
 def render_quantum_hardware(res: Type[Result], des: Descriptor, ctx: Dict[str, Any]) -> None:

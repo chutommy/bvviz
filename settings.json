@@ -1,6 +1,6 @@
 {
   "title": "Bernstein-Vazirani",
-  "page_icon": "assets/logo.png",
+  "page_icon": "assets/images/logo.png",
   "page_width": "84em",
   "descriptions": "assets/descriptions.json",
   "init": {
