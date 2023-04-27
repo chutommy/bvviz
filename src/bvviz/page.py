@@ -275,9 +275,9 @@ def render_footer(des: Descriptor, ctx: Dict[str, Any]) -> None:
         #                     file_name=f'bernstein_vazirani_{ctx["timestamp"]}.csv')
         ste.download_button('OpenQASM (qasm)', data=ctx['qu_qasm'], mime='text/plain',
                             file_name='bernstein_vazirani.qasm')
-        ste.download_button('Counts (JSON)', data=ctx['counts_json'], mime='application/json',
+        ste.download_button('Counts (json)', data=ctx['counts_json'], mime='application/json',
                             file_name='bernstein_vazirani.json')
-        ste.download_button('Measurements (CSV)', data=ctx['memory_csv'], mime='text/csv',
+        ste.download_button('Measurements (csv)', data=ctx['memory_csv'], mime='text/csv',
                             file_name='bernstein_vazirani.csv')
 
     st.divider()

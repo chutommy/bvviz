@@ -51,10 +51,6 @@ class BackendDB:
     """Represents a database of accessible backends."""
 
     def __init__(self, backends: List[Backend]) -> None:
-        # exclude Prague - it's broken (not personal)
-        for backend in backends:
-            if backend.name == 'fake_prague':
-                backends.remove(backend)
         self.backends = list(backends)
         self.cap = len(backends)
 
