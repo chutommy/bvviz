@@ -23,7 +23,7 @@ enforceSerializableSessionState = false
 [server]
 folderWatchBlacklist = []
 fileWatcherType = "auto"
-headless = false
+headless = true
 runOnSave = false
 port = 8080
 baseUrlPath = ""
