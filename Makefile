@@ -6,7 +6,7 @@ lint-test:
 	pylint --load-plugins pylint_quotes --disable=C0114,C0116 tests/
 	mypy --ignore-missing-imports tests/
 
-test-engine:
+test-unit:
 	pytest --cov=src/bvviz -v -s --ignore=tests/ui tests/
 
 test-ui:
