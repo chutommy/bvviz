@@ -159,31 +159,34 @@ def render_basic_metrics(res: Type[Result], des: Descriptor) -> None:
 
 def render_introduction(des: Descriptor) -> None:
     """Renders introduction section."""
-    st.subheader('About the Experiment', anchor=False)
+    st.subheader('About the :violet[Experiment]', anchor=False)
     st.write(des['text_introduction']())
-    st.expander('Bernstein-Vazirani problem in details').write(des['text_bv_explanation']())
+    st.expander(':violet[Bernstein-Vazirani] problem in details').write(
+        des['text_bv_explanation']())
 
 
 def render_quantum_hardware(res: Type[Result], des: Descriptor, ctx: Dict[str, Any]) -> None:
     """Renders quantum hardware section."""
-    st.header('Quantum hardware', anchor=False)
+    st.header(':violet[Quantum] hardware', anchor=False)
     backend_cols = st.columns(2)
 
     with backend_cols[0]:
-        st.subheader('Backend metrics', anchor=False)
+        st.subheader(':violet[Backend] metrics', anchor=False)
 
         cols1 = st.columns(2)
-        cols1[0].metric('Classical bits', value=f'{res.snap.builder.circuit.num_clbits} b',
+        cols1[0].metric(':orange[Classical] bits', value=f'{res.snap.builder.circuit.num_clbits} b',
                         help=des['help_cl_bits']())
-        cols1[1].metric('Quantum bits', value=f'{res.snap.builder.circuit.num_qubits} qu',
+        cols1[1].metric(':violet[Quantum] bits', value=f'{res.snap.builder.circuit.num_qubits} qu',
                         help=des['help_qu_bits']())
 
         cols2 = st.columns(2)
-        cols2[0].metric('Quantum gates', value=f'{res.snap.builder.circuit.size()}',
+        cols2[0].metric(':violet[Quantum] gates', value=f'{res.snap.builder.circuit.size()}',
                         help=des['help_qu_gates']())
-        cols2[1].metric('Quantum bits (total)',
+        cols2[1].metric(':violet[Quantum] bits (total)',
                         value=f'{res.snap.configuration.backend.num_qubits} qu',
                         help=des['help_qu_bits_cap']())
+
+        st.metric(':violet[Quantum] system', value=str(res.snap.configuration.backend.name))
 
         status_message = ':green[success]' if res.result.success else ':red[fail]'
         # noinspection PyUnresolvedReferences
@@ -199,18 +202,18 @@ def render_quantum_hardware(res: Type[Result], des: Descriptor, ctx: Dict[str, A
         tabs[1].pyplot(ctx['map_gate'], clear_figure=True)
 
     with gate_cols[1]:
-        st.subheader('Circuit layout', anchor=False)
+        st.subheader(':violet[Circuit] layout', anchor=False)
         st.write(des['text_circuit_layout']())
         st.caption(f'transpiler seed: :blue[{res.snap.configuration.transpiler_seed}]')
 
     gate_cols2 = st.columns([2, 3])
     with gate_cols2[0]:
-        st.subheader('Error map', anchor=False)
+        st.subheader(':violet[Error] map', anchor=False)
         st.write(des['text_error_map']())
         gate_cols2[1].pyplot(ctx['map_error'], clear_figure=True)
     st.divider()
 
-    st.header('Quantum circuit', anchor=False)
+    st.header(':violet[Quantum] circuit', anchor=False)
     st.write(des['text_quantum_circuit']())
     circuit_tabs = st.tabs(['Built circuit', 'Compiled circuit'])
     circuit_tabs[0].pyplot(ctx['circuit'], clear_figure=True)
@@ -219,7 +222,7 @@ def render_quantum_hardware(res: Type[Result], des: Descriptor, ctx: Dict[str, A
 
 def render_measurement(res: Type[Result], des: Descriptor, ctx: Dict[str, Any]) -> None:
     """Renders measurement section."""
-    st.header('Experimental results', anchor=False)
+    st.header(':violet[Experimental] results', anchor=False)
 
     meas_tabs = st.tabs(['Counts', 'Measurements'])
     meas_tabs[0].pyplot(ctx['bar_counts'], clear_figure=True)
@@ -230,7 +233,7 @@ def render_measurement(res: Type[Result], des: Descriptor, ctx: Dict[str, Any]) 
 
     meas_cols = st.columns(2)
     with meas_cols[0]:
-        st.subheader('Metrics')
+        st.subheader(':violet[Metrics]')
         metric_cols = st.columns(2)
         metric_cols[0].metric(':blue[Correct] rate', value=ctx['correct_rate'],
                               help=des['help_correct_rate']())
@@ -245,7 +248,7 @@ def render_measurement(res: Type[Result], des: Descriptor, ctx: Dict[str, Any]) 
     st.divider()
 
     pie_cols = st.columns([2, 1])
-    pie_cols[1].subheader('Error rate', anchor=False)
+    pie_cols[1].subheader(':violet[Error] rate', anchor=False)
     pie_cols[1].write(des['text_error_rate']())
     pie_cols[0].pyplot(ctx['pie_error_rate'])
 
@@ -254,12 +257,12 @@ def render_footer(des: Descriptor, ctx: Dict[str, Any]) -> None:
     """Renders footer section."""
     cols = st.columns([4, 1])
     with cols[0]:
-        st.subheader('Disclaimer:', anchor=False)
+        st.subheader(':violet[Disclaimer]:', anchor=False)
         st.write(des['text_disclaimer']())
         st.expander('About experimental results').write(des['text_disclaimer_results']())
 
     with cols[1]:
-        st.subheader('Downloads:', anchor=False)
+        st.subheader(':violet[Downloads]:', anchor=False)
         # ste.download_button('OpenQASM (qasm)', data=ctx['qu_qasm'], mime='text/plain',
         #                     file_name=f'bernstein_vazirani_{ctx["timestamp"]}.qasm')
         # ste.download_button('Counts (JSON)', data=ctx['counts_json'], mime='application/json',

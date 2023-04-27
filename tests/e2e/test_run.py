@@ -7,7 +7,7 @@ class e2eTest(BaseCase):
         # self.activate_demo_mode()
         self.maximize_window()
 
-        self.assert_title('Bernstein–Vazirani')
+        self.assert_title('Bernstein-Vazirani')
         self.assert_no_404_errors()
         self.assert_no_js_errors()
 
