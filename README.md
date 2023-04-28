@@ -38,11 +38,13 @@ Now open browser and go to [localhost:8080](http://localhost:8080/).
 
 ### Custom configurations
 
-In the configuration, you are free to customize the device of the simulation as you want. However,
-I recommend secret strings of size 4-12. If you want to experiment with bigger secret strings,
-I advise not going over 16 since the computational demand of each experiment grows exponentially.
+In the configuration, you are free to customize the device of the simulation as you desire. However,
+for best results I recommend secret strings with a length of 4-12. If you wish to experiment with larger secret strings,
+keep in mind that the computational demand grows exponentially with increasing size. I suggest not exceeding a secret
+string length of 16.
 
-*Please avoid using the Prague backend. It will be fixed soon (probably), but it's corrupted right now. Thank you.*
+*Please avoid using the Prague backend as it is currently corrupted. It will likely be fixed soon, but for now, it's
+best to choose a different backend. Thank you.*
 
 ![img.png](assets/images/screenshot3.png)
 
@@ -54,7 +56,7 @@ To test that all parts of the code are working properly, run the respective `mak
 make test-unit
 ```
 
-To run UI tests, make sure the server is online (on port 8080). The testing suit will create a new
+To run UI tests, make sure the server is online (on port 8080). The testing suite will create a new
 session for testing purposes, so you don't need to worry about your current experiment.
 
 Shortly after starting the test, a new testing browser will be opened. Please don't intervene
@@ -70,7 +72,9 @@ make test-ui
 
 > The app is made using the [Streamlit](https://streamlit.io/) library which currently does not support
 > generating unique HTML id's nor classes. This means the UI testing is done by selecting
-> by-products of the HTML generated content. This workaround isn't reliable, however, right now
+> by-products of the HTML generated content.
+> 
+> This workaround isn't reliable, however, right now
 > there are no other relevant ways of testing the UI. These issues are actively being discussed
 > on multiple GitHub issue pages:
 >
