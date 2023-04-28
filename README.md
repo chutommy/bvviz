@@ -20,8 +20,7 @@ git clone https://github.com/chutommy/bvviz.git
 cd chutommy/
 ```
 
-Use the open-source package manager [conda](https://www.anaconda.com/) to install all requirements
-and dependencies from an `environment.yml` file. Please be patient, this may take a while.
+Use the open-source package manager [conda](https://www.anaconda.com/) to install all dependencies.
 
 ```bash
 conda env create -f environment.yml -n bvviz
@@ -29,7 +28,7 @@ conda env create -f environment.yml -n bvviz
 
 ## Usage
 
-To start the `bvviz` server, simply run a single `make` command.
+Run `make` command to start the `bvviz` server.
 
 ```bash
 make run
@@ -38,31 +37,23 @@ make run
 Now feel free to launch to your favorite browser of choice and go to
 [localhost:8080](http://localhost:8080/).
 
-### The layout
-
 ![img.png](assets/images/screenshot2.png)
 
-The layout is very intuitive. First thing of, let's ignore the configuration on the left hand side
-for a moment and focus on the main page.
-
-The moment you open a new session, a default experiment is performed. Don't worry! You
-will be able to run your own experiments later on.
-
+The moment you open a new session, a default experiment is performed.
 At the top of the web page there's a short introduction to the **bvviz** project. You can expand
 the _About_ section to get to know the Bernstein Vazirani problem.
 
 Below the introduction the fun begins. All the metrics, plots, charts and stats are thoroughly
-described. If there happens to be something that's too challenging to grasp or not explained well
-enough, please let me know.
+described. In order to display the tooltip, hover over the question mark.
 
 ![img.png](assets/images/screenshot4.png)
 
 If the statistics and visualizations are inadequate for you, at the bottom of the page there
-are multiple options to download the result of the experiment:
+are multiple options to download the results of the experiment:
 
 1. **OpenQASM** is the quantum circuit of the experiment.
 2. **Counts** is the number of measurements for each value.
-3. **Measurements** contains the individual measurements in the order they were taken.
+3. **Measurements** contains the individual measurements in the order they were captured.
 
 ### Custom configurations
 
@@ -72,19 +63,12 @@ In the configuration you are free to customize the device of the simulation, inc
 backend system, number of shots, your own secret string to the Bernstein-Vazirani problem,
 and your own noise and transpiler model!
 
-Notice the quantum systems are named after cities! Yes, these are IBM's quantum providers. You
-are (almost) free to choose any backend you want. Just remember that the secret string must be
-compatible with the backend you choose.
-
-I recommend secret string of size 4-12. If you want to experiment with bigger secret string
+I recommend secret strings of size 4-12. If you want to experiment with bigger secret strings
 I advise to not go over 18 since the computational demand of each experiment grows exponentially.
-Simulating a Bernstein-Vazirani protocol with a secret of size 15 already takes up to few minutes.
+Simulating a Bernstein-Vazirani protocol with a secret string of size 15 already takes a few minutes.
 
-Rather than waiting all day for an experiment to finish, play with different backends, noise models
-and transpiling methods. Notice how device maps and circuit layouts change based on the quantum
-system you choose.
-
-*Please avoid using Prague backend. It's the only IBM's broken 'fake' system right now. Thank you.*
+*Please avoid using Prague backend. It's the only IBM's 'fake' system that's broken right now.
+Thank you.*
 
 ![img.png](assets/images/screenshot3.png)
 
@@ -96,10 +80,10 @@ To test that all parts of the code are working properly, run the respective `mak
 make test-unit
 ```
 
-To run UI test, make sure the server is online (on port 8080). The testing suit will create a new
-session for testing purpose, your current experiment won't be overriden.
+To run UI tests, make sure the server is online (on port 8080). The testing suit will create a new
+session for testing purpose, so you don't need to worry about your current experiment.
 
-Shortly after starting the test, a new testig browser will be opened. Please don't intervene
+Shortly after starting the test, a new testing browser will be opened. Please don't intervene
 the testing while it's running (ideally sit back and don't interact with the interface at all).
 
 ```bash
