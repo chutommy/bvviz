@@ -17,24 +17,26 @@ To install **bvviz**, first download the source code to your local machine.
 
 ```bash
 git clone https://github.com/chutommy/bvviz.git
-cd chutommy/
+cd bvviz/
 ```
 
-Use the open-source package manager [conda](https://www.anaconda.com/) to install all dependencies.
+Use the open-source package manager [conda](https://www.anaconda.com/) to install all dependencies to
+a new environment named `bvviz`. Please be patient, this may take a while.
 
 ```bash
-conda env create -f environment.yml -n bvviz
+conda env create -f environment.yml -n bvviz -q
 ```
 
 ## Usage
 
-Run `make` command to start the `bvviz` server.
+To perform simulations, activate the bvviz environment and initiate the server.
 
 ```bash
+conda activate bvviz
 make run
 ```
 
-Now open browser and go to [localhost:8080](http://localhost:8080/).
+Now, launch a web browser and navigate to localhost:8080.
 
 ### Custom configurations
 
@@ -43,7 +45,7 @@ for best results I recommend secret strings with a length of 4-12. If you wish t
 keep in mind that the computational demand grows exponentially with increasing size. I suggest not exceeding a secret
 string length of 16.
 
-*Please avoid using the Prague backend as it is currently corrupted. It will likely be fixed soon, but for now, it's
+*Please avoid using the 'Prague' backend as it is currently corrupted. It will likely be fixed soon, but for now, it's
 best to choose a different backend. Thank you.*
 
 ![img.png](assets/images/screenshot3.png)
@@ -60,7 +62,7 @@ To run UI tests, make sure the server is online (on port 8080). The testing suit
 session for testing purposes, so you don't need to worry about your current experiment.
 
 Shortly after starting the test, a new testing browser will be opened. Please don't intervene
-the testing while it's running (ideally, sit back and don't interact with the interface at all).
+the testing while it's running (ideally, don't interact with the interface at all).
 
 ```bash
 # skip if the server is already running
@@ -73,7 +75,7 @@ make test-ui
 > The app is made using the [Streamlit](https://streamlit.io/) library which currently does not support
 > generating unique HTML id's nor classes. This means the UI testing is done by selecting
 > by-products of the HTML generated content.
-> 
+>
 > This workaround isn't reliable, however, right now
 > there are no other relevant ways of testing the UI. These issues are actively being discussed
 > on multiple GitHub issue pages:
