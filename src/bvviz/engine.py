@@ -302,7 +302,7 @@ def preprocess_bar_of_pie(ax1: Any, ax2: Any, correct: int, result: Type[Result]
             bar_c = ax2.bar(0, height, width, bottom=bottom, color='#eb4034', label=label,
                             alpha=0.1 + j / (len(result.secret) + 1))
             ax2.bar_label(bar_c, labels=[f'{height:.0%}'])
-    ax2.set_title('Number of incorrect qubits', pad=15, loc='right')
+    ax2.set_title('Distribution of incorrect qubits', pad=15, loc='right')
     ax2.legend(loc='upper right')
     ax2.set_xlim(- 2.5 * width, 2.5 * width)
 
