@@ -68,7 +68,7 @@ the testing while it's running (ideally, don't interact with the interface at al
 # skip if the server is already running
 make run
 
-# open a new terminal
+# run in a new terminal
 make test-ui
 ```
 
