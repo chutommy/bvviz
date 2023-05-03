@@ -45,8 +45,8 @@ for best results I recommend secret strings with a length of 4-12. If you wish t
 keep in mind that the computational demand grows exponentially with increasing size. I suggest not exceeding a secret
 string length of 16.
 
-*Please avoid using the 'Prague' backend as it is currently corrupted. It will likely be fixed soon, but for now, it's
-best to choose a different backend. Thank you.*
+*Please avoid using the 'Prague' backend as it isn't working propely (https://github.com/Qiskit/qiskit-terra/issues/9935).
+It will likely be fixed soon, but for now, it's best to choose a different backend. Thank you.*
 
 ![img.png](assets/images/screenshot3.png)
 
