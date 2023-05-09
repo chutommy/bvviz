@@ -25,7 +25,6 @@ folderWatchBlacklist = []
 fileWatcherType = "auto"
 headless = true
 runOnSave = false
-port = 8080
 baseUrlPath = ""
 enableCORS = true
 enableXsrfProtection = true
@@ -35,7 +34,6 @@ enableStaticServing = false
 [browser]
 serverAddress = "localhost"
 gatherUsageStats = false
-serverPort = 8080
 
 [deprecation]
 showfileUploaderEncoding = true
