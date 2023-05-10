@@ -1,7 +1,3 @@
-> bipyt semestral version
-
----
-
 # bvviz - The Simulation and Visualization of the Bernstein-Vazirani Quantum Protocol
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/chutommy/bvviz/blob/main/LICENSE)
