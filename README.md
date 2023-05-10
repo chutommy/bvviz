@@ -24,7 +24,7 @@ Use the open-source package manager [conda](https://www.anaconda.com/) to instal
 a new environment named `bvviz`. Please be patient, this may take a while.
 
 ```bash
-conda env create -f environment.yml -n bvviz -q
+conda env create -f condaenv/environment.yml -n bvviz -q
 ```
 
 ## Usage
