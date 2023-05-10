@@ -63,7 +63,7 @@ configList = [
 
 class uiTest(BaseCase):
     def test_ui(self):
-        self.open('http://localhost:8080/')
+        self.open('http://localhost:8501/')
         self.maximize_window()
 
         self.assert_title('Bernstein-Vazirani')
@@ -125,7 +125,7 @@ class uiTest(BaseCase):
 
     def test_experiments(self):
         for config in configList:
-            self.open('http://localhost:8080/')
+            self.open('http://localhost:8501/')
             self.maximize_window()
 
             self.type('input[aria-label="Selected Almaden (20). System"]', config['system'])

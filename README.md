@@ -36,7 +36,7 @@ conda activate bvviz
 make run
 ```
 
-Now, launch a web browser and navigate to localhost:8080.
+Now, launch a web browser and navigate to localhost:8501.
 
 ### Custom configurations
 
@@ -59,7 +59,7 @@ To test that all parts of the code are working properly, run the respective `mak
 make test-unit
 ```
 
-To run UI tests, make sure the server is online (on port 8080). The testing suite will create a new
+To run UI tests, make sure the server is online (on port 8501). The testing suite will create a new
 session for testing purposes, so you don't need to worry about your current experiment.
 
 Shortly after starting the test, a new testing browser will be opened. Please don't intervene
