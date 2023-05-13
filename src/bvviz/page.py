@@ -264,7 +264,7 @@ def render_footer(des: Descriptor, ctx: Dict[str, Any]) -> None:
         st.subheader(':violet[Disclaimer]:', anchor=False)
         st.write(des['text_disclaimer']())
         st.markdown(('Explore the [source code](https://github.com/chutommy/bvviz) to see how the simulation works behind the scenes,'
-                     'or learn more about the [app](https://raw.githubusercontent.com/chutommy/bvviz/master/assets/bvviz.pdf).')
+                     'or learn more about the [app](https://raw.githubusercontent.com/chutommy/bvviz/master/assets/bvviz.pdf).'))
 
     with cols[1]:
         st.subheader(':violet[Downloads]:', anchor=False)
