@@ -36,7 +36,7 @@ Now, launch a web browser and navigate to localhost:8501.
 
 ### Custom configurations
 
-In the configuration, you are free to customize the device of the simulation as you desire. However,
+In the configuration, you are free to customize the device of the simulation as you want. However,
 for best results I recommend secret strings with a length of 4-12. If you wish to experiment with larger secret strings,
 keep in mind that the computational demand grows exponentially with increasing size. I suggest not exceeding a secret
 string length of 16.
