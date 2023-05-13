@@ -162,7 +162,7 @@ def render_introduction(des: Descriptor) -> None:
     st.subheader('About the :violet[Experiment]', anchor=False)
     st.write(des['text_introduction']())
     st.markdown(('Explore the [source code](https://github.com/chutommy/bvviz) to see how the simulation works behind the scenes, '
-             'or learn more about the [app](https://raw.githubusercontent.com/chutommy/bvviz/master/assets/bvviz.pdf).'))
+             'or learn more [about the app](https://raw.githubusercontent.com/chutommy/bvviz/master/assets/bvviz.pdf).'))
     with st.expander('About the Bernstein-Vazirani problem'):
         cols = st.columns([3, 2])
         cols[0].write(des['text_bv_explanation']())
