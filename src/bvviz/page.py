@@ -263,6 +263,7 @@ def render_footer(des: Descriptor, ctx: Dict[str, Any]) -> None:
     with cols[0]:
         st.subheader(':violet[Disclaimer]:', anchor=False)
         st.write(des['text_disclaimer']())
+        st.write("Explore <a href="https://github.com/chutommy/bvviz" target="_blank">source code</a>.")
 
     with cols[1]:
         st.subheader(':violet[Downloads]:', anchor=False)
@@ -292,7 +293,6 @@ def render_footer(des: Descriptor, ctx: Dict[str, Any]) -> None:
         Made with <a href="https://streamlit.io/" target="_blank">Streamlit</a>. <br 'style= top:3px;'>
         Designed and developed by <a href="https://github.com/chutommy" target="_blank">Tommy Chu</a>. <br 'style= top:3px;'>
         © 2023 MIT License <br 'style= top:10px;'>
-        Explore <a href="https://github.com/chutommy/bvviz" target="_blank">source code</a>.
         <!-- © 2023 <a href="https://github.com/chutommy" target="_blank">MIT License</a> --> 
     </p> </div> </div>
     '''
