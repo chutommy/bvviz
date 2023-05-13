@@ -263,7 +263,6 @@ def render_footer(des: Descriptor, ctx: Dict[str, Any]) -> None:
     with cols[0]:
         st.subheader(':violet[Disclaimer]:', anchor=False)
         st.write(des['text_disclaimer']())
-        st.expander('About the experimental results').write(des['text_disclaimer_results']())
 
     with cols[1]:
         st.subheader(':violet[Downloads]:', anchor=False)
