@@ -263,7 +263,7 @@ def render_footer(des: Descriptor, ctx: Dict[str, Any]) -> None:
     with cols[0]:
         st.subheader(':violet[Disclaimer]:', anchor=False)
         st.write(des['text_disclaimer']())
-        st.write("Explore <a href="https://github.com/chutommy/bvviz" target="_blank">source code</a>.")
+        st.write('Explore <a href="https://github.com/chutommy/bvviz" target="_blank">source code</a>.')
 
     with cols[1]:
         st.subheader(':violet[Downloads]:', anchor=False)
