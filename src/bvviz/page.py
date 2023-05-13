@@ -122,8 +122,16 @@ def render_secret_check(eng: Engine, des: Descriptor, secret: str, plc: DeltaGen
 
 def render_basic_metrics(res: Type[Result], des: Descriptor) -> None:
     """Renders basic metrics section."""
+    anchor_styles = '''
+    <style>
+    a { display: inline; text-align: left; background-color: transparent; }
+    a:link , a:visited { color: #7e3dad; text-decoration: none; }
+    a:hover,  a:active { color: #8300e0; text-decoration: underline; }
+    </style>
+    '''
+    st.write(anchor_styles, unsafe_allow_html=True)
+    
     cols = st.columns(2)
-
     with cols[0]:
         st.caption(':orange[Classical] approach')
 
@@ -283,12 +291,6 @@ def render_footer(des: Descriptor, ctx: Dict[str, Any]) -> None:
 
     st.divider()
     footer = '''
-    <style>
-    a { display: inline; text-align: left; background-color: transparent; }
-    a:link , a:visited { color: #7e3dad; text-decoration: none; }
-    a:hover,  a:active { color: #8300e0; text-decoration: underline; }
-    </style>
-
     <div id="page-container"> <div class="footer"> <p style='font-size: 1em'>
         Powered by <a href="https://qiskit.org/" target="_blank">Qiskit</a>. <br 'style= top:3px;'>
         Made with <a href="https://streamlit.io/" target="_blank">Streamlit</a>. <br 'style= top:3px;'>
