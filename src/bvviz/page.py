@@ -263,7 +263,8 @@ def render_footer(des: Descriptor, ctx: Dict[str, Any]) -> None:
     with cols[0]:
         st.subheader(':violet[Disclaimer]:', anchor=False)
         st.write(des['text_disclaimer']())
-        st.markdown('Explore [source code](https://github.com/chutommy/bvviz).')
+        st.markdown(('Explore the [source code](https://github.com/chutommy/bvviz) to see how the simulation works behind the scenes,'
+                     'or learn more about the [app](https://raw.githubusercontent.com/chutommy/bvviz/master/assets/bvviz.pdf).')
 
     with cols[1]:
         st.subheader(':violet[Downloads]:', anchor=False)
@@ -273,12 +274,12 @@ def render_footer(des: Descriptor, ctx: Dict[str, Any]) -> None:
         #                     file_name=f'bernstein_vazirani_{ctx["timestamp"]}.json')
         # ste.download_button('Measurements (CSV)', data=ctx['memory_csv'], mime='text/csv',
         #                     file_name=f'bernstein_vazirani_{ctx["timestamp"]}.csv')
-        ste.download_button('OpenQASM (qasm)', data=ctx['qu_qasm'], mime='text/plain',
+        ste.download_button('Circuit (qasm)', data=ctx['qu_qasm'], mime='text/plain',
                             file_name='bernstein_vazirani.qasm')
-        ste.download_button('Counts (json)', data=ctx['counts_json'], mime='application/json',
-                            file_name='bernstein_vazirani.json')
         ste.download_button('Measurements (csv)', data=ctx['memory_csv'], mime='text/csv',
                             file_name='bernstein_vazirani.csv')
+        ste.download_button('Result (json)', data=ctx['counts_json'], mime='application/json',
+                            file_name='bernstein_vazirani.json')
 
     st.divider()
     footer = '''
