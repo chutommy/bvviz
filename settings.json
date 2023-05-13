@@ -8,7 +8,7 @@
     "layout_method": 2,
     "routing_method": 1,
     "translation_method": 1,
-    "secret": "1011",
+    "secret": "11001",
     "shots": 1000,
     "reset_rate": 0.019,
     "measure_rate": 0.154,
