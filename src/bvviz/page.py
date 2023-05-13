@@ -161,6 +161,8 @@ def render_introduction(des: Descriptor) -> None:
     """Renders introduction section."""
     st.subheader('About the :violet[Experiment]', anchor=False)
     st.write(des['text_introduction']())
+    st.markdown(('Explore the [source code](https://github.com/chutommy/bvviz) to see how the simulation works behind the scenes, '
+             'or learn more about the [app](https://raw.githubusercontent.com/chutommy/bvviz/master/assets/bvviz.pdf).'))
     with st.expander('About the Bernstein-Vazirani problem'):
         cols = st.columns([3, 2])
         cols[0].write(des['text_bv_explanation']())
@@ -263,8 +265,6 @@ def render_footer(des: Descriptor, ctx: Dict[str, Any]) -> None:
     with cols[0]:
         st.subheader(':violet[Disclaimer]:', anchor=False)
         st.write(des['text_disclaimer']())
-        st.markdown(('Explore the [source code](https://github.com/chutommy/bvviz) to see how the simulation works behind the scenes,'
-                     'or learn more about the [app](https://raw.githubusercontent.com/chutommy/bvviz/master/assets/bvviz.pdf).'))
 
     with cols[1]:
         st.subheader(':violet[Downloads]:', anchor=False)
