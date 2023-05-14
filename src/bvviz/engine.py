@@ -109,7 +109,8 @@ class Engine:
         q_oracle = QuantumOracle(secret=secret_seq)
 
         # setup backend
-        self.builder.create_circuit(oracle=q_oracle, random_initialization=True)
+        #self.builder.create_circuit(oracle=q_oracle, random_initialization=True)
+        self.builder.create_circuit(oracle=q_oracle, random_initialization=False)
         self.sim.set_noise(config=self.configuration.noise_config)
         self.sim.set_backend(self.configuration.backend)
         self.sim.transpile(circuit=self.builder.circuit, seed=self.configuration.transpiler_seed,
