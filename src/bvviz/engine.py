@@ -100,7 +100,9 @@ class Engine:
     def check_secret_size(self, secret: str) -> bool:
         """Verifies that secret is of a correct size."""
         size = len(secret)
-        return size <= self.configuration.backend.num_qubits - 1 and size != 0
+        return (size <= self.configuration.backend.num_qubits - 1
+                and size != 0 
+                and size <= 12)  # cloud limitation
 
     def run(self, secret_str: str) -> Type[Result]:
         """Runs experiment."""
