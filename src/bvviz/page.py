@@ -301,7 +301,7 @@ def render_footer(des: Descriptor, ctx: Dict[str, Any]) -> None:
         Powered by <a href="https://qiskit.org/" target="_blank">Qiskit</a>. <br 'style= top:3px;'>
         Made with <a href="https://streamlit.io/" target="_blank">Streamlit</a>. <br 'style= top:3px;'>
         Designed and developed by <a href="https://github.com/chutommy" target="_blank">Tommy Chu</a>. <br 'style= top:3px;'>
-        © 2023 MIT License <br 'style= top:10px;'> <br 'style= top:3px;'>
+        © 2023 MIT License <br 'style= top:5px;'>
         <a href="https://github.com/chutommy/bvviz/" target="_blank">Source Code</a>
     </p> </div> </div>
     '''
