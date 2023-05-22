@@ -109,6 +109,12 @@ def render_sidebar(eng: Engine, cfg: Dict[str, Any], des: Descriptor) -> Tuple[s
 
 def render_secret_check(eng: Engine, des: Descriptor, secret: str, plc: DeltaGenerator) -> None:
     """Renders secret warning on invalid secret."""
+    # cloud limitation
+    if len(secret) > 12:
+        plc.error("Maximum cloud experiment limit reached. Please install the app locally for unrestricted access and to utilize more than 12-qubit size secret strings.")
+        st.warning(des['warn_failure']())
+        st.stop()
+    
     if not eng.check_secret_size(secret):
         plc.error(des['err_secret_str_length'](str_len=str(len(secret)),
                                                qu_num=eng.configuration.backend.num_qubits))
