@@ -302,7 +302,8 @@ def render_footer(des: Descriptor, ctx: Dict[str, Any]) -> None:
         Made with <a href="https://streamlit.io/" target="_blank">Streamlit</a>. <br 'style= top:3px;'>
         Developed by <a href="https://github.com/chutommy" target="_blank">Tommy Chu</a>. <br 'style= top:3px;'>
         © 2023 MIT License <br 'style= top:5px;'>
-        <a href="https://github.com/chutommy/bvviz/" target="_blank">Source Code</a>
+        <a href="https://github.com/chutommy/bvviz/" target="_blank">Source Code</a> <br 'style= top:5px;'>
+        <a href="https://raw.githubusercontent.com/chutommy/bvviz/master/assets/bvviz.pdf" target="_blank">Code Report</a>
     </p> </div> </div>
     '''
     st.write(footer, unsafe_allow_html=True)
