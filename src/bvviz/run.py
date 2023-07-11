@@ -45,7 +45,7 @@ def run(settings_path: str) -> None:
         tmp = st.divider()
         st.title('Simulation and Visualization of the :violet[Bernstein-Vazirani] Quantum Protocol',
                  anchor=False)
-#         st.caption('by Tommy Chu')
+        st.caption('by Tommy Chu')
         render_introduction(descriptor)
         st.divider()
         render_basic_metrics(result, descriptor)
